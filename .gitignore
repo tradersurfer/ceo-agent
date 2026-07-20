@@ -4,6 +4,7 @@ openclaw.json
 openclaw.final.json
 openclaw.example.json
 .env
+ceo-agent.config.json
 .env.local
 .audit/
 .clawhub/

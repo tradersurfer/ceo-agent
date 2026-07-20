@@ -6,11 +6,11 @@ const { ExecutiveStatuses, HealthStates } = require('./constants');
 
 class Supervisor {
   /**
-   * Creates the JECI executive supervisor without runtime execution.
+   * Creates the CEO Agent executive supervisor without runtime execution.
    * @param {object} options Supervisor dependencies.
    */
   constructor(options = {}) {
-    this.id = options.id || 'agent_jeci';
+    this.id = options.id || 'ceo_agent';
     this.agentRegistry = options.agentRegistry || null;
     const initialAgents = this._extractAgents(this.agentRegistry);
     this.agents = new Map(initialAgents.filter(agent => agent && agent.id).map(agent => [agent.id, agent]));
@@ -108,7 +108,7 @@ class Supervisor {
   }
 
   /**
-   * Creates a structured escalation for Agent JECI or a human operator.
+   * Creates a structured escalation for the CEO Agent or a human operator.
    * @param {object} task Task requiring escalation.
    * @param {string} reason Escalation reason.
    * @returns {object} Structured escalation.

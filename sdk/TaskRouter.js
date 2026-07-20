@@ -3,14 +3,12 @@ const { Departments, ExecutiveStatuses } = require('./constants');
 
 const SUPPORTED_DEPARTMENTS = Object.freeze([
   Departments.EXECUTIVE,
-  Departments.OPERATIONS,
-  Departments.ENGINEERING,
-  Departments.MARKETING,
-  Departments.CLIENT_SERVICES,
   Departments.FINANCE,
-  Departments.GROWTH,
-  Departments.RESEARCH,
-  Departments.DESIGN,
+  Departments.OPERATIONS,
+  Departments.TECHNOLOGY,
+  Departments.MARKETING,
+  Departments.PEOPLE,
+  Departments.LEGAL,
 ]);
 
 class TaskRouter {
@@ -122,14 +120,28 @@ class TaskRouter {
       executive_orchestration: Departments.EXECUTIVE,
       operations_execution: Departments.OPERATIONS,
       ops_execution: Departments.OPERATIONS,
-      build_dev: Departments.ENGINEERING,
+      engineering: Departments.TECHNOLOGY,
+      build_dev: Departments.TECHNOLOGY,
+      software_development: Departments.TECHNOLOGY,
+      it: Departments.TECHNOLOGY,
       content: Departments.MARKETING,
       content_creation: Departments.MARKETING,
-      community: Departments.CLIENT_SERVICES,
-      community_engagement: Departments.CLIENT_SERVICES,
+      brand_creative: Departments.MARKETING,
+      digital_marketing: Departments.MARKETING,
+      growth: Departments.MARKETING,
+      client_services: Departments.MARKETING,
+      community: Departments.MARKETING,
+      community_engagement: Departments.MARKETING,
+      hr: Departments.PEOPLE,
+      human_resources: Departments.PEOPLE,
+      people_ops: Departments.PEOPLE,
+      legal_compliance: Departments.LEGAL,
+      compliance: Departments.LEGAL,
       financial_forecasting: Departments.FINANCE,
       financial_statement_analysis: Departments.FINANCE,
-      seo_and_visibility: Departments.GROWTH,
+      accounting: Departments.FINANCE,
+      research: Departments.TECHNOLOGY,
+      design: Departments.MARKETING,
     };
     return aliases[normalized] || normalized;
   }

@@ -10,18 +10,12 @@ const Statuses = Object.freeze({
 
 const Departments = Object.freeze({
   EXECUTIVE: 'executive',
-  OPERATIONS: 'operations',
-  ENGINEERING: 'engineering',
-  MARKETING: 'marketing',
-  CLIENT_SERVICES: 'client_services',
   FINANCE: 'finance',
-  GROWTH: 'growth',
-  RESEARCH: 'research',
-  DESIGN: 'design',
-  EXECUTIVE_ORCHESTRATION: 'executive_orchestration',
-  OPERATIONS_EXECUTION: 'operations_execution',
-  CONTENT: 'content',
-  COMMUNITY: 'community',
+  OPERATIONS: 'operations',
+  TECHNOLOGY: 'technology',
+  MARKETING: 'marketing',
+  PEOPLE: 'people',
+  LEGAL: 'legal',
 });
 
 const Priorities = Object.freeze({

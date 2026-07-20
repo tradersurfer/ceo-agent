@@ -1,0 +1,19 @@
+{
+  "name": "ceo-agent",
+  "version": "0.1.0",
+  "description": "CEO Agent — the AI that runs your AI workforce.",
+  "license": "MIT",
+  "private": true,
+  "type": "commonjs",
+  "bin": {
+    "ceo-agent-setup": "./bin/setup.js",
+    "ceo-agent": "./bin/chat.js"
+  },
+  "scripts": {
+    "setup": "node bin/setup.js",
+    "start": "node bin/chat.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
