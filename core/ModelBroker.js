@@ -13,7 +13,7 @@ const CAPABILITY_RECOMMENDATIONS = Object.freeze({
 });
 
 class ModelBroker {
-  /** Creates a non-executing model and tool registry. @param {object[]} models Model records. */
+  /** Creates a model and tool registry. @param {object[]} models Model records. */
   constructor(models = []) {
     this.models = new Map();
     for (const model of models) this.registerModel(model);
@@ -74,6 +74,33 @@ class ModelBroker {
     if (!modelId) return null;
     const model = this.models.get(modelId);
     return model && model.enabled ? { ...model } : null;
+  }
+
+  /**
+   * Fetches the live OpenRouter model catalog and resolves each API-backed
+   * role (claude, gpt, codex, gemini, grok) to its current flagship model id.
+   * Local/non-API entries (hermes, openclaw) are left untouched.
+   * @param {import('../sdk/OpenRouterClient')} openRouterClient Client instance.
+   * @returns {Promise<object>} The resolved role map that was applied.
+   */
+  async refreshFromOpenRouter(openRouterClient) {
+    const { resolveRoleModels } = require('./ModelResolver');
+    const liveModels = await openRouterClient.listModels();
+    const resolved = resolveRoleModels(liveModels);
+
+    for (const [role, resolution] of Object.entries(resolved)) {
+      const existing = this.models.get(role);
+      if (!existing || !resolution) continue;
+      this.models.set(role, {
+        ...existing,
+        apiModelId: resolution.apiModelId,
+        contextLength: resolution.contextLength,
+        resolvedName: resolution.name,
+        resolvedAt: new Date().toISOString(),
+      });
+    }
+
+    return resolved;
   }
 }
 

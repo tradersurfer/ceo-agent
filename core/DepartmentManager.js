@@ -1,13 +1,11 @@
 const DISPLAY_NAMES = Object.freeze({
   executive: 'Executive Office',
-  operations: 'Operations',
-  engineering: 'Engineering',
-  marketing: 'Marketing',
-  client_services: 'Client Services',
   finance: 'Finance',
-  growth: 'Growth',
-  research: 'Research',
-  design: 'Design',
+  operations: 'Operations',
+  technology: 'Technology',
+  marketing: 'Marketing',
+  people: 'People',
+  legal: 'Legal',
 });
 
 class DepartmentManager {
