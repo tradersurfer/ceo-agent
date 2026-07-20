@@ -1,0 +1,192 @@
+{
+  "registry": {
+    "version": "1.0.0",
+    "owner": null,
+    "org": null,
+    "canonical_lead_agent": "ceo_agent",
+    "description": "Canonical agent registry for this CEO Agent install. The CEO Agent serves as the Chief Intelligence & Orchestration Agent supervising all installed agents."
+  },
+  "orchestration": {
+    "lead_agent": "ceo_agent",
+    "layer": "CEO Agent workspace",
+    "status": "active",
+    "role": "Routes tasks, maintains memory, enforces quality, coordinates specialized agents, and escalates human-critical decisions to the configured Principal.",
+    "workspace": "ceo-agent",
+    "routing_logic": {
+      "executive_orchestration": "ceo_agent",
+      "ops_and_execution": "hermes",
+      "lead_capture": "sales_intake_agent",
+      "onboarding_comms": "onboarding_comms_agent",
+      "dispute_automation": "dispute_agent"
+    }
+  },
+  "agents": [
+    {
+      "id": "ceo_agent",
+      "name": "CEO Agent",
+      "status": "active",
+      "version": "1.0.0",
+      "title": "Chief Intelligence & Orchestration Agent",
+      "tagline": "The executive intelligence layer of your business.",
+      "runtime": "configured per install",
+      "lane": "executive_orchestration",
+      "reports_to": null,
+      "supervises": [
+        "hermes",
+        "sales_intake_agent",
+        "onboarding_comms_agent",
+        "dispute_agent"
+      ],
+      "identity_files": [
+        "IDENTITY.md",
+        "BEHAVIOR.md",
+        "TASK_ROUTER.md",
+        "ORGANIZATION.md"
+      ],
+      "capabilities": [
+        "Task routing",
+        "Agent supervision",
+        "Project memory",
+        "Business strategy",
+        "Research synthesis",
+        "Quality control",
+        "Brand enforcement",
+        "Revenue prioritization",
+        "Escalation management",
+        "Agent registry management"
+      ],
+      "authorized_projects": "Configured per install via CEO_AGENT_PROJECTS env var.",
+      "off_limits": [
+        "Live financial transactions",
+        "Unauthorized production deployments",
+        "Changing secrets or credentials",
+        "Making legal guarantees",
+        "Making financial promises"
+      ]
+    },
+    {
+      "id": "hermes",
+      "name": "Hermes",
+      "status": "active",
+      "title": "Head of Operations & Execution Agent",
+      "lane": "operations_execution",
+      "reports_to": "ceo_agent",
+      "folder": "agents/operations/hermes",
+      "bridge": "agents/operations/hermes/src/HermesBridge.js",
+      "runtime_location_env": "HERMES_RUNTIME_PATH",
+      "application_location_env": "HERMES_APPLICATION_PATH",
+      "external_project": "https://github.com/NousResearch/hermes-agent",
+      "capabilities": [
+        "cron_create",
+        "webhook_subscribe",
+        "api_trigger",
+        "workflow_execution",
+        "skill_chain",
+        "sandbox_execution",
+        "system_monitoring",
+        "alert_dispatch",
+        "intake_parsing",
+        "crm_action",
+        "scheduled_job",
+        "file_processing",
+        "memory_lookup",
+        "automation_run"
+      ],
+      "authorized_projects": "Configured per install via CEO_AGENT_PROJECTS env var.",
+      "off_limits": [
+        "Changing credentials",
+        "Moving money",
+        "Making legal claims",
+        "Changing pricing",
+        "Approving production deployments",
+        "Deleting source files",
+        "Overriding the CEO Agent"
+      ]
+    },
+    {
+      "id": "sales_intake_agent",
+      "name": "Sales Intake Agent",
+      "status": "active",
+      "title": "Lead Capture Agent",
+      "lane": "lead_capture",
+      "department": "sales",
+      "reports_to": "ceo_agent",
+      "folder": "agents/finance/credit-office",
+      "bridge": "agents/finance/credit-office/src/SalesIntakeBridge.js",
+      "runtime_url_env": "SALES_INTAKE_AGENT_URL",
+      "webhook_secret_env": "SALES_INTAKE_AGENT_SECRET",
+      "capabilities": [
+        "create_lead",
+        "intake_capture"
+      ],
+      "authorized_projects": "Configured per install via CEO_AGENT_PROJECTS env var.",
+      "off_limits": [
+        "Sending unauthorized emails",
+        "Modifying client records outside authorized scope",
+        "Overriding CEO Agent routing decisions"
+      ]
+    },
+    {
+      "id": "onboarding_comms_agent",
+      "name": "Onboarding Communications Agent",
+      "status": "active",
+      "title": "Client Onboarding Email Lifecycle Agent",
+      "lane": "onboarding_comms",
+      "department": "client_services",
+      "reports_to": "ceo_agent",
+      "folder": "agents/finance/credit-office",
+      "bridge": "agents/finance/credit-office/src/OnboardingCommsBridge.js",
+      "runtime_url_env": "ONBOARDING_COMMS_AGENT_URL",
+      "webhook_secret_env": "ONBOARDING_COMMS_AGENT_SECRET",
+      "capabilities": [
+        "email_welcome",
+        "email_score_invite",
+        "email_upload_reminder",
+        "email_review_call",
+        "email_scan_complete",
+        "email_mail_reminder",
+        "email_bureau_checkin",
+        "email_sweep_upgrade",
+        "email_testimonial",
+        "email_sequence_queue"
+      ],
+      "authorized_projects": "Configured per install via CEO_AGENT_PROJECTS env var.",
+      "off_limits": [
+        "Sending unsolicited emails",
+        "Modifying client records outside authorized scope",
+        "Overriding CEO Agent routing decisions"
+      ]
+    },
+    {
+      "id": "dispute_agent",
+      "name": "Dispute Agent",
+      "status": "active",
+      "title": "Credit Dispute Automation Agent",
+      "lane": "dispute_automation",
+      "department": "client_services",
+      "reports_to": "ceo_agent",
+      "folder": "agents/legal-compliance/dispute-agent",
+      "bridge": "agents/legal-compliance/dispute-agent/src/DisputeAgentBridge.js",
+      "runtime_url_env": "DISPUTE_AGENT_URL",
+      "webhook_secret_env": "DISPUTE_AGENT_WEBHOOK_SECRET",
+      "capabilities": [
+        "intake_parsing",
+        "pdf_parse",
+        "dispute_generate",
+        "dispute_parse_response",
+        "dispute_strategy",
+        "letter_package",
+        "email_sequence",
+        "agent_loop_trigger",
+        "crm_action"
+      ],
+      "authorized_projects": "Configured per install via CEO_AGENT_PROJECTS env var.",
+      "off_limits": [
+        "Changing pricing",
+        "Sending letters without client approval",
+        "Modifying client records outside authorized scope",
+        "Overriding CEO Agent routing decisions"
+      ]
+    }
+  ]
+}
