@@ -13,6 +13,9 @@
     "setup": "node bin/setup.js",
     "start": "node bin/chat.js"
   },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.0"
+  },
   "engines": {
     "node": ">=18.0.0"
   }

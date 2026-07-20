@@ -1,9 +1,22 @@
 const MemoryClient = require('../../../sdk/MemoryClient');
+const SalesIntakeBridge = require('../../../agents/finance/credit-office/src/SalesIntakeBridge');
+const OnboardingCommsBridge = require('../../../agents/finance/credit-office/src/OnboardingCommsBridge');
+const DisputeAgentBridge = require('../../../agents/legal-compliance/dispute-agent/src/DisputeAgentBridge');
 
 /**
  * Supervisor dispatch handler — pure Node.js, no Next.js dependency.
  * Testable standalone; route.ts wraps this for Next.js deployment.
  */
+
+const CONVERSATIONAL_AGENTS = new Set([
+  'ceo_agent', 'cfo_agent', 'coo_agent', 'cto_agent', 'cmo_agent', 'chro_agent', 'clo_agent',
+]);
+
+const BRIDGE_FACTORIES = {
+  sales_intake_agent: () => new SalesIntakeBridge(),
+  onboarding_comms_agent: () => new OnboardingCommsBridge(),
+  dispute_agent: () => new DisputeAgentBridge(),
+};
 
 /**
  * Validates the dispatch secret from request headers.
@@ -55,24 +68,37 @@ function buildTask(body) {
 async function routeToAgent(agentId, task) {
   await recordDispatchMemory(agentId, task);
 
-  switch (agentId) {
-    case 'dispute_agent':
-      return dispatchToDisputeAgent(task);
-    case 'hermes':
-      return {
-        agent: 'hermes',
-        status: 'queued',
-        summary: 'Hermes runtime HTTP dispatch not yet connected.',
-        task,
-        timestamp: new Date().toISOString(),
-      };
-    default:
-      return {
-        status: 'blocked',
-        reason: `No dispatch handler registered for agent: ${agentId}`,
-        timestamp: new Date().toISOString(),
-      };
+  if (CONVERSATIONAL_AGENTS.has(agentId)) {
+    return {
+      agent: agentId,
+      status: 'conversational_only',
+      summary: `${agentId} is a conversational C-suite agent, not a dispatchable automation target. Use the chat interface (node bin/chat.js) to talk to this agent directly.`,
+      task,
+      timestamp: new Date().toISOString(),
+    };
   }
+
+  if (agentId === 'hermes') {
+    return {
+      agent: 'hermes',
+      status: 'queued',
+      summary: 'Task validated and queued. Hermes runtime execution requires a local OpenClaw/Hermes connection not included in this scaffold — wire HERMES_RUNTIME_PATH per install.',
+      task,
+      timestamp: new Date().toISOString(),
+    };
+  }
+
+  const bridgeFactory = BRIDGE_FACTORIES[agentId];
+  if (bridgeFactory) {
+    const bridge = bridgeFactory();
+    return bridge.trigger(task);
+  }
+
+  return {
+    status: 'blocked',
+    reason: `No dispatch handler registered for agent: ${agentId}`,
+    timestamp: new Date().toISOString(),
+  };
 }
 
 /**
@@ -105,40 +131,6 @@ async function recordDispatchMemory(agentId, task) {
     skipped: true,
     reason: error.message,
   }));
-}
-
-/**
- * Triggers the dispute agent's action loop via HTTP.
- * Requires DISPUTE_AGENT_URL and DISPUTE_AGENT_WEBHOOK_SECRET env vars.
- * @param {object} task
- * @returns {Promise<object>}
- */
-async function dispatchToDisputeAgent(task) {
-  const base = process.env.DISPUTE_AGENT_URL;
-  const secret = process.env.DISPUTE_AGENT_WEBHOOK_SECRET;
-
-  if (!base || !secret) {
-    return {
-      agent: 'dispute_agent',
-      status: 'queued',
-      summary: 'Set DISPUTE_AGENT_URL and DISPUTE_AGENT_WEBHOOK_SECRET to enable runtime dispatch.',
-      task,
-      timestamp: new Date().toISOString(),
-    };
-  }
-
-  const endpoint = `${base.replace(/\/$/, '')}/api/agent/run?secret=${secret}`;
-  const response = await fetch(endpoint, { method: 'POST' });
-  const data = await response.json().catch(() => ({}));
-
-  return {
-    agent: 'dispute_agent',
-    status: response.ok ? 'triggered' : 'failed',
-    httpStatus: response.status,
-    result: data,
-    task,
-    timestamp: new Date().toISOString(),
-  };
 }
 
 module.exports = { isAuthorized, validateBody, buildTask, routeToAgent, recordDispatchMemory };

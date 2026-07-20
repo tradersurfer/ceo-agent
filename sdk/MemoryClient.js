@@ -1,5 +1,3 @@
-const { createClient } = require('@supabase/supabase-js');
-
 const DEFAULT_LIMIT = 20;
 const MEMORY_TABLE = 'memory_entries';
 const SESSION_TABLE = 'memory_sessions';
@@ -18,7 +16,12 @@ function normalizeLimit(limit) {
 
 class MemoryClient {
   /**
-   * Creates a Supabase-backed shared memory client.
+   * Creates a Supabase-backed shared memory client. The @supabase/supabase-js
+   * dependency is loaded lazily here (not at module top-level) so that
+   * requiring this file — or anything that requires it, like the dispatch
+   * handler — never fails just because the package isn't installed. It's
+   * only actually needed when someone constructs a MemoryClient with real
+   * Supabase credentials present.
    * @param {object} options Supabase client or connection settings.
    */
   constructor(options = {}) {
@@ -30,6 +33,7 @@ class MemoryClient {
       if (!this.url || !this.serviceRoleKey) {
         throw new Error('SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are required for MemoryClient.');
       }
+      const { createClient } = require('@supabase/supabase-js');
       this.supabase = createClient(this.url, this.serviceRoleKey, {
         auth: { persistSession: false, autoRefreshToken: false },
       });
