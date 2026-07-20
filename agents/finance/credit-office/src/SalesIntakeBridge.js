@@ -12,7 +12,7 @@ class SalesIntakeBridge extends BaseBridge {
       id: 'sales_intake_agent',
       name: 'Sales Intake Agent',
       title: 'Client Lead Capture Agent',
-      reportsTo: 'ceo_agent',
+      reportsTo: 'cmo_agent',
       allowedApprovers: ALLOWED_APPROVERS,
       allowedProjects: ALLOWED_PROJECTS,
       allowedTaskTypes: ALLOWED_TASK_TYPES,

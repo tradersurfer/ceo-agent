@@ -168,27 +168,27 @@ class Organization {
 
     const departments = [
       ['executive', 'Executive Office'],
-      ['operations', 'Operations'],
-      ['engineering', 'Engineering'],
-      ['marketing', 'Marketing'],
       ['finance', 'Finance'],
-      ['research', 'Research'],
-      ['growth', 'Growth'],
-      ['client_services', 'Client Services'],
-      ['design', 'Design'],
+      ['operations', 'Operations'],
+      ['technology', 'Technology'],
+      ['marketing', 'Marketing'],
+      ['people', 'People'],
+      ['legal', 'Legal & Compliance'],
     ];
     for (const [id, name] of departments) organization.registerDepartment({ id, name });
 
     const roles = [
-      ['chief_intelligence_officer', 'Chief Intelligence Officer', 'executive', ['executive_orchestration']],
-      ['operations_supervisor', 'Operations Supervisor', 'operations', ['workflow_execution']],
-      ['senior_software_engineer', 'Senior Software Engineer', 'engineering', ['software_development']],
-      ['creative_director', 'Creative Director', 'marketing', ['content_creation']],
-      ['financial_intelligence_analyst', 'Financial Intelligence Analyst', 'finance', ['financial_forecasting']],
-      ['research_lead', 'Research Lead', 'research', ['research']],
-      ['growth_strategist', 'Growth Strategist', 'growth', ['seo_optimization']],
-      ['client_success_lead', 'Client Success Lead', 'client_services', ['community_engagement']],
-      ['design_director', 'Design Director', 'design', ['design_generation']],
+      ['chief_intelligence_officer', 'Chief Intelligence & Orchestration Agent', 'executive', ['executive_orchestration']],
+      ['chief_financial_officer', 'Chief Financial Officer', 'finance', ['financial_strategy', 'financial_forecasting']],
+      ['chief_operating_officer', 'Chief Operating Officer', 'operations', ['operations_strategy']],
+      ['chief_technology_officer', 'Chief Technology Officer', 'technology', ['technology_strategy', 'software_development']],
+      ['chief_marketing_officer', 'Chief Marketing Officer', 'marketing', ['marketing_strategy', 'content_creation']],
+      ['chief_people_officer', 'Chief People Officer', 'people', ['people_strategy']],
+      ['chief_legal_officer', 'Chief Legal Officer', 'legal', ['legal_strategy', 'regulatory_compliance']],
+      ['operations_execution_lead', 'Operations Execution Lead', 'operations', ['workflow_execution']],
+      ['sales_intake_lead', 'Client Lead Capture Agent', 'marketing', ['create_lead', 'intake_capture']],
+      ['onboarding_comms_lead', 'Client Onboarding Email Lifecycle Agent', 'marketing', ['email_sequence_queue']],
+      ['dispute_automation_lead', 'Credit Dispute Automation Agent', 'legal', ['dispute_generate', 'regulatory_compliance']],
     ];
     for (const [id, title, department, requiredCapabilities] of roles) {
       organization.registerRole({ id, title, department, requiredCapabilities });
@@ -196,12 +196,16 @@ class Organization {
 
     const agents = [
       { id: 'ceo_agent', name: 'CEO Agent', title: 'Chief Intelligence & Orchestration Agent', department: 'executive', role: 'chief_intelligence_officer', capabilities: ['executive_orchestration'], models: ['GPT', 'Claude'], reportsTo: null },
-      { id: 'hermes', name: 'Hermes', title: 'Head of Operations & Execution Agent', department: 'operations', role: 'operations_supervisor', capabilities: ['workflow_execution', 'cron_create', 'webhook_subscribe'], models: ['Hermes', 'Hermes Runtime'], reportsTo: 'ceo_agent' },
-      { id: 'content_lead', name: 'Content Lead', title: 'Creative Director', department: 'marketing', role: 'creative_director', capabilities: ['content_creation'], models: ['Claude', 'GPT'], reportsTo: 'ceo_agent' },
-      { id: 'finance_analyst', name: 'Finance Analyst', title: 'Financial Intelligence Analyst', department: 'finance', role: 'financial_intelligence_analyst', capabilities: ['financial_forecasting', 'financial_statement_analysis'], models: ['GPT', 'Claude'], reportsTo: 'ceo_agent' },
-      { id: 'growth_strategist', name: 'Growth Strategist', title: 'Growth Strategist', department: 'growth', role: 'growth_strategist', capabilities: ['seo_optimization'], models: ['GPT'], reportsTo: 'ceo_agent' },
-      { id: 'claude_code', name: 'Claude Code', title: 'Senior Software Engineer', department: 'engineering', role: 'senior_software_engineer', capabilities: ['software_development'], models: ['Codex', 'GPT'], reportsTo: 'ceo_agent' },
-      { id: 'design_lead', name: 'Design Lead', title: 'Design Director', department: 'design', role: 'design_director', capabilities: ['design_generation', 'image_generation'], models: ['Gemini'], reportsTo: 'ceo_agent' },
+      { id: 'cfo_agent', name: 'CFO Agent', title: 'Chief Financial Officer', department: 'finance', role: 'chief_financial_officer', capabilities: ['financial_strategy', 'financial_forecasting'], models: ['GPT', 'Claude'], reportsTo: 'ceo_agent' },
+      { id: 'coo_agent', name: 'COO Agent', title: 'Chief Operating Officer', department: 'operations', role: 'chief_operating_officer', capabilities: ['operations_strategy'], models: ['GPT', 'Claude'], reportsTo: 'ceo_agent' },
+      { id: 'cto_agent', name: 'CTO Agent', title: 'Chief Technology Officer', department: 'technology', role: 'chief_technology_officer', capabilities: ['technology_strategy', 'software_development'], models: ['Codex', 'GPT'], reportsTo: 'ceo_agent' },
+      { id: 'cmo_agent', name: 'CMO Agent', title: 'Chief Marketing Officer', department: 'marketing', role: 'chief_marketing_officer', capabilities: ['marketing_strategy', 'content_creation'], models: ['Claude', 'GPT'], reportsTo: 'ceo_agent' },
+      { id: 'chro_agent', name: 'CHRO Agent', title: 'Chief People Officer', department: 'people', role: 'chief_people_officer', capabilities: ['people_strategy'], models: ['GPT', 'Claude'], reportsTo: 'ceo_agent' },
+      { id: 'clo_agent', name: 'CLO Agent', title: 'Chief Legal Officer', department: 'legal', role: 'chief_legal_officer', capabilities: ['legal_strategy', 'regulatory_compliance'], models: ['GPT', 'Claude'], reportsTo: 'ceo_agent' },
+      { id: 'hermes', name: 'Hermes', title: 'Operations Execution Lead', department: 'operations', role: 'operations_execution_lead', capabilities: ['workflow_execution', 'cron_create', 'webhook_subscribe'], models: ['Hermes', 'Hermes Runtime'], reportsTo: 'coo_agent' },
+      { id: 'sales_intake_agent', name: 'Sales Intake Agent', title: 'Client Lead Capture Agent', department: 'marketing', role: 'sales_intake_lead', capabilities: ['create_lead', 'intake_capture'], models: ['GPT'], reportsTo: 'cmo_agent' },
+      { id: 'onboarding_comms_agent', name: 'Onboarding Communications Agent', title: 'Client Onboarding Email Lifecycle Agent', department: 'marketing', role: 'onboarding_comms_lead', capabilities: ['email_sequence_queue'], models: ['GPT'], reportsTo: 'cmo_agent' },
+      { id: 'dispute_agent', name: 'Dispute Agent', title: 'Credit Dispute Automation Agent', department: 'legal', role: 'dispute_automation_lead', capabilities: ['dispute_generate', 'regulatory_compliance'], models: ['GPT', 'Claude'], reportsTo: 'clo_agent' },
     ];
     for (const agent of agents) organization.registerAgent(agent);
 

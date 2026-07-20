@@ -26,7 +26,7 @@ class DisputeAgentBridge extends BaseBridge {
       id: 'dispute_agent',
       name: 'Dispute Agent',
       title: 'Credit Dispute Automation Agent',
-      reportsTo: 'ceo_agent',
+      reportsTo: 'clo_agent',
       allowedApprovers: ALLOWED_APPROVERS,
       allowedProjects: ALLOWED_PROJECTS,
       allowedTaskTypes: ALLOWED_TASK_TYPES,

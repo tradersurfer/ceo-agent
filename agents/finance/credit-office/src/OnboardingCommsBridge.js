@@ -23,7 +23,7 @@ class OnboardingCommsBridge extends BaseBridge {
       id: 'onboarding_comms_agent',
       name: 'Onboarding Communications Agent',
       title: 'Client Onboarding Email Lifecycle Agent',
-      reportsTo: 'ceo_agent',
+      reportsTo: 'cmo_agent',
       allowedApprovers: ALLOWED_APPROVERS,
       allowedProjects: ALLOWED_PROJECTS,
       allowedTaskTypes: ALLOWED_TASK_TYPES,

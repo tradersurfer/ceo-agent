@@ -27,8 +27,8 @@ class HermesBridge extends BaseBridge {
     super({
       id: 'hermes',
       name: 'Hermes',
-      title: 'Head of Operations & Execution Agent',
-      reportsTo: 'ceo_agent',
+      title: 'Operations Execution Lead',
+      reportsTo: 'coo_agent',
       runtimePath: process.env.HERMES_RUNTIME_PATH || null,
       applicationPath: process.env.HERMES_APPLICATION_PATH || null,
       allowedApprovers: ALLOWED_APPROVERS,
