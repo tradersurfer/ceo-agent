@@ -7,6 +7,14 @@ const ROOT = path.resolve(__dirname, '..');
 const CONFIG_PATH = path.join(ROOT, 'ceo-agent.config.json');
 const ENV_PATH = path.join(ROOT, '.env');
 
+const colorEnabled = !process.env.NO_COLOR && process.stdout.isTTY;
+function paint(code, text) {
+  return colorEnabled ? `\x1b[${code}m${text}\x1b[0m` : text;
+}
+const cyan = text => paint(36, text);
+const gray = text => paint(90, text);
+const bold = text => paint(1, text);
+
 function loadEnv() {
   if (!fs.existsSync(ENV_PATH)) return;
   const lines = fs.readFileSync(ENV_PATH, 'utf8').split('\n');
@@ -98,10 +106,10 @@ async function main() {
   let liveModelsResolved = false;
 
   console.log('');
-  console.log('=========================================');
-  console.log(`  ${config.agentName}`);
-  console.log(`  Reporting relationship: ${config.principalName || 'you'}`);
-  console.log('=========================================');
+  console.log(cyan('========================================='));
+  console.log(cyan(`  ${config.agentName}`));
+  console.log(gray(`  Reporting relationship: ${config.principalName || 'you'}`));
+  console.log(cyan('========================================='));
   console.log('');
   console.log(`Business: ${config.businessContext || 'not specified'}`);
   console.log(`Active departments: ${config.activeDepartments.join(', ')}`);

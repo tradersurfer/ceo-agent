@@ -7,12 +7,22 @@ const ROOT = path.resolve(__dirname, '..');
 const CONFIG_PATH = path.join(ROOT, 'ceo-agent.config.json');
 const ENV_PATH = path.join(ROOT, '.env');
 
+const colorEnabled = !process.env.NO_COLOR && process.stdout.isTTY;
+function paint(code, text) {
+  return colorEnabled ? `\x1b[${code}m${text}\x1b[0m` : text;
+}
+const cyan = text => paint(36, text);
+const gray = text => paint(90, text);
+const green = text => paint(32, text);
+const amber = text => paint(33, text);
+const bold = text => paint(1, text);
+
 const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
 
 function ask(question, defaultValue = '') {
   return new Promise(resolve => {
-    const suffix = defaultValue ? ` (${defaultValue})` : '';
-    rl.question(`${question}${suffix}: `, answer => {
+    const suffix = defaultValue ? gray(` (${defaultValue})`) : '';
+    rl.question(`  ${question}${suffix} ${cyan('›')} `, answer => {
       resolve(answer.trim() || defaultValue);
     });
   });
@@ -20,73 +30,131 @@ function ask(question, defaultValue = '') {
 
 function askSecret(question) {
   return new Promise(resolve => {
-    rl.question(`${question}: `, answer => resolve(answer.trim()));
+    rl.question(`  ${question} ${cyan('›')} `, answer => resolve(answer.trim()));
   });
 }
 
 async function askYesNo(question, defaultYes = true) {
   const hint = defaultYes ? 'Y/n' : 'y/N';
-  const answer = (await ask(`${question} [${hint}]`)).toLowerCase();
+  const answer = (await ask(`${question} ${gray(`[${hint}]`)}`)).toLowerCase();
   if (!answer) return defaultYes;
   return answer.startsWith('y');
 }
 
+function stepHeader(step, total, title) {
+  console.log('');
+  console.log(gray('─────────────────────────────────────────────────'));
+  console.log(gray(` step ${step} of ${total} `) + bold(`— ${title}`));
+  console.log(gray('─────────────────────────────────────────────────'));
+}
+
+const BANNER = `${cyan(`╔══════════════════════════════════════════════════╗
+║                                                    ║
+║    ██████╗███████╗ ██████╗      █████╗  ██████╗   ║
+║   ██╔════╝██╔════╝██╔═══██╗    ██╔══██╗██╔════╝   ║
+║   ██║     █████╗  ██║   ██║    ███████║██║  ███╗  ║
+║   ██║     ██╔══╝  ██║   ██║    ██╔══██║██║   ██║  ║
+║   ╚██████╗███████╗╚██████╔╝    ██║  ██║╚██████╔╝  ║
+║    ╚═════╝╚══════╝ ╚═════╝     ╚═╝  ╚═╝ ╚═════╝   ║
+║                                                    ║
+║`)}          the ai that runs your ai workforce       ${cyan('║')}
+${cyan('║                                                    ║')}
+${cyan('╚══════════════════════════════════════════════════╝')}`;
+
 const ALL_DEPARTMENTS = [
-  { id: 'finance', label: 'Finance (CFO)' },
-  { id: 'operations', label: 'Operations (COO)' },
-  { id: 'technology', label: 'Technology (CTO)' },
-  { id: 'marketing', label: 'Marketing (CMO)' },
-  { id: 'people', label: 'People (CHRO)' },
-  { id: 'legal', label: 'Legal (CLO)' },
+  { id: 'finance', label: 'Finance (CFO)', bridges: [] },
+  { id: 'operations', label: 'Operations (COO)', bridges: ['Hermes'] },
+  { id: 'technology', label: 'Technology (CTO)', bridges: [] },
+  { id: 'marketing', label: 'Marketing (CMO)', bridges: ['Sales Intake Agent', 'Onboarding Comms Agent'] },
+  { id: 'people', label: 'People (CHRO)', bridges: [] },
+  { id: 'legal', label: 'Legal (CLO)', bridges: ['Dispute Agent'] },
 ];
+
+function printSummary(config, activeDeptIds) {
+  console.log('');
+  console.log(gray('─────────────────────────────────────────────────'));
+  console.log(bold(`${config.agentName} is ready`));
+  console.log(gray('─────────────────────────────────────────────────'));
+  console.log(`  reports to:   ${config.principalName}`);
+  console.log(`  business:     ${config.businessContext}`);
+  console.log(`  cost mode:    ${config.costMode}`);
+  console.log('');
+  console.log('  her team:');
+  for (const dept of ALL_DEPARTMENTS) {
+    const active = activeDeptIds.has(dept.id);
+    const mark = active ? green('✓') : gray('✗');
+    if (active) {
+      const bridgeSuffix = dept.bridges.length ? gray(`  →  ${dept.bridges.join(', ')}`) : '';
+      console.log(`    ${mark} ${dept.label.padEnd(20)}${bridgeSuffix}`);
+    } else {
+      console.log(`    ${mark} ${gray(dept.label + '  not activated')}`);
+    }
+  }
+  console.log('');
+  console.log(amber('  starting your first conversation now...'));
+  console.log('');
+}
 
 async function main() {
   console.log('');
-  console.log('=========================================');
-  console.log('   CEO Agent — Setup');
-  console.log('=========================================');
+  console.log(BANNER);
   console.log('');
-  console.log("Let's configure your CEO Agent. You can re-run this anytime.");
+  console.log(gray("  let's get your CEO Agent set up. about two minutes,"));
+  console.log(gray('  and you can re-run this anytime to make changes.'));
   console.log('');
+  await ask(amber('press enter to begin...'));
 
-  const agentName = await ask('What do you want to name your CEO Agent?', 'CEO Agent');
-  const principalName = await ask('What should your CEO Agent call you?');
-  const businessContext = await ask('Briefly describe your business or role');
-  const operatingRhythm = await ask(
-    'When are you typically available for decisions? (e.g. "9am-6pm EST, mobile after hours")',
-    'Not specified'
-  );
+  stepHeader(1, 5, 'name your agent');
+  console.log("  she's yours. what do you want to call her?");
+  const agentName = await ask('', 'CEO Agent');
 
+  stepHeader(2, 5, 'introduce yourself');
+  console.log(`  what should ${agentName} call you?`);
+  const principalName = await ask('');
+
+  stepHeader(3, 5, 'tell her about your business');
+  console.log('  in a sentence or two, what does your business do?');
+  console.log(gray("  the more specific, the better she'll understand her job."));
+  const businessContext = await ask('');
+
+  stepHeader(4, 5, 'build her team');
+  console.log(`  ${agentName} leads a standard executive team. turn on`);
+  console.log('  whichever departments your business actually needs —');
+  console.log('  you can always change this later.');
   console.log('');
-  console.log('Which departments should be active? (Executive is always active.)');
   const activeDepartments = ['executive'];
+  const activeDeptIds = new Set(['executive']);
   for (const dept of ALL_DEPARTMENTS) {
-    const enabled = await askYesNo(`  Activate ${dept.label}?`, true);
-    if (enabled) activeDepartments.push(dept.id);
+    const enabled = await askYesNo(`activate ${dept.label}?`, true);
+    if (enabled) {
+      activeDepartments.push(dept.id);
+      activeDeptIds.add(dept.id);
+    }
   }
 
+  stepHeader(5, 5, 'cost and connection');
+  console.log('  flagship gives the best response quality. efficient');
+  console.log('  costs less per message. change anytime with /cost.');
   console.log('');
-  console.log('Cost mode — flagship uses the best available model for every response');
-  console.log('(higher quality, higher cost). Efficient uses a smaller/cheaper model');
-  console.log('(lower cost, may be less capable). You can change this anytime with /cost.');
-  const useFlagship = await askYesNo('Use flagship (highest quality) by default?', true);
+  const useFlagship = await askYesNo('use flagship by default?', true);
   const costMode = useFlagship ? 'flagship' : 'efficient';
-
   console.log('');
-  console.log('Model provider setup — CEO Agent routes tasks via OpenRouter by default.');
-  const hasKey = await askYesNo('Do you have an OpenRouter API key ready to add now?', false);
+  console.log(`  to talk with ${agentName}, she needs an OpenRouter API key`);
+  console.log(gray('  (openrouter.ai/keys — free to create).'));
+  console.log('');
+  const hasKey = await askYesNo('do you have one ready to add now?', false);
   let openRouterKey = '';
   if (hasKey) {
-    openRouterKey = await askSecret('Paste your OpenRouter API key (input will not be shown back)');
+    openRouterKey = await askSecret("paste it here (won't be shown back)");
   } else {
-    console.log('  Skipping — you can add OPENROUTER_API_KEY to .env later.');
+    console.log(gray('  skipping — you can add OPENROUTER_API_KEY to .env later.'));
   }
 
   const config = {
     agentName,
     principalName,
     businessContext,
-    operatingRhythm,
+    operatingRhythm: 'Not specified',
     activeDepartments,
     costMode,
     createdAt: new Date().toISOString(),
@@ -99,31 +167,18 @@ async function main() {
     if (fs.existsSync(ENV_PATH)) {
       const existing = fs.readFileSync(ENV_PATH, 'utf8');
       if (existing.includes('OPENROUTER_API_KEY=')) {
-        fs.writeFileSync(
-          ENV_PATH,
-          existing.replace(/OPENROUTER_API_KEY=.*/g, envLine.trim()),
-          'utf8'
-        );
+        fs.writeFileSync(ENV_PATH, existing.replace(/OPENROUTER_API_KEY=.*/g, envLine.trim()), 'utf8');
       } else {
         fs.appendFileSync(ENV_PATH, envLine, 'utf8');
       }
     } else {
       fs.writeFileSync(ENV_PATH, envLine, 'utf8');
     }
-    console.log('');
-    console.log('  Saved to .env (not committed to git).');
   }
 
-  console.log('');
-  console.log('=========================================');
-  console.log(`  ${agentName} is configured.`);
-  console.log(`  Active departments: ${activeDepartments.join(', ')}`);
-  console.log(`  Cost mode: ${costMode}`);
-  console.log('=========================================');
-  console.log('');
+  printSummary(config, activeDeptIds);
 
   rl.close();
-
   require('./chat.js');
 }
 
