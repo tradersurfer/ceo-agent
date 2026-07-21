@@ -43,6 +43,27 @@ class ModelBroker {
     return model ? { ...model } : null;
   }
 
+  /**
+   * Gets the resolved API model id for a role at a given cost tier.
+   * Falls back to flagship if the requested tier wasn't resolved, and
+   * falls back to the model's base apiModelId (legacy single-tier shape)
+   * if refreshFromOpenRouter hasn't run with the new tiered shape yet.
+   * @param {string} id Model role id (e.g. "claude").
+   * @param {'flagship'|'efficient'} tier Cost tier.
+   * @returns {string|null} OpenRouter model id, or null if unresolved.
+   */
+  getApiModelId(id, tier = 'flagship') {
+    const model = this.models.get(id);
+    if (!model) return null;
+    if (model.tiers && model.tiers[tier] && model.tiers[tier].apiModelId) {
+      return model.tiers[tier].apiModelId;
+    }
+    if (model.tiers && model.tiers.flagship && model.tiers.flagship.apiModelId) {
+      return model.tiers.flagship.apiModelId;
+    }
+    return model.apiModelId || null;
+  }
+
   /** Disables a model. @param {string} id Model id. @returns {object|null} Model or null. */
   disableModel(id) {
     const model = this.models.get(id);
@@ -78,8 +99,9 @@ class ModelBroker {
 
   /**
    * Fetches the live OpenRouter model catalog and resolves each API-backed
-   * role (claude, gpt, codex, gemini, grok) to its current flagship model id.
-   * Local/non-API entries (hermes, openclaw) are left untouched.
+   * role (claude, gpt, codex, gemini, grok) to both a flagship and an
+   * efficient/cheaper tier. Local/non-API entries (hermes, openclaw) are
+   * left untouched.
    * @param {import('../sdk/OpenRouterClient')} openRouterClient Client instance.
    * @returns {Promise<object>} The resolved role map that was applied.
    */
@@ -88,14 +110,13 @@ class ModelBroker {
     const liveModels = await openRouterClient.listModels();
     const resolved = resolveRoleModels(liveModels);
 
-    for (const [role, resolution] of Object.entries(resolved)) {
+    for (const [role, tiers] of Object.entries(resolved)) {
       const existing = this.models.get(role);
-      if (!existing || !resolution) continue;
+      if (!existing) continue;
       this.models.set(role, {
         ...existing,
-        apiModelId: resolution.apiModelId,
-        contextLength: resolution.contextLength,
-        resolvedName: resolution.name,
+        tiers,
+        apiModelId: tiers.flagship ? tiers.flagship.apiModelId : existing.apiModelId,
         resolvedAt: new Date().toISOString(),
       });
     }

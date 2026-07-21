@@ -7,7 +7,6 @@ const ROOT = path.resolve(__dirname, '..');
 const CONFIG_PATH = path.join(ROOT, 'ceo-agent.config.json');
 const ENV_PATH = path.join(ROOT, '.env');
 
-// Minimal .env loader (no external dependency)
 function loadEnv() {
   if (!fs.existsSync(ENV_PATH)) return;
   const lines = fs.readFileSync(ENV_PATH, 'utf8').split('\n');
@@ -33,6 +32,10 @@ function loadConfig() {
     process.exit(1);
   }
   return JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf8'));
+}
+
+function saveConfig(config) {
+  fs.writeFileSync(CONFIG_PATH, JSON.stringify(config, null, 2) + '\n', 'utf8');
 }
 
 function buildActiveAgentList(registry, activeDepartments) {
@@ -61,8 +64,21 @@ function buildSystemPrompt(config, agent) {
   return `You are ${agent.name}, the ${agent.title} at ${business}. You report to ${name} (the CEO Agent). ${principal} is the ultimate human principal. Answer within your domain expertise with clarity and directness.`;
 }
 
+function formatUsageLine(usage) {
+  if (!usage) return null;
+  const parts = [];
+  if (usage.promptTokens != null) parts.push(`prompt=${usage.promptTokens}`);
+  if (usage.completionTokens != null) parts.push(`completion=${usage.completionTokens}`);
+  const cached = usage.cachedTokens ?? usage.cacheReadTokens;
+  if (cached != null && cached > 0) parts.push(`cached=${cached}`);
+  if (parts.length === 0) return null;
+  return `[tokens: ${parts.join(' ')}]`;
+}
+
 async function main() {
   const config = loadConfig();
+  if (!config.costMode) config.costMode = 'flagship'; // backward compatibility for pre-existing configs
+
   const registry = new AgentRegistry();
   const activeAgents = buildActiveAgentList(registry, config.activeDepartments);
 
@@ -89,6 +105,7 @@ async function main() {
   console.log('');
   console.log(`Business: ${config.businessContext || 'not specified'}`);
   console.log(`Active departments: ${config.activeDepartments.join(', ')}`);
+  console.log(`Cost mode: ${config.costMode}`);
   console.log('');
 
   if (!process.env.OPENROUTER_API_KEY) {
@@ -108,7 +125,7 @@ async function main() {
     console.log('');
   }
 
-  console.log('Commands: /org  /status  /models  /help  /exit');
+  console.log('Commands: /org  /status  /models  /cost  /help  /exit');
   console.log('Address a department directly with @department, e.g. "@legal draft an NDA clause"');
   console.log('');
 
@@ -129,7 +146,8 @@ async function main() {
       console.log('');
       console.log('  /org               Show the active org chart');
       console.log('  /status            Show runtime + agent status');
-      console.log('  /models            Show resolved model assignments');
+      console.log('  /models            Show resolved model assignments (both tiers)');
+      console.log('  /cost              Show or change cost mode (flagship/efficient)');
       console.log('  @department <msg>  Address a department head directly');
       console.log('  <anything else>    Talk to the CEO Agent directly');
       console.log('  /exit              Quit');
@@ -164,8 +182,11 @@ async function main() {
         console.log('  No live model resolution available (OPENROUTER_API_KEY not set or fetch failed).');
       } else {
         for (const model of runtime.modelBroker.listModels()) {
-          if (model.apiModelId) {
-            console.log(`  ${model.id.padEnd(8)} -> ${model.apiModelId}  (context: ${model.contextLength || 'unknown'})`);
+          if (model.tiers) {
+            const flagship = model.tiers.flagship;
+            const efficient = model.tiers.efficient;
+            console.log(`  ${model.id.padEnd(8)} flagship:  ${flagship ? flagship.apiModelId : '(none)'}`);
+            console.log(`  ${''.padEnd(8)} efficient: ${efficient ? efficient.apiModelId : '(none)'}`);
           }
         }
       }
@@ -174,7 +195,24 @@ async function main() {
       return;
     }
 
-    // @department addressing
+    if (input === '/cost') {
+      console.log('');
+      console.log(`  Current cost mode: ${config.costMode}`);
+      console.log('');
+      rl.prompt();
+      return;
+    }
+
+    if (input === '/cost flagship' || input === '/cost efficient') {
+      config.costMode = input.endsWith('flagship') ? 'flagship' : 'efficient';
+      saveConfig(config);
+      console.log('');
+      console.log(`  Cost mode set to: ${config.costMode}`);
+      console.log('');
+      rl.prompt();
+      return;
+    }
+
     let targetDepartment = null;
     let message = input;
     const deptMatch = input.match(/^@(\S+)\s+([\s\S]+)/);
@@ -218,29 +256,28 @@ async function main() {
       return;
     }
 
-    // Pick which resolved role to call for this agent's response.
-    // Executive/most department heads default to 'claude'; engineering-flavored
-    // work prefers 'codex'. This is a simple v1 default, not final routing logic.
     const roleForAgent = (agent.department === 'technology' || agent.lane === 'technology') ? 'codex' : 'claude';
-    const modelRecord = runtime.modelBroker.getModel(roleForAgent);
+    const apiModelId = runtime.modelBroker.getApiModelId(roleForAgent, config.costMode);
 
-    if (!modelRecord || !modelRecord.apiModelId) {
-      console.log('  No resolved model available for this agent role.');
+    if (!apiModelId) {
+      console.log(`  No resolved model available for this agent role at cost mode "${config.costMode}".`);
       console.log('');
       rl.prompt();
       return;
     }
 
     try {
-      const reply = await openRouterClient.chatCompletion({
-        model: modelRecord.apiModelId,
+      const { text, usage } = await openRouterClient.chatCompletion({
+        model: apiModelId,
         messages: [
           { role: 'system', content: buildSystemPrompt(config, agent) },
           { role: 'user', content: message },
         ],
       });
       console.log('');
-      console.log(reply.trim());
+      console.log(text.trim());
+      const usageLine = formatUsageLine(usage);
+      if (usageLine) console.log(`\n  ${usageLine}`);
       console.log('');
     } catch (err) {
       console.log(`  Model call failed: ${err.message}`);

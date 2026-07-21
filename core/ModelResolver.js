@@ -1,7 +1,8 @@
 /**
  * Resolves internal role labels (claude, gpt, gemini, grok, codex) to live
- * OpenRouter model ids by fetching the current model catalog and picking
- * the flagship candidate for each provider — never hardcoded, since exact
+ * OpenRouter model ids by fetching the current model catalog. Resolves TWO
+ * tiers per role: "flagship" (best available) and "efficient" (cheaper/
+ * smaller, for cost-conscious installs) — never hardcoded, since exact
  * model slugs change over time and a stale hardcoded slug fails silently.
  */
 
@@ -13,39 +14,31 @@ const PROVIDER_PREFIXES = Object.freeze({
   grok: 'x-ai/',
 });
 
-// Keywords that mark a smaller/cheaper tier — excluded from flagship selection
-// unless a provider has no larger-tier candidate available.
 const SMALL_TIER_KEYWORDS = Object.freeze(['mini', 'nano', 'haiku', 'flash', 'lite', 'instant', 'small']);
 
 /**
- * Checks whether a model is a pure text-chat model. output_modalities lives
- * at model.architecture.output_modalities per OpenRouter's actual API
- * response shape (confirmed against a live record). Requiring the array to
- * contain ONLY "text" (not "text" among others) is deliberate: some models
- * — e.g. Google's Lyria music-generation line — list output_modalities as
- * ["text", "audio"], which makes them pass a loose "includes text" check
- * despite not being chat models. A CEO Agent conversational role needs a
- * model whose primary and sole output is text.
+ * Checks whether a model is a pure text-chat model (excludes multimodal
+ * output like Lyria's text+audio). See git history for why this check
+ * requires an EXACT single-element ["text"] array, not "includes text".
  * @param {object} model OpenRouter model record.
- * @returns {boolean} Whether this model is text-only output.
+ * @returns {boolean}
  */
 function isTextCapable(model) {
   const outputModalities = model?.architecture?.output_modalities;
-  if (!Array.isArray(outputModalities)) return true; // unknown shape — don't exclude
+  if (!Array.isArray(outputModalities)) return true;
   return outputModalities.length === 1 && outputModalities[0] === 'text';
 }
 
 /**
- * Picks the best candidate for one provider prefix from the live model list.
+ * Picks the best (highest context, non-small-tier) candidate for a provider.
  * @param {object[]} models Full OpenRouter model list.
  * @param {string} prefix Provider id prefix, e.g. "anthropic/".
- * @returns {object|null} Selected model record or null if none found.
+ * @returns {object|null}
  */
 function pickFlagship(models, prefix) {
-  const providerCandidates = models.filter(
-    model => typeof model.id === 'string' && model.id.startsWith(prefix)
-  );
-  const candidates = providerCandidates.filter(isTextCapable);
+  const candidates = models
+    .filter(model => typeof model.id === 'string' && model.id.startsWith(prefix))
+    .filter(isTextCapable);
   if (candidates.length === 0) return null;
 
   const flagshipTier = candidates.filter(
@@ -61,19 +54,52 @@ function pickFlagship(models, prefix) {
 }
 
 /**
- * Resolves all known role labels to live OpenRouter model ids.
- * @param {object[]} models Full OpenRouter model list (from OpenRouterClient.listModels()).
- * @returns {object} Map of role -> { apiModelId, contextLength } or null if unresolved.
+ * Picks the cheapest reasonable small-tier candidate for a provider, for
+ * cost-conscious installs. Prefers models matching SMALL_TIER_KEYWORDS;
+ * falls back to the lowest-context (typically cheapest) candidate if no
+ * small-tier match exists for that provider.
+ * @param {object[]} models Full OpenRouter model list.
+ * @param {string} prefix Provider id prefix, e.g. "anthropic/".
+ * @returns {object|null}
+ */
+function pickEfficient(models, prefix) {
+  const candidates = models
+    .filter(model => typeof model.id === 'string' && model.id.startsWith(prefix))
+    .filter(isTextCapable);
+  if (candidates.length === 0) return null;
+
+  const smallTier = candidates.filter(
+    model => SMALL_TIER_KEYWORDS.some(keyword => model.id.toLowerCase().includes(keyword))
+  );
+  const pool = smallTier.length > 0 ? smallTier : candidates;
+
+  return pool.reduce((cheapest, current) => {
+    const cheapestPrice = parseFloat(cheapest?.pricing?.prompt || '999');
+    const currentPrice = parseFloat(current?.pricing?.prompt || '999');
+    return currentPrice < cheapestPrice ? current : cheapest;
+  }, pool[0]);
+}
+
+/**
+ * Resolves all known role labels to live OpenRouter model ids, both tiers.
+ * @param {object[]} models Full OpenRouter model list.
+ * @returns {object} Map of role -> { flagship: {...}|null, efficient: {...}|null }
  */
 function resolveRoleModels(models) {
   const resolved = {};
   for (const [role, prefix] of Object.entries(PROVIDER_PREFIXES)) {
-    const match = pickFlagship(models, prefix);
-    resolved[role] = match
-      ? { apiModelId: match.id, contextLength: match.context_length || null, name: match.name || match.id }
-      : null;
+    const flagship = pickFlagship(models, prefix);
+    const efficient = pickEfficient(models, prefix);
+    resolved[role] = {
+      flagship: flagship
+        ? { apiModelId: flagship.id, contextLength: flagship.context_length || null, name: flagship.name || flagship.id }
+        : null,
+      efficient: efficient
+        ? { apiModelId: efficient.id, contextLength: efficient.context_length || null, name: efficient.name || efficient.id }
+        : null,
+    };
   }
   return resolved;
 }
 
-module.exports = { resolveRoleModels, pickFlagship, isTextCapable, PROVIDER_PREFIXES, SMALL_TIER_KEYWORDS };
+module.exports = { resolveRoleModels, pickFlagship, pickEfficient, isTextCapable, PROVIDER_PREFIXES, SMALL_TIER_KEYWORDS };

@@ -66,6 +66,13 @@ async function main() {
   }
 
   console.log('');
+  console.log('Cost mode — flagship uses the best available model for every response');
+  console.log('(higher quality, higher cost). Efficient uses a smaller/cheaper model');
+  console.log('(lower cost, may be less capable). You can change this anytime with /cost.');
+  const useFlagship = await askYesNo('Use flagship (highest quality) by default?', true);
+  const costMode = useFlagship ? 'flagship' : 'efficient';
+
+  console.log('');
   console.log('Model provider setup — CEO Agent routes tasks via OpenRouter by default.');
   const hasKey = await askYesNo('Do you have an OpenRouter API key ready to add now?', false);
   let openRouterKey = '';
@@ -81,6 +88,7 @@ async function main() {
     businessContext,
     operatingRhythm,
     activeDepartments,
+    costMode,
     createdAt: new Date().toISOString(),
   };
 
@@ -110,12 +118,12 @@ async function main() {
   console.log('=========================================');
   console.log(`  ${agentName} is configured.`);
   console.log(`  Active departments: ${activeDepartments.join(', ')}`);
+  console.log(`  Cost mode: ${costMode}`);
   console.log('=========================================');
   console.log('');
 
   rl.close();
 
-  // Launch straight into the chat IDE
   require('./chat.js');
 }
 
