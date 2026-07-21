@@ -63,6 +63,7 @@ CEO Agent sits above every specialized agent. She never does the specialized wor
 | `ARCHITECTURE.md` | The full tenant / office / agent product model |
 | `TASK_ROUTER.md`, `BEHAVIOR.md`, `ORGANIZATION-STRUCTURE.md` | Reference behavior specs |
 | `core/WorkflowRuntime.js` | Workflow pack execution engine (see `docs/WORKFLOW_RUNTIME.md`) |
+| `core/BridgeExecutors.js` | Wires real agent bridges as workflow-step executors |
 
 ---
 
