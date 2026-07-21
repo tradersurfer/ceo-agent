@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { isAuthorized, validateBody, buildTask, routeToAgent } from './handler';
+import { isAuthorized, validateBody, buildTask, routeToAgent, checkRateLimit } from './handler';
 
 /**
  * POST /api/dispatch
@@ -10,6 +10,12 @@ import { isAuthorized, validateBody, buildTask, routeToAgent } from './handler';
  * Body: { agent, task_type, project, approved_by?, payload? }
  */
 export async function POST(request: Request) {
+  const clientKey = request.headers.get('x-forwarded-for') || 'unknown';
+  const rateLimit = checkRateLimit(clientKey);
+  if (!rateLimit.allowed) {
+    return NextResponse.json({ error: 'Rate limit exceeded. Try again shortly.' }, { status: 429 });
+  }
+
   const provided = request.headers.get('x-dispatch-secret');
   if (!isAuthorized(provided, process.env.DISPATCH_SECRET)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

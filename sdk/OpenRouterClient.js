@@ -12,11 +12,15 @@ class OpenRouterClient {
   }
 
   /**
-   * Fetches the live list of models available on OpenRouter.
+   * Fetches the live list of models available on OpenRouter, filtered
+   * server-side to text-output models only via the output_modalities
+   * query parameter. This is the authoritative filter — OpenRouter applies
+   * it before returning results, so it doesn't depend on guessing the
+   * shape of per-model metadata client-side.
    * @returns {Promise<object[]>} Raw model records from OpenRouter.
    */
   async listModels() {
-    const response = await fetch(`${OPENROUTER_BASE}/models`);
+    const response = await fetch(`${OPENROUTER_BASE}/models?output_modalities=text`);
     if (!response.ok) {
       throw new Error(`OpenRouter /models request failed: ${response.status}`);
     }

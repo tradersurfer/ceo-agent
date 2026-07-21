@@ -1,3 +1,4 @@
+const crypto = require('crypto');
 const MemoryClient = require('../../../sdk/MemoryClient');
 const SalesIntakeBridge = require('../../../agents/finance/credit-office/src/SalesIntakeBridge');
 const OnboardingCommsBridge = require('../../../agents/finance/credit-office/src/OnboardingCommsBridge');
@@ -18,14 +19,48 @@ const BRIDGE_FACTORIES = {
   dispute_agent: () => new DisputeAgentBridge(),
 };
 
+// In-memory sliding-window rate limiter. Suitable for a single-instance
+// deployment (the default for this scaffold). Multi-instance/production
+// deployments should replace this with a shared store (Redis, etc.) —
+// noted in SECURITY.md.
+const RATE_LIMIT_WINDOW_MS = 60_000;
+const RATE_LIMIT_MAX_REQUESTS = 30;
+const requestLog = new Map(); // key -> array of timestamps
+
 /**
- * Validates the dispatch secret from request headers.
+ * Checks and records a rate-limit hit for a given key (e.g. caller IP).
+ * @param {string} key Identifying key for the caller.
+ * @returns {{allowed: boolean, remaining: number}}
+ */
+function checkRateLimit(key) {
+  const now = Date.now();
+  const windowStart = now - RATE_LIMIT_WINDOW_MS;
+  const timestamps = (requestLog.get(key) || []).filter(t => t > windowStart);
+
+  if (timestamps.length >= RATE_LIMIT_MAX_REQUESTS) {
+    requestLog.set(key, timestamps);
+    return { allowed: false, remaining: 0 };
+  }
+
+  timestamps.push(now);
+  requestLog.set(key, timestamps);
+  return { allowed: true, remaining: RATE_LIMIT_MAX_REQUESTS - timestamps.length };
+}
+
+/**
+ * Validates the dispatch secret from request headers using a timing-safe
+ * comparison, so response time doesn't leak how many leading characters
+ * of a guessed secret were correct.
  * @param {string|null} provided - value of x-dispatch-secret header
  * @param {string|undefined} expected - value of DISPATCH_SECRET env var
  * @returns {boolean}
  */
 function isAuthorized(provided, expected) {
-  return !!expected && provided === expected;
+  if (!expected || !provided) return false;
+  const providedBuf = Buffer.from(String(provided));
+  const expectedBuf = Buffer.from(String(expected));
+  if (providedBuf.length !== expectedBuf.length) return false;
+  return crypto.timingSafeEqual(providedBuf, expectedBuf);
 }
 
 /**
@@ -133,4 +168,4 @@ async function recordDispatchMemory(agentId, task) {
   }));
 }
 
-module.exports = { isAuthorized, validateBody, buildTask, routeToAgent, recordDispatchMemory };
+module.exports = { isAuthorized, validateBody, buildTask, routeToAgent, recordDispatchMemory, checkRateLimit };
