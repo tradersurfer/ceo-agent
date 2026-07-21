@@ -18,13 +18,34 @@ const PROVIDER_PREFIXES = Object.freeze({
 const SMALL_TIER_KEYWORDS = Object.freeze(['mini', 'nano', 'haiku', 'flash', 'lite', 'instant', 'small']);
 
 /**
+ * Checks whether a model is a pure text-chat model. output_modalities lives
+ * at model.architecture.output_modalities per OpenRouter's actual API
+ * response shape (confirmed against a live record). Requiring the array to
+ * contain ONLY "text" (not "text" among others) is deliberate: some models
+ * — e.g. Google's Lyria music-generation line — list output_modalities as
+ * ["text", "audio"], which makes them pass a loose "includes text" check
+ * despite not being chat models. A CEO Agent conversational role needs a
+ * model whose primary and sole output is text.
+ * @param {object} model OpenRouter model record.
+ * @returns {boolean} Whether this model is text-only output.
+ */
+function isTextCapable(model) {
+  const outputModalities = model?.architecture?.output_modalities;
+  if (!Array.isArray(outputModalities)) return true; // unknown shape — don't exclude
+  return outputModalities.length === 1 && outputModalities[0] === 'text';
+}
+
+/**
  * Picks the best candidate for one provider prefix from the live model list.
  * @param {object[]} models Full OpenRouter model list.
  * @param {string} prefix Provider id prefix, e.g. "anthropic/".
  * @returns {object|null} Selected model record or null if none found.
  */
 function pickFlagship(models, prefix) {
-  const candidates = models.filter(model => typeof model.id === 'string' && model.id.startsWith(prefix));
+  const providerCandidates = models.filter(
+    model => typeof model.id === 'string' && model.id.startsWith(prefix)
+  );
+  const candidates = providerCandidates.filter(isTextCapable);
   if (candidates.length === 0) return null;
 
   const flagshipTier = candidates.filter(
@@ -55,4 +76,4 @@ function resolveRoleModels(models) {
   return resolved;
 }
 
-module.exports = { resolveRoleModels, pickFlagship, PROVIDER_PREFIXES, SMALL_TIER_KEYWORDS };
+module.exports = { resolveRoleModels, pickFlagship, isTextCapable, PROVIDER_PREFIXES, SMALL_TIER_KEYWORDS };
