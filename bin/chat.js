@@ -216,29 +216,41 @@ async function main() {
       return;
     }
 
-    let targetDepartment = null;
+    let target = null;
     let message = input;
-    const deptMatch = input.match(/^@(\S+)\s+([\s\S]+)/);
-    if (deptMatch) {
-      targetDepartment = deptMatch[1].toLowerCase();
-      message = deptMatch[2];
+    const atMatch = input.match(/^@(\S+)\s+([\s\S]+)/);
+    if (atMatch) {
+      target = atMatch[1].toLowerCase();
+      message = atMatch[2];
     }
 
-    const decision = targetDepartment
-      ? runtime.routeTask({
-          department: targetDepartment,
-          goal: message,
-          task: message,
-          project: 'cli-session',
-          approved_by: 'ceo_agent',
-        })
-      : runtime.routeTask({
+    let decision;
+    if (!target) {
+      decision = runtime.routeTask({
           assignedAgent: 'ceo_agent',
           goal: message,
           task: message,
           project: 'cli-session',
           approved_by: 'ceo_agent',
         });
+    } else {
+      decision = runtime.routeTask({
+          assignedAgent: target,
+          goal: message,
+          task: message,
+          project: 'cli-session',
+          approved_by: 'ceo_agent',
+        });
+      if (decision.status !== 'routed') {
+        decision = runtime.routeTask({
+          department: target,
+          goal: message,
+          task: message,
+          project: 'cli-session',
+          approved_by: 'ceo_agent',
+        });
+      }
+    }
 
     if (decision.status !== 'routed') {
       console.log('');

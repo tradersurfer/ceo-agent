@@ -19,19 +19,27 @@ function substitutePlaceholders(template, values) {
 
 function loadAgentPrompt({ root, config, agent }) {
   const agentId = agent && agent.id ? agent.id : 'ceo_agent';
-  const promptParts = PROMPT_PATHS[agentId] || PROMPT_PATHS.ceo_agent;
-  const promptPath = path.join(root, 'departments', ...promptParts);
-  const template = fs.readFileSync(promptPath, 'utf8');
 
-  return substitutePlaceholders(template, {
+  const values = {
     AGENT_NAME: agentId === 'ceo_agent'
       ? (config.agentName || 'CEO Agent')
-      : (agent.name || agent.title || agentId),
+      : (agent && (agent.name || agent.title)) || agentId,
     CEO_AGENT_NAME: config.agentName || 'CEO Agent',
     PRINCIPAL_NAME: config.principalName || 'the Principal',
     BUSINESS_CONTEXT: config.businessContext || 'the configured business',
     AGENT_TITLE: agent && agent.title ? agent.title : 'Chief Intelligence & Orchestration Agent',
-  });
+  };
+
+  // Custom (user-added) agents carry their prompt inline in config, never as a
+  // departments/ file — never attempt a file read for them.
+  if (agent && agent.custom && typeof agent.prompt === 'string') {
+    return substitutePlaceholders(agent.prompt, values);
+  }
+
+  const promptParts = PROMPT_PATHS[agentId] || PROMPT_PATHS.ceo_agent;
+  const promptPath = path.join(root, 'departments', ...promptParts);
+  const template = fs.readFileSync(promptPath, 'utf8');
+  return substitutePlaceholders(template, values);
 }
 
 module.exports = { loadAgentPrompt, substitutePlaceholders, PROMPT_PATHS };

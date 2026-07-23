@@ -19,17 +19,23 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'message is required' }, { status: 400 });
   }
 
-  let targetDepartment: string | null = null;
+  let target: string | null = null;
   let message = rawMessage;
-  const deptMatch = rawMessage.match(/^@(\S+)\s+([\s\S]+)/);
-  if (deptMatch) {
-    targetDepartment = deptMatch[1].toLowerCase();
-    message = deptMatch[2];
+  const atMatch = rawMessage.match(/^@(\S+)\s+([\s\S]+)/);
+  if (atMatch) {
+    target = atMatch[1].toLowerCase();
+    message = atMatch[2];
   }
 
-  const decision = targetDepartment
-    ? runtime.routeTask({ department: targetDepartment, goal: message, task: message, project: 'web-session', approved_by: 'ceo_agent' })
-    : runtime.routeTask({ assignedAgent: 'ceo_agent', goal: message, task: message, project: 'web-session', approved_by: 'ceo_agent' });
+  let decision;
+  if (!target) {
+    decision = runtime.routeTask({ assignedAgent: 'ceo_agent', goal: message, task: message, project: 'web-session', approved_by: 'ceo_agent' });
+  } else {
+    decision = runtime.routeTask({ assignedAgent: target, goal: message, task: message, project: 'web-session', approved_by: 'ceo_agent' });
+    if (decision.status !== 'routed') {
+      decision = runtime.routeTask({ department: target, goal: message, task: message, project: 'web-session', approved_by: 'ceo_agent' });
+    }
+  }
 
   if (decision.status !== 'routed') {
     return NextResponse.json({ status: decision.status, reason: decision.reason || 'Could not route this message.' });

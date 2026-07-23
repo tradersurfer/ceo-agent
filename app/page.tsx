@@ -6,8 +6,9 @@ import ChatView from './components/ChatView';
 import OrgView from './components/OrgView';
 import StatusView from './components/StatusView';
 import SettingsView from './components/SettingsView';
+import AddAgentView from './components/AddAgentView';
 
-type Tab = 'chat' | 'org' | 'status' | 'settings';
+type Tab = 'chat' | 'org' | 'status' | 'add' | 'settings';
 
 export default function Home() {
   const [tab, setTab] = useState<Tab>('chat');
@@ -47,6 +48,7 @@ export default function Home() {
         {tab === 'chat' && <ChatView config={config} />}
         {tab === 'org' && <OrgView />}
         {tab === 'status' && <StatusView />}
+        {tab === 'add' && <AddAgentView onCreated={refreshConfig} />}
         {tab === 'settings' && <SettingsView config={config} onSaved={refreshConfig} />}
       </main>
     </div>
