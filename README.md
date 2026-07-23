@@ -6,47 +6,82 @@ CEO Agent is an orchestration layer that sits above your other AI agents and mod
 
 You can rename her on install. The role doesn't change.
 
-> **Status: early scaffold.** The identity layer, SDK, organizational model, and a handful of example agent bridges are here and working. The installer wizard, full runtime wiring, and marketplace integration are still being built. See [Roadmap](#roadmap).
+> **Status: working v1, CLI.** Identity, SDK, organizational model, setup wizard, chat interface, dispatch API, and workflow execution engine are all built and live-tested. A web interface is in progress. See [Roadmap](#roadmap).
+
+---
+
+## Install and run it
+
+Not yet published to npm — install from the repository.
+
+```
+git clone https://github.com/tradersurfer/ceo-agent.git
+cd ceo-agent
+npm install
+npm run setup
+```
+
+Requires Node 18 or newer. The setup wizard will:
+- Name your CEO Agent
+- Ask about your business
+- Let you activate whichever departments you need
+- Choose flagship or efficient cost mode
+- Save your OpenRouter key to a local, gitignored `.env`
+- Launch straight into the chat interface
+
+After setup, start it again anytime:
+
+```
+npm start
+```
+
+Inside the chat interface:
+
+```
+/org       show your active org chart
+/status    runtime + agent status
+/models    resolved model assignments (both cost tiers)
+/cost      view or change cost mode (flagship / efficient)
+/help      full command list
+/exit      quit
+```
+
+Address a department head directly with `@department`, e.g. `@legal draft an NDA clause`. Anything else goes to CEO Agent directly.
 
 ---
 
 ## What Makes This Different
 
-Most "AI assistants" answer one question at a time. CEO Agent runs the org: she knows which agent handles which kind of work, delegates to it, checks the result, and reports back — while also being able to answer things directly herself when a task doesn't need a heavier agent at all.
+Most "AI assistants" answer one question at a time. CEO Agent runs the org: she knows which department head owns which kind of work, delegates to them, and stays accountable for the result — while also being able to answer things directly herself when a task doesn't need to go anywhere else.
 
 | Capability | Description |
 |---|---|
-| **Executive orchestration** | Owns the top-level decision layer — decides what gets done, in what order, by which agent |
-| **Multi-agent task routing** | Reads incoming work, identifies the right domain, delegates to the agent built for it |
-| **Model-agnostic** | Chooses which underlying model handles a task, rather than defaulting to one option for everything |
-| **Organizational memory** | Persists context across every agent and every session |
-| **Quality control** | Reviews delegated work before it's considered done |
-| **Business-vocabulary interface** | Speaks in Business / Office / Department / Employee terms — not agent/prompt/API jargon |
+| Executive orchestration | Owns the top-level decision layer — decides what gets done, in what order, by whom |
+| Multi-agent task routing | Reads incoming work, identifies the right department, delegates to the head built for it |
+| Model-agnostic | Resolves the current best available model per provider live from OpenRouter, rather than hardcoding stale model names |
+| Cost-aware | Dual-tier model resolution (flagship/efficient), prompt caching, real token usage shown after every response |
+| Quality control | Reviews delegated work before it's considered done |
+| Business-vocabulary interface | Speaks in Business / Department / Employee terms — not agent/prompt/API jargon |
 
 ---
 
 ## Architecture
 
-                         ┌─────────────────────┐
-                         │      CEO AGENT       │
-                         │  Chief Intelligence  │
-                         │  & Orchestration     │
-                         └──────────┬───────────┘
-                                    │
-            ┌───────────────┬──────┴──────┬───────────────┐
-            ▼               ▼             ▼               ▼
-     ┌─────────────┐ ┌─────────────┐ ┌──────────┐ ┌──────────────┐
-     │ Operations  │ │ Engineering │ │  Client  │ │   Finance    │
-     │   Agent     │ │    Agent    │ │ Success  │ │    Agent     │
-     └─────────────┘ └─────────────┘ └──────────┘ └──────────────┘
-            │               │             │               │
-            ▼               ▼             ▼               ▼
-     ┌─────────────┐ ┌──────────────┐ ┌──────────────────────────┐
-     │   Content    │ │    Growth    │ │          Design          │
-     │    Agent     │ │    Agent     │ │           Agent          │
-     └─────────────┘ └──────────────┘ └──────────────────────────┘
+```
+                         CEO AGENT
+                    Chief Intelligence
+                    & Orchestration
+                          |
+       -----------------------------------------------------
+       |          |          |            |          |          |
+      CFO        COO        CTO          CMO        CHRO        CLO
+    Finance       Ops       Tech        Market.     People      Legal
+                   |                       |                     |
+                Hermes            Sales Intake,              Dispute
+                                  Onboarding Comms             Agent
+```
 
-CEO Agent sits above every specialized agent. She never does the specialized work herself — she decides *who* does it, *in what order*, and *whether the output is good enough to ship*. See [`ARCHITECTURE.md`](./ARCHITECTURE.md) for the full multi-tenant model.
+Seven departments, standard C-suite model. Every department has a conversational head agent; three of them (Operations, Marketing, Legal) have real automatable agent bridges reporting into them. Activate only the departments your business needs. See [`ARCHITECTURE.md`](./ARCHITECTURE.md) for the full model.
 
 ---
 
@@ -55,26 +90,28 @@ CEO Agent sits above every specialized agent. She never does the specialized wor
 | Path | What it is |
 |---|---|
 | `IDENTITY.md` | The CEO Agent's white-label identity template |
-| `core/` | Runtime config, department management, model routing |
+| `core/` | Runtime config, department management, model routing, workflow execution engine |
 | `sdk/` | Agent lifecycle, task routing, memory, permissions — the production SDK |
-| `organization/` | The programmatic org-chart model (departments, roles, agents) |
+| `organization/` | The programmatic C-suite org-chart model |
+| `bin/setup.js` | Interactive CLI setup wizard |
+| `bin/chat.js` | The chat interface — live model calls, cost-mode switching, org chart, status |
+| `app/api/dispatch/` | Dispatch API — real bridge execution for automatable agents |
 | `agents/operations/hermes/` | Example operations agent bridge (Hermes, powered by [NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent)) |
-| `agents/finance/` `agents/legal-compliance/` | Example domain-specific agent bridges |
-| `ARCHITECTURE.md` | The full tenant / office / agent product model |
+| `agents/finance/`, `agents/legal-compliance/` | Example domain-specific agent bridges |
+| `tests/` | Automated test coverage (WorkflowRuntime, BridgeExecutors) |
+| `ARCHITECTURE.md` | The full department / agent product model |
+| `SECURITY.md` | Honest security posture — what's handled, what's your responsibility |
 | `TASK_ROUTER.md`, `BEHAVIOR.md`, `ORGANIZATION-STRUCTURE.md` | Reference behavior specs |
-| `core/WorkflowRuntime.js` | Workflow pack execution engine (see `docs/WORKFLOW_RUNTIME.md`) |
-| `core/BridgeExecutors.js` | Wires real agent bridges as workflow-step executors |
 
 ---
 
 ## Who This Is For
 
-Built to plug into and become the CEO for:
 - A solo entrepreneur running a local business
 - A CFO or CEO at a larger private company who wants an executive AI layer
 - A small business owner with their own existing tech stack
 
-Across desktop, web, and — eventually — mobile.
+Currently a CLI experience. A web interface is in active development.
 
 ---
 
@@ -82,13 +119,18 @@ Across desktop, web, and — eventually — mobile.
 
 - [x] White-label identity layer
 - [x] Core SDK (task routing, memory, permissions, agent lifecycle)
-- [x] Organizational model
+- [x] Organizational model (standard C-suite: CFO/COO/CTO/CMO/CHRO/CLO)
 - [x] Example agent bridges (operations, finance, legal-compliance)
-- [ ] Installer / setup wizard (name your agent, connect models, activate departments)
-- [ ] Full runtime wiring (dispatch API, workflow execution)
-- [ ] Cost/token optimization pass
-- [ ] Security hardening pass
+- [x] Installer / setup wizard — built and live-tested
+- [x] Chat interface — live model resolution, real completions, cost-mode switching
+- [x] Dispatch API — real bridge execution, rate limiting, timing-safe auth
+- [x] Workflow execution engine — tested, wired to real bridge executors
+- [x] Cost/token optimization — dual-tier models, prompt caching, usage visibility
+- [x] Security hardening pass — see `SECURITY.md`
+- [ ] Web interface
 - [ ] Marketplace listing as the flagship install
+
+Some install-specific pieces remain by design, not as gaps: production runtime URLs for each bridge, persistent workflow storage, and a scheduler for delayed workflow steps are all things an individual install configures for itself.
 
 ---
 
@@ -100,4 +142,4 @@ MIT — see [`LICENSE`](./LICENSE). Copyright (c) 2026 JECI Group, LLC.
 
 ## Contributing
 
-This is an early-stage scaffold. Issues and PRs welcome once the repo is public — check back or watch this repo for updates.
+Issues are being filed as this moves toward a public release — check the Issues tab for open items. PRs welcome.
