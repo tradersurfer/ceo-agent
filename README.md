@@ -127,7 +127,7 @@ Currently a CLI experience. A web interface is in active development.
 - [x] Workflow execution engine — tested, wired to real bridge executors
 - [x] Cost/token optimization — dual-tier models, prompt caching, usage visibility
 - [x] Security hardening pass — see `SECURITY.md`
-- [ ] Web interface
+- [x] Web interface — chat, org chart, status, and settings dashboard
 - [ ] Marketplace listing as the flagship install
 
 Some install-specific pieces remain by design, not as gaps: production runtime URLs for each bridge, persistent workflow storage, and a scheduler for delayed workflow steps are all things an individual install configures for itself.

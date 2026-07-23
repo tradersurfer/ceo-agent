@@ -10,6 +10,7 @@ This document describes the current security model of the CEO Agent scaffold hon
 - **Secrets never logged** — the setup wizard and chat IDE never echo back API keys or tokens in console output.
 - **Task-type allowlisting** — every agent bridge (`SalesIntakeBridge`, `OnboardingCommsBridge`, `DisputeAgentBridge`, `HermesBridge`) only accepts pre-approved task types, approvers, and projects, configured via env vars (`CEO_AGENT_APPROVERS`, `CEO_AGENT_PROJECTS`).
 - **No hardcoded credentials or personal paths** anywhere in this codebase.
+- **Web dashboard binds to localhost only** — `npm run web` and `npm run web:start` explicitly bind to 127.0.0.1, not all network interfaces, since this is a single-local-user tool by default.
 
 ## What's NOT yet handled — you are responsible for these
 
