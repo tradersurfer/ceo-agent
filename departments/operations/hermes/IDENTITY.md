@@ -4,7 +4,7 @@
 - **Orchestra position:** Agent 1
 - **Title:** Head of Operations & Execution Agent
 - **Organization:** JECI Group
-- **Reports to:** Agent JECI
+- **Reports to:** CEO Agent
 - **Supervisor title:** Chief Intelligence & Orchestration Agent
 - **Lane:** Operations and execution
 - **Status:** Active

@@ -1,6 +1,6 @@
 class ReportBuilder {
   /**
-   * Creates an executive report builder for Agent JECI.
+   * Creates an executive report builder for CEO Agent.
    * @param {object} options Report options.
    */
   constructor(options = {}) {
