@@ -6,9 +6,16 @@ export async function GET() {
   if (!runtime) {
     return NextResponse.json({ configured: false });
   }
+  const runtimeStatus = runtime.getStatus();
+  const supervisorStatus = runtime.supervisor.reportStatus();
   return NextResponse.json({
     configured: true,
     costMode: config.costMode,
-    status: runtime.getStatus(),
+    status: {
+      ...runtimeStatus,
+      agentCount: supervisorStatus.agentCount,
+      agents: supervisorStatus.agents,
+      health: supervisorStatus.health.state,
+    },
   });
 }

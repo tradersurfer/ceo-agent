@@ -20,14 +20,11 @@ node_modules/
 MEMORY.md
 
 offices/
-agents/operations/hermes/skills/red-teaming/
 
-agents/_tools/.claude/
-agents/_tools/.codex/
-agents/_tools/.grok/
-agents/_tools/.copilot/
+departments/_tools/.claude/
+departments/_tools/.codex/
+departments/_tools/.grok/
+departments/_tools/.copilot/
 
-agents/operations/hermes/logs/
-agents/operations/hermes/skills/.curator_backups/
-
-agents/operations/hermes/skills/.curator_state
+departments/operations/hermes/logs/
+departments/operations/hermes/skills/

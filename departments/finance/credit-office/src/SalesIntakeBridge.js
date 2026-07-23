@@ -11,7 +11,7 @@ class SalesIntakeBridge extends BaseBridge {
     super({
       id: 'sales_intake_agent',
       name: 'Sales Intake Agent',
-      title: 'Client Lead Capture Agent',
+      title: 'VP of Sales',
       reportsTo: 'cmo_agent',
       allowedApprovers: ALLOWED_APPROVERS,
       allowedProjects: ALLOWED_PROJECTS,

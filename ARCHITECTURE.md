@@ -6,7 +6,7 @@ _Sovereign. Reusable. Multi-tenant._
 
 ## 1. CEO Agent Core
 
-**Location:** `sdk/`, `core/`, `registry/`, `agents/*/src/*Bridge.js`, `app/api/dispatch/`
+**Location:** `sdk/`, `core/`, `registry/`, `departments/*/src/*Bridge.js`, `app/api/dispatch/`
 
 CEO Agent Core is the platform runtime. It has zero knowledge of any specific
 business, client, tenant, or product. It only knows:
@@ -46,19 +46,19 @@ future, that is a distinct, deliberate decision — not an inherited default.
 
 ---
 
-## 3. Agent Products
+## 3. Department Agents
 
-**Location:** `agents/<category>/<agent-id>/`
+**Location:** `departments/<department>/<agent-id>/`
 
-An agent product is a single callable agent with a defined contract
+An agent is a single callable role with a defined contract
 (bridge, capabilities, authorized task types). Agent bridges report to a
 department head in `organization/Organization.js` and are registered in
 `registry/agent-registry.json`.
 
 Example structure:
-- `agents/legal-compliance/dispute-agent/` — regulated dispute/compliance automation pipeline
-- `agents/operations/hermes/` — operations and execution automation
-- `agents/finance/credit-office/` — lead capture and onboarding communications
+- `departments/operations/hermes/` — the Chief Operating Officer and operations execution bridge
+- `departments/finance/credit-office/` — sales intake and onboarding communications
+- `examples/dispute-agent/` — optional regulated-domain reference implementation, not in the default roster
 
 Agent products expose a bridge interface. Tenants do not write bridge code —
 they configure which agents are active via environment variables
@@ -84,10 +84,9 @@ only editing local config, zero core changes.
 
 `WorkflowRuntime` executes an ordered sequence of steps with dependencies,
 conditions, delays, and retries — see `docs/WORKFLOW_RUNTIME.md` for full
-detail. `BridgeExecutors.js` registers the three real agent bridges (Sales
-Intake, Onboarding Comms, Dispute Agent) as workflow-step executors, so a
-workflow step can actually call a bridge's `trigger()` method when the
-workflow runs.
+detail. `BridgeExecutors.js` registers the Sales Intake and Onboarding Comms
+department bridges, plus the optional Dispute Agent example, as workflow-step
+executors so a workflow step can call a bridge's `trigger()` method.
 
 Workflow definitions themselves (what steps exist, in what order, for what
 purpose) are not shipped in this repo — they're something an install
@@ -101,7 +100,8 @@ defines for its own use case, using `WorkflowRuntime.execute()` directly.
 sdk/                       — Supervisor, TaskRouter, BaseBridge, AgentRegistry, etc.
 core/                      — Runtime, DepartmentManager, ModelBroker, RuntimeConfig, WorkflowRuntime, BridgeExecutors
 registry/agent-registry.json  — canonical agent roster
-agents/*/src/*Bridge.js    — agent bridge implementations
+departments/*/src/*Bridge.js — default department bridge implementations
+examples/*/src/*Bridge.js  — optional reference bridge implementations
 app/api/dispatch/          — supervisor dispatch endpoint
 ```
 
@@ -137,13 +137,14 @@ Rules for core files:
 ```
 CEO Agent Core
     ↓ supervises
-    ├── CFO Agent, COO Agent, CTO Agent, CMO Agent, CHRO Agent, CLO Agent
+    ├── CFO Agent, Hermes/COO, CTO Agent, CMO Agent, CHRO Agent, CLO Agent
     ↓ some department heads supervise
-    ├── Hermes (Operations)
-    ├── Sales Intake Agent, Onboarding Comms Agent (Marketing)
-    └── Dispute Agent (Legal)
+    └── VP of Sales, Onboarding Comms Agent (Marketing)
     ↓ automatable agents are callable via
 Dispatch API  or  Workflow Runtime (BridgeExecutors)
 ```
+
+The Dispute Agent remains available under `examples/` but is not part of the
+default deployment model or active registry.
 
 Same platform. Different tenants. Different departments activated. Same core.

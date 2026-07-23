@@ -1,4 +1,4 @@
-const BaseBridge = require('../../../../sdk/BaseBridge');
+const BaseBridge = require('../../../sdk/BaseBridge');
 
 const ALLOWED_APPROVERS = (process.env.CEO_AGENT_APPROVERS || 'ceo_agent')
   .split(',').map(s => s.trim()).filter(Boolean);
