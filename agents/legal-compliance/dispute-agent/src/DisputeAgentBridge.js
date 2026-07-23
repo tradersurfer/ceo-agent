@@ -35,13 +35,14 @@ class DisputeAgentBridge extends BaseBridge {
 
   /**
    * Returns the dispute agent's agent-loop trigger URL, or null if env is not set.
+   * The secret is no longer embedded in the URL — see trigger() for the
+   * x-dispute-secret header instead.
    * @returns {string|null}
    */
   getRunEndpoint() {
     const base = process.env.DISPUTE_AGENT_URL;
-    const secret = process.env.DISPUTE_AGENT_WEBHOOK_SECRET;
-    if (!base || !secret) return null;
-    return `${base.replace(/\/$/, '')}/api/agent/run?secret=${secret}`;
+    if (!base) return null;
+    return `${base.replace(/\/$/, '')}/api/agent/run`;
   }
 
   /**
@@ -72,7 +73,8 @@ class DisputeAgentBridge extends BaseBridge {
     }
 
     const endpoint = this.getRunEndpoint();
-    if (!endpoint) {
+    const secret = process.env.DISPUTE_AGENT_WEBHOOK_SECRET;
+    if (!endpoint || !secret) {
       return {
         agent: this.id,
         status: 'queued',
@@ -83,7 +85,10 @@ class DisputeAgentBridge extends BaseBridge {
     }
 
     try {
-      const response = await fetch(endpoint, { method: 'POST' });
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'x-dispute-secret': secret },
+      });
       const data = await response.json().catch(() => ({}));
       return {
         agent: this.id,
