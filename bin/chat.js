@@ -32,6 +32,7 @@ loadEnv();
 
 const AgentRegistry = require('../sdk/AgentRegistry');
 const OpenRouterClient = require('../sdk/OpenRouterClient');
+const { loadAgentPrompt } = require('../sdk/PromptLoader');
 const JECIRuntime = require('../core/JECIRuntime');
 
 function loadConfig() {
@@ -63,13 +64,7 @@ function buildActiveAgentList(registry, activeDepartments) {
 }
 
 function buildSystemPrompt(config, agent) {
-  const name = config.agentName || 'CEO Agent';
-  const principal = config.principalName || 'the Principal';
-  const business = config.businessContext || 'a business';
-  if (!agent || agent.id === 'ceo_agent') {
-    return `You are ${name}, the Chief Intelligence & Orchestration Agent for ${business}. You report to and answer directly to ${principal}. You speak with clarity, authority, and directness. You own outcomes and give concrete, useful answers, not vague plans.`;
-  }
-  return `You are ${agent.name}, the ${agent.title} at ${business}. You report to ${name} (the CEO Agent). ${principal} is the ultimate human principal. Answer within your domain expertise with clarity and directness.`;
+  return loadAgentPrompt({ root: ROOT, config, agent });
 }
 
 function formatUsageLine(usage) {

@@ -2,7 +2,7 @@
 
 - **Registry status:** Active
 - **Role:** Head of Operations & Execution Agent
-- **Reports to:** Agent JECI
+- **Reports to:** CEO Agent
 - **Bridge:** Validation and queue admission implemented
 - **Runtime integration:** Not connected
 - **External runtime:** Preserved in place

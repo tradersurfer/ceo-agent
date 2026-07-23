@@ -1,11 +1,11 @@
 class ReportBuilder {
   /**
-   * Creates an executive report builder for Agent JECI.
+   * Creates an executive report builder for CEO Agent.
    * @param {object} options Report options.
    */
   constructor(options = {}) {
-    this.title = options.title || 'JECI Executive Operations Report';
-    this.audience = options.audience || 'agent_jeci';
+    this.title = options.title || 'CEO Agent Executive Operations Report';
+    this.audience = options.audience || 'ceo_agent';
     this.sections = [];
   }
 
