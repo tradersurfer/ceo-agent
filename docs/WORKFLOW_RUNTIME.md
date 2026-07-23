@@ -19,10 +19,10 @@ business or tenant.
 - Emits lifecycle events via a Node `EventEmitter` and records them to a
   pluggable audit log (defaults to in-memory; swap in a real store for
   production).
-- **Has real executors registered for the three working agent bridges**
-  (Sales Intake, Onboarding Comms, Dispute Agent) via
-  `core/BridgeExecutors.js` — a workflow step with `type: 'create_lead'`,
-  for example, actually calls `SalesIntakeBridge.trigger()`.
+- **Has real executors registered for the default Sales Intake and Onboarding
+  Comms bridges, plus the optional Dispute Agent example**, via
+  `core/BridgeExecutors.js` — a workflow step with `type: 'create_lead'`, for
+  example, actually calls `SalesIntakeBridge.trigger()`.
 
 ## What it does NOT do yet
 

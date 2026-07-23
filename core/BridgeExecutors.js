@@ -1,13 +1,13 @@
-const SalesIntakeBridge = require('../agents/finance/credit-office/src/SalesIntakeBridge');
-const OnboardingCommsBridge = require('../agents/finance/credit-office/src/OnboardingCommsBridge');
-const DisputeAgentBridge = require('../agents/legal-compliance/dispute-agent/src/DisputeAgentBridge');
+const SalesIntakeBridge = require('../departments/finance/credit-office/src/SalesIntakeBridge');
+const OnboardingCommsBridge = require('../departments/finance/credit-office/src/OnboardingCommsBridge');
+const DisputeAgentBridge = require('../examples/dispute-agent/src/DisputeAgentBridge');
 
 /**
- * Registers workflow-step executors backed by the three real agent bridges
- * (Sales Intake, Onboarding Comms, Dispute Agent) onto a WorkflowRuntime
- * instance. One executor is registered per allowed task type on each
- * bridge, so a workflow step with type: 'create_lead' will actually call
- * SalesIntakeBridge.trigger() when the workflow runs.
+ * Registers workflow-step executors backed by the default Sales Intake and
+ * Onboarding Comms bridges plus the optional Dispute Agent example onto a
+ * WorkflowRuntime instance. One executor is registered per allowed task type
+ * on each bridge, so a workflow step with type: 'create_lead' will actually
+ * call SalesIntakeBridge.trigger() when the workflow runs.
  *
  * Bridge trigger() results are translated into WorkflowRuntime's pass/fail
  * contract. Only a bridge status of 'triggered' counts as workflow success.

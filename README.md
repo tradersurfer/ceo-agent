@@ -74,14 +74,19 @@ Most "AI assistants" answer one question at a time. CEO Agent runs the org: she 
                           |
        -----------------------------------------------------
        |          |          |            |          |          |
-      CFO        COO        CTO          CMO        CHRO        CLO
+      CFO      HERMES/COO    CTO          CMO        CHRO        CLO
     Finance       Ops       Tech        Market.     People      Legal
-                   |                       |                     |
-                Hermes            Sales Intake,              Dispute
-                                  Onboarding Comms             Agent
+                                            |
+                                      VP Sales,
+                                  Onboarding Comms
 ```
 
-Seven departments, standard C-suite model. Every department has a conversational head agent; three of them (Operations, Marketing, Legal) have real automatable agent bridges reporting into them. Activate only the departments your business needs. See [`ARCHITECTURE.md`](./ARCHITECTURE.md) for the full model.
+Seven departments, standard C-suite model. Hermes fills the COO seat directly,
+and Marketing includes a VP of Sales plus onboarding communications. The
+domain-specific Dispute Agent is retained under `examples/` as a reference
+implementation, not activated in the default roster. Activate only the
+departments your business needs. See [`ARCHITECTURE.md`](./ARCHITECTURE.md) for
+the full model.
 
 ---
 
@@ -96,8 +101,9 @@ Seven departments, standard C-suite model. Every department has a conversational
 | `bin/setup.js` | Interactive CLI setup wizard |
 | `bin/chat.js` | The chat interface — live model calls, cost-mode switching, org chart, status |
 | `app/api/dispatch/` | Dispatch API — real bridge execution for automatable agents |
-| `agents/operations/hermes/` | Example operations agent bridge (Hermes, powered by [NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent)) |
-| `agents/finance/`, `agents/legal-compliance/` | Example domain-specific agent bridges |
+| `departments/operations/hermes/` | Operations department head and bridge (Hermes, powered by [NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent)) |
+| `departments/finance/` | Sales intake and onboarding communications bridges |
+| `examples/dispute-agent/` | Optional domain-specific reference implementation; not in the default roster |
 | `tests/` | Automated test coverage (WorkflowRuntime, BridgeExecutors) |
 | `ARCHITECTURE.md` | The full department / agent product model |
 | `SECURITY.md` | Honest security posture — what's handled, what's your responsibility |
@@ -111,7 +117,7 @@ Seven departments, standard C-suite model. Every department has a conversational
 - A CFO or CEO at a larger private company who wants an executive AI layer
 - A small business owner with their own existing tech stack
 
-Currently a CLI experience. A web interface is in active development.
+Available through both the CLI and the local-only web dashboard.
 
 ---
 

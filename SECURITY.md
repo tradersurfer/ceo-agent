@@ -18,6 +18,7 @@ This document describes the current security model of the CEO Agent scaffold hon
 - **Model API key rotation** — this scaffold doesn't rotate or manage OpenRouter/model provider keys. Rotate them yourself if compromised.
 - **Sandboxing of agent execution** — Hermes and other agent runtimes are not sandboxed by this scaffold. If you wire a real Hermes runtime, apply your own process isolation.
 - **Dependency auditing** — run `npm audit` yourself before production use; this scaffold doesn't automate it.
+- **Tracked transitive dependency advisories** — `GHSA-qx2v-qp2m-jg93` and `GHSA-6g55-p6wh-862q` (PostCSS), plus `GHSA-f88m-g3jw-g9cj` (sharp/libvips), are transitive-only through Next.js; the available `npm audit fix --force` would perform a breaking downgrade to Next 9.3.3, so these remain tracked pending a safe non-breaking upstream fix.
 - **Human-in-the-loop enforcement beyond task-type allowlisting** — the bridges block unauthorized task types, but no additional confirmation step exists for high-stakes actions (e.g. sending real client emails, real financial transactions) beyond what you configure in your own runtime wiring.
 - **TLS/HTTPS** — this scaffold assumes you're deploying behind infrastructure (Vercel, a reverse proxy, etc.) that terminates TLS. It does not handle this itself.
 

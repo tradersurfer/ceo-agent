@@ -15,15 +15,14 @@
     "routing_logic": {
       "executive_orchestration": "ceo_agent",
       "finance": "cfo_agent",
-      "operations": "coo_agent",
+      "operations": "hermes",
       "technology": "cto_agent",
       "marketing": "cmo_agent",
       "people": "chro_agent",
       "legal": "clo_agent",
-      "ops_and_execution": "hermes",
+      "workflow_execution": "hermes",
       "lead_capture": "sales_intake_agent",
-      "onboarding_comms": "onboarding_comms_agent",
-      "dispute_automation": "dispute_agent"
+      "onboarding_comms": "onboarding_comms_agent"
     }
   },
   "agents": [
@@ -35,11 +34,11 @@
       "title": "Chief Intelligence & Orchestration Agent",
       "tagline": "The executive intelligence layer of your business.",
       "runtime": "configured per install",
-      "lane": "executive_orchestration",
+      "lane": "executive",
       "reports_to": null,
       "supervises": [
         "cfo_agent",
-        "coo_agent",
+        "hermes",
         "cto_agent",
         "cmo_agent",
         "chro_agent",
@@ -87,24 +86,6 @@
       "authorized_projects": "Configured per install via CEO_AGENT_PROJECTS env var.",
       "off_limits": [
         "Live financial transactions without approval",
-        "Overriding the CEO Agent"
-      ]
-    },
-    {
-      "id": "coo_agent",
-      "name": "COO Agent",
-      "status": "active",
-      "title": "Chief Operating Officer",
-      "lane": "operations",
-      "reports_to": "ceo_agent",
-      "supervises": [
-        "hermes"
-      ],
-      "capabilities": [
-        "operations_strategy"
-      ],
-      "authorized_projects": "Configured per install via CEO_AGENT_PROJECTS env var.",
-      "off_limits": [
         "Overriding the CEO Agent"
       ]
     },
@@ -169,9 +150,7 @@
       "title": "Chief Legal Officer",
       "lane": "legal",
       "reports_to": "ceo_agent",
-      "supervises": [
-        "dispute_agent"
-      ],
+      "supervises": [],
       "capabilities": [
         "legal_strategy",
         "regulatory_compliance"
@@ -186,15 +165,17 @@
       "id": "hermes",
       "name": "Hermes",
       "status": "active",
-      "title": "Operations Execution Lead",
-      "lane": "operations_execution",
-      "reports_to": "coo_agent",
-      "folder": "agents/operations/hermes",
-      "bridge": "agents/operations/hermes/src/HermesBridge.js",
+      "title": "Chief Operating Officer",
+      "role": "chief_operating_officer",
+      "lane": "operations",
+      "reports_to": "ceo_agent",
+      "folder": "departments/operations/hermes",
+      "bridge": "departments/operations/hermes/src/HermesBridge.js",
       "runtime_location_env": "HERMES_RUNTIME_PATH",
       "application_location_env": "HERMES_APPLICATION_PATH",
       "external_project": "https://github.com/NousResearch/hermes-agent",
       "capabilities": [
+        "operations_strategy",
         "cron_create",
         "webhook_subscribe",
         "api_trigger",
@@ -225,14 +206,16 @@
       "id": "sales_intake_agent",
       "name": "Sales Intake Agent",
       "status": "active",
-      "title": "Lead Capture Agent",
-      "lane": "lead_capture",
+      "title": "VP of Sales",
+      "role": "vp_sales",
+      "lane": "marketing",
       "reports_to": "cmo_agent",
-      "folder": "agents/finance/credit-office",
-      "bridge": "agents/finance/credit-office/src/SalesIntakeBridge.js",
+      "folder": "departments/finance/credit-office",
+      "bridge": "departments/finance/credit-office/src/SalesIntakeBridge.js",
       "runtime_url_env": "SALES_INTAKE_AGENT_URL",
       "webhook_secret_env": "SALES_INTAKE_AGENT_SECRET",
       "capabilities": [
+        "sales_strategy",
         "create_lead",
         "intake_capture"
       ],
@@ -248,10 +231,11 @@
       "name": "Onboarding Communications Agent",
       "status": "active",
       "title": "Client Onboarding Email Lifecycle Agent",
-      "lane": "onboarding_comms",
+      "role": "onboarding_comms_lead",
+      "lane": "marketing",
       "reports_to": "cmo_agent",
-      "folder": "agents/finance/credit-office",
-      "bridge": "agents/finance/credit-office/src/OnboardingCommsBridge.js",
+      "folder": "departments/finance/credit-office",
+      "bridge": "departments/finance/credit-office/src/OnboardingCommsBridge.js",
       "runtime_url_env": "ONBOARDING_COMMS_AGENT_URL",
       "webhook_secret_env": "ONBOARDING_COMMS_AGENT_SECRET",
       "capabilities": [
@@ -269,36 +253,6 @@
       "authorized_projects": "Configured per install via CEO_AGENT_PROJECTS env var.",
       "off_limits": [
         "Sending unsolicited emails",
-        "Modifying client records outside authorized scope",
-        "Overriding CEO Agent routing decisions"
-      ]
-    },
-    {
-      "id": "dispute_agent",
-      "name": "Dispute Agent",
-      "status": "active",
-      "title": "Credit Dispute Automation Agent",
-      "lane": "dispute_automation",
-      "reports_to": "clo_agent",
-      "folder": "agents/legal-compliance/dispute-agent",
-      "bridge": "agents/legal-compliance/dispute-agent/src/DisputeAgentBridge.js",
-      "runtime_url_env": "DISPUTE_AGENT_URL",
-      "webhook_secret_env": "DISPUTE_AGENT_WEBHOOK_SECRET",
-      "capabilities": [
-        "intake_parsing",
-        "pdf_parse",
-        "dispute_generate",
-        "dispute_parse_response",
-        "dispute_strategy",
-        "letter_package",
-        "email_sequence",
-        "agent_loop_trigger",
-        "crm_action"
-      ],
-      "authorized_projects": "Configured per install via CEO_AGENT_PROJECTS env var.",
-      "off_limits": [
-        "Changing pricing",
-        "Sending letters without client approval",
         "Modifying client records outside authorized scope",
         "Overriding CEO Agent routing decisions"
       ]

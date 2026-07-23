@@ -1,8 +1,8 @@
 const crypto = require('crypto');
 const MemoryClient = require('../../../sdk/MemoryClient');
-const SalesIntakeBridge = require('../../../agents/finance/credit-office/src/SalesIntakeBridge');
-const OnboardingCommsBridge = require('../../../agents/finance/credit-office/src/OnboardingCommsBridge');
-const DisputeAgentBridge = require('../../../agents/legal-compliance/dispute-agent/src/DisputeAgentBridge');
+const SalesIntakeBridge = require('../../../departments/finance/credit-office/src/SalesIntakeBridge');
+const OnboardingCommsBridge = require('../../../departments/finance/credit-office/src/OnboardingCommsBridge');
+const DisputeAgentBridge = require('../../../examples/dispute-agent/src/DisputeAgentBridge');
 
 /**
  * Supervisor dispatch handler — pure Node.js, no Next.js dependency.
@@ -10,7 +10,7 @@ const DisputeAgentBridge = require('../../../agents/legal-compliance/dispute-age
  */
 
 const CONVERSATIONAL_AGENTS = new Set([
-  'ceo_agent', 'cfo_agent', 'coo_agent', 'cto_agent', 'cmo_agent', 'chro_agent', 'clo_agent',
+  'ceo_agent', 'cfo_agent', 'cto_agent', 'cmo_agent', 'chro_agent', 'clo_agent',
 ]);
 
 const BRIDGE_FACTORIES = {

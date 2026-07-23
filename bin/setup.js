@@ -63,11 +63,11 @@ ${cyan('╚═══════════════════════
 
 const ALL_DEPARTMENTS = [
   { id: 'finance', label: 'Finance (CFO)', bridges: [] },
-  { id: 'operations', label: 'Operations (COO)', bridges: ['Hermes'] },
+  { id: 'operations', label: 'Operations (Hermes, COO)', bridges: [] },
   { id: 'technology', label: 'Technology (CTO)', bridges: [] },
   { id: 'marketing', label: 'Marketing (CMO)', bridges: ['Sales Intake Agent', 'Onboarding Comms Agent'] },
   { id: 'people', label: 'People (CHRO)', bridges: [] },
-  { id: 'legal', label: 'Legal (CLO)', bridges: ['Dispute Agent'] },
+  { id: 'legal', label: 'Legal (CLO)', bridges: [] },
 ];
 
 function printSummary(config, activeDeptIds) {
