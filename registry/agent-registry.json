@@ -210,8 +210,8 @@
       "role": "vp_sales",
       "lane": "marketing",
       "reports_to": "cmo_agent",
-      "folder": "departments/finance/credit-office",
-      "bridge": "departments/finance/credit-office/src/SalesIntakeBridge.js",
+      "folder": "departments/marketing/sales-intake",
+      "bridge": "departments/marketing/sales-intake/src/SalesIntakeBridge.js",
       "runtime_url_env": "SALES_INTAKE_AGENT_URL",
       "webhook_secret_env": "SALES_INTAKE_AGENT_SECRET",
       "capabilities": [
@@ -234,8 +234,8 @@
       "role": "onboarding_comms_lead",
       "lane": "marketing",
       "reports_to": "cmo_agent",
-      "folder": "departments/finance/credit-office",
-      "bridge": "departments/finance/credit-office/src/OnboardingCommsBridge.js",
+      "folder": "departments/marketing/onboarding-comms",
+      "bridge": "departments/marketing/onboarding-comms/src/OnboardingCommsBridge.js",
       "runtime_url_env": "ONBOARDING_COMMS_AGENT_URL",
       "webhook_secret_env": "ONBOARDING_COMMS_AGENT_SECRET",
       "capabilities": [

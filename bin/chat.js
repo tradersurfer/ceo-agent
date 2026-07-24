@@ -63,6 +63,12 @@ function buildActiveAgentList(registry, activeDepartments) {
   });
 }
 
+function buildConfiguredAgentList(registry, config) {
+  const baseAgents = buildActiveAgentList(registry, config.activeDepartments);
+  const customAgents = Array.isArray(config.customAgents) ? config.customAgents : [];
+  return [...baseAgents, ...customAgents];
+}
+
 function buildSystemPrompt(config, agent) {
   return loadAgentPrompt({ root: ROOT, config, agent });
 }
@@ -83,7 +89,7 @@ async function main() {
   if (!config.costMode) config.costMode = 'flagship'; // backward compatibility for pre-existing configs
 
   const registry = new AgentRegistry();
-  const activeAgents = buildActiveAgentList(registry, config.activeDepartments);
+  const activeAgents = buildConfiguredAgentList(registry, config);
 
   const runtime = new JECIRuntime({
     config: {
@@ -305,7 +311,11 @@ async function main() {
   rl.on('close', () => process.exit(0));
 }
 
-main().catch(err => {
-  console.error('CEO Agent failed to start:', err.message);
-  process.exit(1);
-});
+if (require.main === module) {
+  main().catch(err => {
+    console.error('CEO Agent failed to start:', err.message);
+    process.exit(1);
+  });
+}
+
+module.exports = { buildActiveAgentList, buildConfiguredAgentList };
