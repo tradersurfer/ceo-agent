@@ -100,12 +100,17 @@ function buildTask(body) {
  * @param {object} task
  * @returns {Promise<object>}
  */
-async function routeToAgent(agentId, task) {
+async function routeToAgent(agentId, task, runtime = null) {
   await recordDispatchMemory(agentId, task);
 
   if (CONVERSATIONAL_AGENTS.has(agentId)) {
+    const routing = runtime
+      ? runtime.routeTask({ ...task, assignedAgent: agentId })
+      : null;
+    if (routing && routing.status !== 'routed') return routing;
     return {
       agent: agentId,
+      routedAgent: routing ? routing.agent : null,
       status: 'conversational_only',
       summary: `${agentId} is a conversational C-suite agent, not a dispatchable automation target. Use the chat interface (node bin/chat.js) to talk to this agent directly.`,
       task,

@@ -1,4 +1,6 @@
 {
+  "$schema": "./registry.schema.json",
+  "registryType": "agents",
   "registry": {
     "version": "1.1.0",
     "owner": null,
@@ -32,9 +34,11 @@
       "status": "active",
       "version": "1.1.0",
       "title": "Chief Intelligence & Orchestration Agent",
+      "role": "chief_intelligence_officer",
       "tagline": "The executive intelligence layer of your business.",
       "runtime": "configured per install",
       "lane": "executive",
+      "department": "executive",
       "reports_to": null,
       "supervises": [
         "cfo_agent",
@@ -51,16 +55,16 @@
         "ORGANIZATION-STRUCTURE.md"
       ],
       "capabilities": [
-        "Task routing",
-        "Agent supervision",
-        "Project memory",
-        "Business strategy",
-        "Research synthesis",
-        "Quality control",
-        "Brand enforcement",
-        "Revenue prioritization",
-        "Escalation management",
-        "Agent registry management"
+        "task_routing",
+        "agent_supervision",
+        "project_memory",
+        "business_strategy",
+        "research_synthesis",
+        "quality_control",
+        "brand_enforcement",
+        "revenue_prioritization",
+        "escalation_management",
+        "agent_registry_management"
       ],
       "authorized_projects": "Configured per install via CEO_AGENT_PROJECTS env var.",
       "off_limits": [
@@ -76,7 +80,9 @@
       "name": "CFO Agent",
       "status": "active",
       "title": "Chief Financial Officer",
+      "role": "chief_financial_officer",
       "lane": "finance",
+      "department": "finance",
       "reports_to": "ceo_agent",
       "supervises": [],
       "capabilities": [
@@ -94,7 +100,9 @@
       "name": "CTO Agent",
       "status": "active",
       "title": "Chief Technology Officer",
+      "role": "chief_technology_officer",
       "lane": "technology",
+      "department": "technology",
       "reports_to": "ceo_agent",
       "supervises": [],
       "capabilities": [
@@ -112,7 +120,9 @@
       "name": "CMO Agent",
       "status": "active",
       "title": "Chief Marketing Officer",
+      "role": "chief_marketing_officer",
       "lane": "marketing",
+      "department": "marketing",
       "reports_to": "ceo_agent",
       "supervises": [
         "sales_intake_agent",
@@ -132,7 +142,9 @@
       "name": "CHRO Agent",
       "status": "active",
       "title": "Chief People Officer",
+      "role": "chief_people_officer",
       "lane": "people",
+      "department": "people",
       "reports_to": "ceo_agent",
       "supervises": [],
       "capabilities": [
@@ -148,7 +160,9 @@
       "name": "CLO Agent",
       "status": "active",
       "title": "Chief Legal Officer",
+      "role": "chief_legal_officer",
       "lane": "legal",
+      "department": "legal",
       "reports_to": "ceo_agent",
       "supervises": [],
       "capabilities": [
@@ -168,6 +182,7 @@
       "title": "Chief Operating Officer",
       "role": "chief_operating_officer",
       "lane": "operations",
+      "department": "operations",
       "reports_to": "ceo_agent",
       "folder": "departments/operations/hermes",
       "bridge": "departments/operations/hermes/src/HermesBridge.js",
@@ -209,6 +224,7 @@
       "title": "VP of Sales",
       "role": "vp_sales",
       "lane": "marketing",
+      "department": "marketing",
       "reports_to": "cmo_agent",
       "folder": "departments/marketing/sales-intake",
       "bridge": "departments/marketing/sales-intake/src/SalesIntakeBridge.js",
@@ -233,6 +249,7 @@
       "title": "Client Onboarding Email Lifecycle Agent",
       "role": "onboarding_comms_lead",
       "lane": "marketing",
+      "department": "marketing",
       "reports_to": "cmo_agent",
       "folder": "departments/marketing/onboarding-comms",
       "bridge": "departments/marketing/onboarding-comms/src/OnboardingCommsBridge.js",

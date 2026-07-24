@@ -193,15 +193,15 @@ class Organization {
     }
 
     const agents = [
-      { id: 'ceo_agent', name: 'CEO Agent', title: 'Chief Intelligence & Orchestration Agent', department: 'executive', role: 'chief_intelligence_officer', capabilities: ['executive_orchestration'], models: ['GPT', 'Claude'], reportsTo: null },
+      { id: 'ceo_agent', name: 'CEO Agent', title: 'Chief Intelligence & Orchestration Agent', department: 'executive', role: 'chief_intelligence_officer', capabilities: ['task_routing', 'agent_supervision', 'project_memory', 'business_strategy', 'research_synthesis', 'quality_control', 'brand_enforcement', 'revenue_prioritization', 'escalation_management', 'agent_registry_management'], models: ['GPT', 'Claude'], reportsTo: null },
       { id: 'cfo_agent', name: 'CFO Agent', title: 'Chief Financial Officer', department: 'finance', role: 'chief_financial_officer', capabilities: ['financial_strategy', 'financial_forecasting'], models: ['GPT', 'Claude'], reportsTo: 'ceo_agent' },
       { id: 'cto_agent', name: 'CTO Agent', title: 'Chief Technology Officer', department: 'technology', role: 'chief_technology_officer', capabilities: ['technology_strategy', 'software_development'], models: ['Codex', 'GPT'], reportsTo: 'ceo_agent' },
       { id: 'cmo_agent', name: 'CMO Agent', title: 'Chief Marketing Officer', department: 'marketing', role: 'chief_marketing_officer', capabilities: ['marketing_strategy', 'content_creation'], models: ['Claude', 'GPT'], reportsTo: 'ceo_agent' },
       { id: 'chro_agent', name: 'CHRO Agent', title: 'Chief People Officer', department: 'people', role: 'chief_people_officer', capabilities: ['people_strategy'], models: ['GPT', 'Claude'], reportsTo: 'ceo_agent' },
       { id: 'clo_agent', name: 'CLO Agent', title: 'Chief Legal Officer', department: 'legal', role: 'chief_legal_officer', capabilities: ['legal_strategy', 'regulatory_compliance'], models: ['GPT', 'Claude'], reportsTo: 'ceo_agent' },
-      { id: 'hermes', name: 'Hermes', title: 'Chief Operating Officer', department: 'operations', role: 'chief_operating_officer', capabilities: ['operations_strategy', 'workflow_execution', 'cron_create', 'webhook_subscribe'], models: ['Hermes', 'Hermes Runtime'], reportsTo: 'ceo_agent' },
+      { id: 'hermes', name: 'Hermes', title: 'Chief Operating Officer', department: 'operations', role: 'chief_operating_officer', capabilities: ['operations_strategy', 'cron_create', 'webhook_subscribe', 'api_trigger', 'workflow_execution', 'skill_chain', 'sandbox_execution', 'system_monitoring', 'alert_dispatch', 'intake_parsing', 'crm_action', 'scheduled_job', 'file_processing', 'memory_lookup', 'automation_run'], models: ['Hermes', 'Hermes Runtime'], reportsTo: 'ceo_agent' },
       { id: 'sales_intake_agent', name: 'Sales Intake Agent', title: 'VP of Sales', department: 'marketing', role: 'vp_sales', capabilities: ['sales_strategy', 'create_lead', 'intake_capture'], models: ['GPT'], reportsTo: 'cmo_agent' },
-      { id: 'onboarding_comms_agent', name: 'Onboarding Communications Agent', title: 'Client Onboarding Email Lifecycle Agent', department: 'marketing', role: 'onboarding_comms_lead', capabilities: ['email_sequence_queue'], models: ['GPT'], reportsTo: 'cmo_agent' },
+      { id: 'onboarding_comms_agent', name: 'Onboarding Communications Agent', title: 'Client Onboarding Email Lifecycle Agent', department: 'marketing', role: 'onboarding_comms_lead', capabilities: ['email_welcome', 'email_score_invite', 'email_upload_reminder', 'email_review_call', 'email_scan_complete', 'email_mail_reminder', 'email_bureau_checkin', 'email_sweep_upgrade', 'email_testimonial', 'email_sequence_queue'], models: ['GPT'], reportsTo: 'cmo_agent' },
     ];
     for (const agent of agents) organization.registerAgent(agent);
 

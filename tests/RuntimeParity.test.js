@@ -1,10 +1,9 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
-const AgentRegistry = require('../sdk/AgentRegistry');
-const { buildConfiguredAgentList: buildCliAgentList } = require('../bin/chat');
-const { buildConfiguredAgentList: buildWebAgentList } = require('../lib/ceoAgentServer');
+const { createRuntime: createCliRuntime } = require('../bin/chat');
+const { createRuntime: createWebRuntime } = require('../lib/ceoAgentServer');
 
-test('CLI and web runtimes build the same agent list from the same config', () => {
+test('CLI and web paths build identical runtime state from the same config', () => {
   const config = {
     activeDepartments: ['executive', 'operations', 'marketing'],
     customAgents: [
@@ -21,9 +20,16 @@ test('CLI and web runtimes build the same agent list from the same config', () =
     ],
   };
 
-  const cliIds = buildCliAgentList(new AgentRegistry(), config).map(agent => agent.id);
-  const webIds = buildWebAgentList(new AgentRegistry(), config).map(agent => agent.id);
+  const cliRuntime = createCliRuntime(config);
+  const webRuntime = createWebRuntime(config);
+  const snapshot = runtime => ({
+    agents: runtime.supervisor.listAgents().map(agent => agent.id),
+    departments: runtime.departmentManager.listDepartments().map(department => department.id),
+    models: runtime.modelBroker.listModels().map(model => model.id),
+    registries: Object.keys(runtime.registries).sort(),
+    organizationAgents: runtime.organization.listAgents().map(agent => agent.id),
+  });
 
-  assert.deepEqual(cliIds, webIds);
-  assert.ok(cliIds.includes('growth_lead'));
+  assert.deepEqual(snapshot(cliRuntime), snapshot(webRuntime));
+  assert.ok(snapshot(cliRuntime).agents.includes('growth_lead'));
 });
