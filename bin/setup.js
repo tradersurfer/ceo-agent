@@ -179,7 +179,10 @@ async function main() {
   printSummary(config, activeDeptIds);
 
   rl.close();
-  require('./chat.js');
+  require('./chat.js').main().catch(err => {
+    console.error('CEO Agent failed to start:', err.message);
+    process.exit(1);
+  });
 }
 
 main().catch(err => {

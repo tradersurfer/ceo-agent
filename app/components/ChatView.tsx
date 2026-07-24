@@ -37,7 +37,7 @@ export default function ChatView({ config }: { config: any }) {
       if (data.status === 'ok') {
         setMessages(prev => [...prev, { role: 'agent', text: data.text, agentName: data.agentName, usage: data.usage }]);
       } else {
-        setMessages(prev => [...prev, { role: 'system', text: data.reason || `Status: ${data.status}` }]);
+        setMessages(prev => [...prev, { role: 'system', text: data.userMessage || 'Something went wrong. Please try again.' }]);
       }
     } catch {
       setMessages(prev => [...prev, { role: 'system', text: 'Request failed. Check that the server is running.' }]);
