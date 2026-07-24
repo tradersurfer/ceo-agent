@@ -29,7 +29,7 @@ The full executive framework catalog is implemented in `core/frameworks/catalog.
 
 The optional `hermes-agent` submodule points to external runtime source. Having the submodule checked out does not connect it to CEO Agent.
 
-The dispatch API currently special-cases Hermes as queued without calling `HermesBridge.runTask()`. `core/BridgeExecutors.js` does not register Hermes as a WorkflowRuntime executor. These are deliberate truths in the COO prompt so conversational responses cannot overstate execution.
+The dispatch API now calls `HermesBridge.runTask()` for real, and `core/BridgeExecutors.js` registers Hermes as a WorkflowRuntime executor. The bridge still only validates and queues — it does not execute the external runtime — so a Hermes workflow step resolves to failure rather than success. These remain deliberate truths in the COO prompt so conversational responses cannot overstate execution.
 
 ## Manager skills
 

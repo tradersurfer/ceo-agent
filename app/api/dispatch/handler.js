@@ -3,6 +3,7 @@ const MemoryClient = require('../../../sdk/MemoryClient');
 const SalesIntakeBridge = require('../../../departments/marketing/sales-intake/src/SalesIntakeBridge');
 const OnboardingCommsBridge = require('../../../departments/marketing/onboarding-comms/src/OnboardingCommsBridge');
 const DisputeAgentBridge = require('../../../examples/dispute-agent/src/DisputeAgentBridge');
+const HermesBridge = require('../../../departments/operations/hermes/src/HermesBridge');
 
 /**
  * Supervisor dispatch handler — pure Node.js, no Next.js dependency.
@@ -17,6 +18,7 @@ const BRIDGE_FACTORIES = {
   sales_intake_agent: () => new SalesIntakeBridge(),
   onboarding_comms_agent: () => new OnboardingCommsBridge(),
   dispute_agent: () => new DisputeAgentBridge(),
+  hermes: () => new HermesBridge(),
 };
 
 // In-memory sliding-window rate limiter. Suitable for a single-instance
@@ -118,20 +120,17 @@ async function routeToAgent(agentId, task, runtime = null) {
     };
   }
 
-  if (agentId === 'hermes') {
-    return {
-      agent: 'hermes',
-      status: 'queued',
-      summary: 'Task validated and queued. Hermes runtime execution requires a local OpenClaw/Hermes connection not included in this scaffold — wire HERMES_RUNTIME_PATH per install.',
-      task,
-      timestamp: new Date().toISOString(),
-    };
-  }
-
   const bridgeFactory = BRIDGE_FACTORIES[agentId];
   if (bridgeFactory) {
     const bridge = bridgeFactory();
-    return bridge.trigger(task);
+    // Most bridges expose trigger(); Hermes exposes runTask(). Call whichever
+    // the bridge implements so dispatch runs its real validation instead of a
+    // hardcoded placeholder. Hermes still validates-and-queues (it does not
+    // execute an external runtime), but that result now comes from the bridge.
+    const invoke = typeof bridge.trigger === 'function'
+      ? bridge.trigger.bind(bridge)
+      : bridge.runTask.bind(bridge);
+    return invoke(task);
   }
 
   return {

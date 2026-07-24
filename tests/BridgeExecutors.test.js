@@ -12,14 +12,33 @@ const assert = require('node:assert/strict');
 const { WorkflowRuntime } = require('../core/WorkflowRuntime');
 const { registerBridgeExecutors } = require('../core/BridgeExecutors');
 
-test('registers an executor for every allowed task type across all three bridges', () => {
+test('registers an executor for every allowed task type across all four bridges', () => {
   const runtime = new WorkflowRuntime();
   const bridges = registerBridgeExecutors(runtime);
+  // Hermes is now the fourth registered bridge (issue #27).
+  assert.ok(bridges.hermes, 'Expected Hermes to be one of the registered bridges');
   for (const bridge of Object.values(bridges)) {
     for (const taskType of bridge.allowedTaskTypes) {
       assert.ok(runtime.executors.has(taskType), `Expected executor registered for ${taskType}`);
     }
   }
+  // Explicitly assert Hermes task types are registered — previously they were not.
+  for (const taskType of bridges.hermes.allowedTaskTypes) {
+    assert.ok(runtime.executors.has(taskType), `Expected Hermes executor registered for ${taskType}`);
+  }
+  assert.ok(runtime.executors.has('cron_create'), 'Expected Hermes cron_create executor registered');
+});
+
+test('a validated Hermes workflow step is a workflow failure, not a false success (validated but not executed)', async () => {
+  const runtime = new WorkflowRuntime();
+  registerBridgeExecutors(runtime, { project: 'test-project' });
+  // Hermes validates successfully (project is allowlisted) but returns 'queued'
+  // because it does not execute an external runtime — this must NOT be reported
+  // as workflow success.
+  const workflow = { id: 'wf-hermes-unexecuted', steps: [{ id: 'step1', type: 'cron_create' }] };
+  const run = await runtime.execute({ workflow, input: {} });
+  assert.equal(run.status, 'failed');
+  assert.equal(run.steps[0].status, 'failed');
 });
 
 test('a configured bridge with a successful fetch response completes the workflow step', async () => {

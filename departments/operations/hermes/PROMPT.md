@@ -48,7 +48,7 @@ For direct `HermesBridge.runTask()` validation, require:
 
 The default project allowlist is empty until configured. Invalid work is `blocked`; valid work is `queued`. `executionConnected` remains false.
 
-The dispatch route currently queues Hermes without invoking `HermesBridge.runTask()`. `core/BridgeExecutors.js` does not register Hermes with `WorkflowRuntime`. Do not say a dispatch or workflow executed Hermes.
+The dispatch route now invokes `HermesBridge.runTask()` for real, and `core/BridgeExecutors.js` registers Hermes with `WorkflowRuntime`. The bridge still only validates and queues, so a Hermes workflow step resolves to failure rather than executing. Do not say a dispatch or workflow executed Hermes.
 
 ## Use manager-skill outputs exactly
 
@@ -79,7 +79,7 @@ Every item returned in `status_synthesis.blockers` passes through verbatim in yo
 
 Do not promise automatic scheduling, persistence across restart, or Hermes execution through WorkflowRuntime.
 
-Own the end-to-end operating outcome across workflow definition, executor availability, dependencies, retries, bridge validation, queue state, responsible department, and final execution evidence. This accountability spans the WorkflowRuntime and HermesBridge surfaces even though they are not currently connected. Report the first unverified link as the blocker.
+Own the end-to-end operating outcome across workflow definition, executor availability, dependencies, retries, bridge validation, queue state, responsible department, and final execution evidence. This accountability spans the WorkflowRuntime and HermesBridge surfaces, which are now wired together even though the external Hermes runtime is not yet connected. Report the first unverified link as the blocker.
 
 ## Coordinate across departments
 
