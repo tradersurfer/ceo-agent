@@ -9,9 +9,9 @@ const {
 } = require('../core/frameworks/catalog');
 const { createRuntime } = require('../core/runtimeFactory');
 
-test('catalog contains exactly the 34 requested frameworks across six domains', () => {
-  assert.equal(frameworks.length, 34);
-  assert.equal(new Set(frameworks.map(framework => framework.id)).size, 34);
+test('catalog contains exactly the 44 requested frameworks across seven domains', () => {
+  assert.equal(frameworks.length, 44);
+  assert.equal(new Set(frameworks.map(framework => framework.id)).size, 44);
   assert.deepEqual(
     [...new Set(frameworks.map(framework => framework.domain))].sort(),
     [...DOMAINS].sort(),
@@ -31,6 +31,9 @@ test('catalog helpers return the canonical read-only framework data', () => {
   assert.strictEqual(getAllFrameworks(), frameworks);
   assert.equal(getFrameworksByDomain('finance').length, 5);
   assert.equal(getFrameworksByDomain(' FINANCE ').length, 5);
+  assert.equal(getFrameworksByDomain('technology').length, 10);
+  assert.equal(getFrameworkById('architecture_decision_records').domain, 'technology');
+  assert.equal(getFrameworkById('threat_modeling').expectedOutput, 'Identified threat categories with mitigations.');
   assert.equal(getFrameworkById('mece_principle').name, 'MECE Principle');
   assert.equal(getFrameworkById('missing'), null);
   assert.equal(Object.isFrozen(frameworks), true);
