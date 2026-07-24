@@ -9,10 +9,10 @@ const {
 } = require('../core/frameworks/catalog');
 const { createRuntime } = require('../core/runtimeFactory');
 
-test('catalog contains exactly the 55 requested frameworks across eight domains', () => {
-  assert.equal(frameworks.length, 55);
-  assert.equal(new Set(frameworks.map(framework => framework.id)).size, 55);
-  assert.equal(DOMAINS.length, 8);
+test('catalog contains exactly the 61 requested frameworks across nine domains', () => {
+  assert.equal(frameworks.length, 61);
+  assert.equal(new Set(frameworks.map(framework => framework.id)).size, 61);
+  assert.equal(DOMAINS.length, 9);
   assert.deepEqual(
     [...new Set(frameworks.map(framework => framework.domain))].sort(),
     [...DOMAINS].sort(),
@@ -37,6 +37,10 @@ test('catalog helpers return the canonical read-only framework data', () => {
   assert.equal(getFrameworksByDomain(' PEOPLE ').length, 11);
   assert.equal(getFrameworkById('scarf_model').domain, 'people');
   assert.equal(getFrameworkById('galbraiths_star_model').name, "Galbraith's Star Model");
+  assert.equal(getFrameworksByDomain('legal').length, 6);
+  assert.equal(getFrameworksByDomain(' LEGAL ').length, 6);
+  assert.equal(getFrameworkById('irac_legal_analysis').domain, 'legal');
+  assert.equal(getFrameworkById('regulatory_compliance_mapping').name, 'Regulatory Compliance Mapping');
   assert.equal(getFrameworkById('architecture_decision_records').domain, 'technology');
   assert.equal(getFrameworkById('threat_modeling').expectedOutput, 'Identified threat categories with mitigations.');
   assert.equal(getFrameworkById('mece_principle').name, 'MECE Principle');

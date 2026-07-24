@@ -7,6 +7,7 @@ const DOMAINS = Object.freeze([
   'technology',
   'organization',
   'people',
+  'legal',
 ]);
 
 function deepFreeze(value) {
@@ -455,6 +456,54 @@ const frameworks = deepFreeze([
     definition: 'Connect talent decisions to strategic impact through Logic, Analytics, Measures, and Process, so people metrics change real decisions rather than only reporting activity.',
     whenToUse: 'Deciding which people metrics matter and how they should drive a specific decision.',
     expectedOutput: 'A decision-linked measurement plan rather than an activity dashboard.',
+  },
+  {
+    id: 'irac_legal_analysis',
+    name: 'IRAC Legal Analysis',
+    domain: 'legal',
+    definition: 'Analyze a legal question through Issue, Rule, Application, and Conclusion, separating the governing rule from its application to the specific facts.',
+    whenToUse: 'Structured legal issue spotting or a reasoned position on a specific question.',
+    expectedOutput: 'A labeled issue, rule, application, and conclusion with the qualified-counsel dependency named.',
+  },
+  {
+    id: 'regulatory_compliance_mapping',
+    name: 'Regulatory Compliance Mapping',
+    domain: 'legal',
+    definition: 'Map applicable laws and regulations to concrete obligations, the controls that satisfy them, and the owner accountable for each.',
+    whenToUse: 'Assessing regulatory exposure or building a compliance obligation register.',
+    expectedOutput: 'An obligation-to-control-to-owner map with identified gaps.',
+  },
+  {
+    id: 'contract_risk_allocation',
+    name: 'Contract Risk Allocation',
+    domain: 'legal',
+    definition: 'Allocate risk between parties through indemnification, limitation of liability, warranties, termination, and intellectual-property terms.',
+    whenToUse: 'Reviewing or structuring an agreement before qualified-counsel sign-off.',
+    expectedOutput: 'A clause-level risk-allocation summary with flagged exposures and escalation points.',
+  },
+  {
+    id: 'enterprise_risk_management',
+    name: 'Enterprise Risk Management (COSO / Three Lines of Defense)',
+    domain: 'legal',
+    definition: 'Identify, assess, own, and govern enterprise risk across the operating, oversight, and assurance lines of defense.',
+    whenToUse: 'Governance-level risk assessment or assigning risk ownership across the organization.',
+    expectedOutput: 'A prioritized risk register with owners and defense-line accountability.',
+  },
+  {
+    id: 'legal_hold_and_privilege',
+    name: 'Legal Hold & Privilege Preservation',
+    domain: 'legal',
+    definition: 'Preserve attorney-client privilege and issue and enforce legal holds when litigation, a dispute, or an investigation is reasonably anticipated.',
+    whenToUse: 'Anticipated litigation, a dispute, or a regulatory investigation.',
+    expectedOutput: 'A hold scope, custodian list, and privilege-preservation posture with counsel escalation.',
+  },
+  {
+    id: 'regulatory_horizon_scanning',
+    name: 'Regulatory Horizon Scanning',
+    domain: 'legal',
+    definition: 'Systematically track upcoming legal and regulatory change and assess its impact on current obligations and commitments.',
+    whenToUse: 'Anticipating regulatory change or assessing forward compliance exposure.',
+    expectedOutput: 'A watchlist of pending changes with assessed impact and recommended preparation.',
   },
 ]);
 
