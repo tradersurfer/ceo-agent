@@ -1,27 +1,103 @@
-# CEO Agent
+# CEO Agent 👔
 
-**The AI that runs your AI workforce.**
+<p align="center">
+  <b>The AI that runs your AI workforce.</b>
+</p>
 
-CEO Agent is an orchestration layer that sits above your other AI agents and models. It learns your business, knows who's responsible for what, decides who handles a task, and answers for the outcome — the way a real CEO runs a company, not the way a chatbot answers a question.
-
-You can rename her on install. The role doesn't change.
-
-> **Status: working v1, CLI.** Identity, SDK, organizational model, setup wizard, chat interface, dispatch API, and workflow execution engine are all built and live-tested. A web interface is in progress. See [Roadmap](#roadmap).
+<p align="center">
+  <img src="https://img.shields.io/badge/Status-Working%20v1-brightgreen?style=for-the-badge" alt="Working v1">
+  <img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="MIT License">
+  <img src="https://img.shields.io/badge/Node-18%2B-339933?style=for-the-badge&logo=nodedotjs&logoColor=white" alt="Node 18+">
+</p>
 
 ---
 
-## Install and run it
+CEO Agent is an orchestration layer that sits above your other AI agents and models. It learns your business, knows who's responsible for what, decides who handles a task, and answers for the outcome — the way a real CEO runs a company, not the way a chatbot answers a question.
+
+**You can rename her on install. The role doesn't change.**
+
+> **Status: working v1.** The white-label identity layer, SDK, organizational model, setup wizard, CLI and local web chat interfaces, dispatch API, workflow execution engine, and safe skill-invocation proof of concept are built and tested. See [Roadmap](#roadmap) for what comes next.
+
+---
+
+## Setup Wizard — Live Walkthrough
+
+Five steps, about two minutes, re-runnable anytime.
+
+![Setup wizard welcome](screenshots/ceo-agent-02-intro.jpeg)
+
+<table>
+<tr>
+<td width="50%">
+
+**Step 1 — Name your agent**
+
+![Name your CEO Agent](screenshots/ceo-agent-01-welcome.jpeg)
+
+</td>
+<td width="50%">
+
+**Step 2 — Introduce yourself**
+
+![Principal name step](screenshots/ceo-agent-03-name.jpeg)
+
+</td>
+</tr>
+<tr>
+<td width="50%">
+
+**Step 3 — Tell her about your business**
+
+![Business description step](screenshots/ceo-agent-04-business.jpeg)
+
+</td>
+<td width="50%">
+
+**Step 4 — Build her team**
+
+![Department activation prompts](screenshots/ceo-agent-05-departments.jpeg)
+
+</td>
+</tr>
+<tr>
+<td width="50%">
+
+**Step 5 — Cost mode and API key**
+
+![Cost mode and OpenRouter key setup](screenshots/ceo-agent-06-cost-key.jpeg)
+
+</td>
+<td width="50%">
+
+**Ready — org chart confirmed**
+
+![Org chart summary before first conversation](screenshots/ceo-agent-07-org-summary.jpeg)
+
+</td>
+</tr>
+</table>
+
+**First conversation, live:**
+
+![CEO Agent chat interface ready with commands](screenshots/ceo-agent-08-chat-ready.jpeg)
+
+*Every department shown here is a real setup toggle: Finance, Operations (Hermes/COO), Technology, Marketing, People, and Legal. Skip the API key and CEO Agent still boots in routing-only mode until you connect a model provider.*
+
+---
+
+## Install and Run It
 
 Not yet published to npm — install from the repository.
 
-```
+```bash
 git clone https://github.com/tradersurfer/ceo-agent.git
 cd ceo-agent
 npm install
 npm run setup
 ```
 
-Requires Node 18 or newer. The setup wizard will:
+Requires **Node 18 or newer.** The setup wizard will:
+
 - Name your CEO Agent
 - Ask about your business
 - Let you activate whichever departments you need
@@ -29,64 +105,67 @@ Requires Node 18 or newer. The setup wizard will:
 - Save your OpenRouter key to a local, gitignored `.env`
 - Launch straight into the chat interface
 
-After setup, start it again anytime:
+After setup, start the CLI again anytime:
 
-```
+```bash
 npm start
 ```
 
-Inside the chat interface:
+Start the local-only web dashboard:
 
-```
-/org       show your active org chart
-/status    runtime + agent status
-/models    resolved model assignments (both cost tiers)
-/cost      view or change cost mode (flagship / efficient)
-/help      full command list
-/exit      quit
+```bash
+npm run web
 ```
 
-Address a department head directly with `@department`, e.g. `@legal draft an NDA clause`. Anything else goes to CEO Agent directly.
+### In-Chat Commands
+
+| Command | Description |
+|---|---|
+| `/org` | Show your active org chart |
+| `/status` | Runtime and agent status |
+| `/models` | Resolved model assignments for both cost tiers |
+| `/cost` | View or change cost mode (`flagship` or `efficient`) |
+| `/help` | Full command list |
+| `/exit` | Quit |
+
+Address a department head directly with `@department` — for example, `@legal draft an NDA clause`. Anything else goes to CEO Agent directly.
 
 ---
 
 ## What Makes This Different
 
-Most "AI assistants" answer one question at a time. CEO Agent runs the org: she knows which department head owns which kind of work, delegates to them, and stays accountable for the result — while also being able to answer things directly herself when a task doesn't need to go anywhere else.
+Most AI assistants answer one question at a time. CEO Agent runs the organization: she knows which department head owns which kind of work, delegates to them, and stays accountable for the result — while also answering directly when a task does not need to go anywhere else.
 
 | Capability | Description |
 |---|---|
-| Executive orchestration | Owns the top-level decision layer — decides what gets done, in what order, by whom |
-| Multi-agent task routing | Reads incoming work, identifies the right department, delegates to the head built for it |
-| Model-agnostic | Resolves the current best available model per provider live from OpenRouter, rather than hardcoding stale model names |
-| Cost-aware | Dual-tier model resolution (flagship/efficient), prompt caching, real token usage shown after every response |
-| Quality control | Reviews delegated work before it's considered done |
-| Business-vocabulary interface | Speaks in Business / Department / Employee terms — not agent/prompt/API jargon |
+| **Executive orchestration** | Owns the top-level decision layer — decides what gets done, in what order, and by whom |
+| **Multi-agent task routing** | Reads incoming work, identifies the right department, and delegates to the appropriate head |
+| **Model-agnostic operation** | Resolves current models live through OpenRouter rather than hardcoding stale model identifiers |
+| **Cost-aware execution** | Supports flagship and efficient model tiers, prompt caching, and real token-usage reporting |
+| **Workflow execution** | Runs dependency chains, conditions, delays, retries, and registered bridge executors |
+| **Controlled skills** | Provides a narrow, reviewed skill registry and executor pattern rather than arbitrary script execution |
+| **Business-vocabulary interface** | Speaks in business, department, and employee terms instead of agent and prompt jargon |
 
 ---
 
 ## Architecture
 
-```
+```text
                          CEO AGENT
                     Chief Intelligence
-                    & Orchestration
-                          |
-       -----------------------------------------------------
-       |          |          |            |          |          |
-      CFO      HERMES/COO    CTO          CMO        CHRO        CLO
-    Finance       Ops       Tech        Market.     People      Legal
-                                            |
-                                      VP Sales,
-                                  Onboarding Comms
+                     & Orchestration
+                           │
+       ┌──────────┬────────┼────────┬──────────┬──────────┐
+       ▼          ▼        ▼        ▼          ▼          ▼
+      CFO    HERMES/COO   CTO      CMO        CHRO       CLO
+    Finance      Ops      Tech   Marketing    People     Legal
+                                   │
+                         ┌─────────┴──────────┐
+                         ▼                    ▼
+                    VP of Sales      Onboarding Comms
 ```
 
-Seven departments, standard C-suite model. Hermes fills the COO seat directly,
-and Marketing includes a VP of Sales plus onboarding communications. The
-domain-specific Dispute Agent is retained under `examples/` as a reference
-implementation, not activated in the default roster. Activate only the
-departments your business needs. See [`ARCHITECTURE.md`](./ARCHITECTURE.md) for
-the full model.
+Seven departments, standard C-suite model. Hermes fills the COO seat directly, and Marketing includes a VP of Sales plus onboarding communications. The domain-specific Dispute Agent remains under `examples/` as an optional reference implementation and is not activated in the default roster. Activate only the departments your business needs. See [`ARCHITECTURE.md`](./ARCHITECTURE.md) for the full model.
 
 ---
 
@@ -95,27 +174,31 @@ the full model.
 | Path | What it is |
 |---|---|
 | `IDENTITY.md` | The CEO Agent's white-label identity template |
-| `core/` | Runtime config, department management, model routing, workflow execution engine |
-| `sdk/` | Agent lifecycle, task routing, memory, permissions — the production SDK |
-| `organization/` | The programmatic C-suite org-chart model |
-| `bin/setup.js` | Interactive CLI setup wizard |
-| `bin/chat.js` | The chat interface — live model calls, cost-mode switching, org chart, status |
-| `app/api/dispatch/` | Dispatch API — real bridge execution for automatable agents |
-| `departments/operations/hermes/` | Operations department head and bridge (Hermes, powered by [NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent)) |
-| `departments/finance/` | Sales intake and onboarding communications bridges |
+| `departments/` | C-suite identity documents and department-specific bridges |
+| `core/` | Runtime configuration, departments, model routing, workflows, and skill execution |
+| `sdk/` | Agent lifecycle, task routing, memory, permissions, prompts, and provider clients |
+| `organization/` | The programmatic C-suite organizational model |
+| `registry/agent-registry.json` | Canonical built-in agent roster and reporting structure |
+| `bin/setup.js` | Interactive CLI setup wizard shown above |
+| `bin/chat.js` | CLI chat with live model calls, cost switching, org chart, and status |
+| `app/` | Local web dashboard and API routes for chat, configuration, status, org data, agents, and dispatch |
+| `departments/operations/hermes/` | Hermes, the Operations department head and bridge, powered by [NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent) |
+| `departments/marketing/sales-intake/` | Marketing-owned sales intake bridge |
+| `departments/marketing/onboarding-comms/` | Marketing-owned onboarding communications bridge |
 | `examples/dispute-agent/` | Optional domain-specific reference implementation; not in the default roster |
-| `tests/` | Automated test coverage (WorkflowRuntime, BridgeExecutors) |
-| `ARCHITECTURE.md` | The full department / agent product model |
-| `SECURITY.md` | Honest security posture — what's handled, what's your responsibility |
-| `TASK_ROUTER.md`, `BEHAVIOR.md`, `ORGANIZATION-STRUCTURE.md` | Reference behavior specs |
+| `tests/` | Six automated suites with 33 tests covering workflows, bridges, skills, custom agents, runtime parity, and user messages |
+| `ARCHITECTURE.md` | The full department and agent product model |
+| `SECURITY.md` | Current security posture, known limitations, and installer responsibilities |
+| `TASK_ROUTER.md`, `BEHAVIOR.md`, `ORGANIZATION-STRUCTURE.md` | Reference behavior and routing specifications |
 
 ---
 
 ## Who This Is For
 
-- A solo entrepreneur running a local business
-- A CFO or CEO at a larger private company who wants an executive AI layer
-- A small business owner with their own existing tech stack
+- A solo entrepreneur operating a local business
+- A CFO or CEO who wants an executive AI layer over an existing technology stack
+- A small-business owner coordinating multiple specialized AI tools or agents
+- A developer building a white-label multi-agent installation
 
 Available through both the CLI and the local-only web dashboard.
 
@@ -124,19 +207,32 @@ Available through both the CLI and the local-only web dashboard.
 ## Roadmap
 
 - [x] White-label identity layer
-- [x] Core SDK (task routing, memory, permissions, agent lifecycle)
-- [x] Organizational model (standard C-suite: CFO/COO/CTO/CMO/CHRO/CLO)
-- [x] Example agent bridges (operations, finance, legal-compliance)
-- [x] Installer / setup wizard — built and live-tested
-- [x] Chat interface — live model resolution, real completions, cost-mode switching
-- [x] Dispatch API — real bridge execution, rate limiting, timing-safe auth
-- [x] Workflow execution engine — tested, wired to real bridge executors
-- [x] Cost/token optimization — dual-tier models, prompt caching, usage visibility
-- [x] Security hardening pass — see `SECURITY.md`
-- [x] Web interface — chat, org chart, status, and settings dashboard
-- [ ] Marketplace listing as the flagship install
+- [x] Core SDK for task routing, memory, permissions, and agent lifecycle
+- [x] Standard C-suite organizational model
+- [x] Department-head identity and prompt documents
+- [x] Operations and Marketing agent bridges, plus an optional Legal reference example
+- [x] Installer and setup wizard
+- [x] CLI chat with live model resolution and cost-mode switching
+- [x] Local web dashboard for chat, org chart, status, settings, and custom agents
+- [x] Dispatch API with authentication and rate limiting
+- [x] Workflow execution engine wired to registered bridge executors
+- [x] Safe skill-registry and executor proof of concept
+- [x] Cost and token optimization with dual-tier models, prompt caching, and usage visibility
+- [x] Security hardening and documented limitations
+- [ ] Persistent workflow storage and delayed-step scheduler
+- [ ] Multi-instance/shared rate limiting for hosted deployments
+- [ ] Direct-provider adapter evaluation beyond OpenRouter
+- [ ] Marketplace listing
 
-Some install-specific pieces remain by design, not as gaps: production runtime URLs for each bridge, persistent workflow storage, and a scheduler for delayed workflow steps are all things an individual install configures for itself.
+Some install-specific pieces remain configurable by design: production runtime URLs for bridges, persistent storage, scheduling, model credentials, and deployment infrastructure.
+
+---
+
+## Security
+
+The included web commands bind to `127.0.0.1` by default. The dispatch and chat APIs include in-memory request throttling, but hosted or multi-instance deployments need shared rate limiting, TLS termination, authentication appropriate to their environment, and a reviewed secrets-management process.
+
+See [`SECURITY.md`](./SECURITY.md) before deploying beyond a single local machine.
 
 ---
 
@@ -148,4 +244,4 @@ MIT — see [`LICENSE`](./LICENSE). Copyright (c) 2026 JECI Group, LLC.
 
 ## Contributing
 
-Issues are being filed as this moves toward a public release — check the Issues tab for open items. PRs welcome.
+Issues and pull requests are welcome. Please avoid committing credentials, tenant-specific business data, personal paths, or private installation details.
