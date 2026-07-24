@@ -4,6 +4,7 @@ const TABS = [
   { id: 'chat', label: 'Chat' },
   { id: 'org', label: 'Org chart' },
   { id: 'status', label: 'Status' },
+  { id: 'add', label: 'Add agent' },
   { id: 'settings', label: 'Settings' },
 ] as const;
 
@@ -14,7 +15,7 @@ export default function Sidebar({
 }: {
   agentName: string;
   tab: string;
-  onSelect: (t: 'chat' | 'org' | 'status' | 'settings') => void;
+  onSelect: (t: 'chat' | 'org' | 'status' | 'add' | 'settings') => void;
 }) {
   return (
     <aside className="sidebar">
