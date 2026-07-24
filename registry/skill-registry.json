@@ -1,0 +1,35 @@
+{
+  "$schema": "./registry.schema.json",
+  "schemaVersion": "2.0.0",
+  "registryType": "skills",
+  "skills": [
+    {
+      "id": "summarize_text",
+      "capability": "text_summarization",
+      "inputSchema": {
+        "text": { "type": "string", "required": true }
+      },
+      "handler": "core/skills/exampleSkills.js#registerExampleSkills",
+      "risk": "safe"
+    },
+    {
+      "id": "format_currency",
+      "capability": "currency_formatting",
+      "inputSchema": {
+        "amount": { "type": "number", "required": true },
+        "currency": { "type": "string", "required": false }
+      },
+      "handler": "core/skills/exampleSkills.js#registerExampleSkills",
+      "risk": "safe"
+    },
+    {
+      "id": "lookup_department",
+      "capability": "org_lookup",
+      "inputSchema": {
+        "departmentId": { "type": "string", "required": true }
+      },
+      "handler": "core/skills/exampleSkills.js#registerExampleSkills",
+      "risk": "safe"
+    }
+  ]
+}

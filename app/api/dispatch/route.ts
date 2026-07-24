@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { isAuthorized, validateBody, buildTask, routeToAgent, checkRateLimit } from './handler';
+const { getRuntime } = require('../../../lib/ceoAgentServer');
 
 /**
  * POST /api/dispatch
@@ -35,7 +36,8 @@ export async function POST(request: Request) {
 
   try {
     const task = buildTask(body as { agent: string; task_type: string; project: string; approved_by?: string; payload?: Record<string, unknown> });
-    const result = await routeToAgent(String(body.agent), task);
+    const { runtime } = getRuntime();
+    const result = await routeToAgent(String(body.agent), task, runtime);
     return NextResponse.json({ supervisor: 'ceo_agent', ...result }, { status: 200 });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);

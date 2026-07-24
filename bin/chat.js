@@ -30,10 +30,13 @@ function loadEnv() {
 }
 loadEnv();
 
-const AgentRegistry = require('../sdk/AgentRegistry');
 const OpenRouterClient = require('../sdk/OpenRouterClient');
 const { loadAgentPrompt } = require('../sdk/PromptLoader');
-const JECIRuntime = require('../core/JECIRuntime');
+const {
+  createRuntime,
+  buildActiveAgentList,
+  buildConfiguredAgentList,
+} = require('../core/runtimeFactory');
 const { friendlyMessageFor } = require('../lib/userMessages');
 
 function loadConfig() {
@@ -46,28 +49,6 @@ function loadConfig() {
 
 function saveConfig(config) {
   fs.writeFileSync(CONFIG_PATH, JSON.stringify(config, null, 2) + '\n', 'utf8');
-}
-
-function buildActiveAgentList(registry, activeDepartments) {
-  const allAgents = registry.listAgents();
-  const activeSet = new Set(activeDepartments);
-  return allAgents.filter(agent => {
-    if (agent.id === 'ceo_agent') return true;
-    const dept = agent.department || agent.lane || null;
-    if (dept && activeSet.has(dept)) return true;
-    const reportsTo = agent.reports_to;
-    if (reportsTo) {
-      const head = allAgents.find(a => a.id === reportsTo);
-      if (head && activeSet.has(head.lane)) return true;
-    }
-    return false;
-  });
-}
-
-function buildConfiguredAgentList(registry, config) {
-  const baseAgents = buildActiveAgentList(registry, config.activeDepartments);
-  const customAgents = Array.isArray(config.customAgents) ? config.customAgents : [];
-  return [...baseAgents, ...customAgents];
 }
 
 function buildSystemPrompt(config, agent) {
@@ -89,20 +70,7 @@ async function main() {
   const config = loadConfig();
   if (!config.costMode) config.costMode = 'flagship'; // backward compatibility for pre-existing configs
 
-  const registry = new AgentRegistry();
-  const activeAgents = buildConfiguredAgentList(registry, config);
-
-  const runtime = new JECIRuntime({
-    config: {
-      supervisorAgentId: 'ceo_agent',
-      brandName: config.agentName,
-      organization: config.businessContext,
-      owner: config.principalName,
-      departments: config.activeDepartments,
-    },
-    registry: activeAgents,
-  });
-  runtime.initialize();
+  const runtime = createRuntime(config, { root: ROOT });
 
   const openRouterClient = new OpenRouterClient();
   let liveModelsResolved = false;
@@ -319,4 +287,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = { buildActiveAgentList, buildConfiguredAgentList, main };
+module.exports = { createRuntime, buildActiveAgentList, buildConfiguredAgentList, main };

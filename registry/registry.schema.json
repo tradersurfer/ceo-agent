@@ -1,0 +1,155 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/ceo-agent/registry.schema.json",
+  "title": "CEO Agent Canonical Registry Schema",
+  "description": "Canonical entity definitions for agents, roles, capabilities, skills, tools, workflows, and projects.",
+  "oneOf": [
+    {
+      "required": ["registryType", "agents"],
+      "properties": {
+        "registryType": { "const": "agents" },
+        "agents": { "type": "array", "items": { "$ref": "#/$defs/agent" } }
+      }
+    },
+    {
+      "required": ["registryType", "projects"],
+      "properties": {
+        "registryType": { "const": "projects" },
+        "projects": { "type": "array", "items": { "$ref": "#/$defs/project" } }
+      }
+    },
+    {
+      "required": ["registryType", "skills"],
+      "properties": {
+        "registryType": { "const": "skills" },
+        "skills": { "type": "array", "items": { "$ref": "#/$defs/skill" } }
+      }
+    },
+    {
+      "required": ["registryType", "tools"],
+      "properties": {
+        "registryType": { "const": "tools" },
+        "tools": { "type": "array", "items": { "$ref": "#/$defs/tool" } }
+      }
+    },
+    {
+      "required": ["registryType", "workflows"],
+      "properties": {
+        "registryType": { "const": "workflows" },
+        "workflows": { "type": "array", "items": { "$ref": "#/$defs/workflow" } }
+      }
+    },
+    {
+      "required": ["registryType", "roles", "capabilities"],
+      "properties": {
+        "registryType": { "const": "organization" },
+        "roles": { "type": "array", "items": { "$ref": "#/$defs/role" } },
+        "capabilities": { "type": "array", "items": { "$ref": "#/$defs/capability" } }
+      }
+    }
+  ],
+  "$defs": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*$"
+    },
+    "agent": {
+      "type": "object",
+      "required": ["id", "name", "title", "department", "role", "capabilities"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "name": { "type": "string", "minLength": 1 },
+        "title": { "type": "string", "minLength": 1 },
+        "department": { "$ref": "#/$defs/id" },
+        "role": { "$ref": "#/$defs/id" },
+        "capabilities": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/id" },
+          "uniqueItems": true
+        },
+        "skills": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/id" },
+          "uniqueItems": true
+        }
+      }
+    },
+    "role": {
+      "type": "object",
+      "required": ["id", "title", "department", "requiredCapabilities"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "title": { "type": "string", "minLength": 1 },
+        "department": { "$ref": "#/$defs/id" },
+        "requiredCapabilities": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/id" },
+          "uniqueItems": true
+        }
+      }
+    },
+    "capability": {
+      "type": "object",
+      "required": ["id", "name"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "name": { "type": "string", "minLength": 1 },
+        "description": { "type": "string" }
+      }
+    },
+    "skill": {
+      "type": "object",
+      "required": ["id", "capability", "inputSchema", "handler"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "capability": { "$ref": "#/$defs/id" },
+        "inputSchema": { "type": "object" },
+        "handler": { "type": "string", "minLength": 1 },
+        "risk": { "enum": ["safe", "review_required"] }
+      }
+    },
+    "tool": {
+      "type": "object",
+      "required": ["id", "agentId", "handler", "actions"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "agentId": { "$ref": "#/$defs/id" },
+        "handler": { "type": "string", "minLength": 1 },
+        "actions": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/id" },
+          "uniqueItems": true
+        },
+        "defaultInstall": { "type": "boolean" }
+      }
+    },
+    "workflow": {
+      "type": "object",
+      "required": ["id", "steps"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "description": { "type": "string" },
+        "steps": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "type"],
+            "properties": {
+              "id": { "$ref": "#/$defs/id" },
+              "type": { "$ref": "#/$defs/id" }
+            }
+          }
+        }
+      }
+    },
+    "project": {
+      "type": "object",
+      "required": ["id", "kind", "description"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "kind": { "enum": ["session", "install_defined"] },
+        "description": { "type": "string", "minLength": 1 }
+      }
+    }
+  }
+}
