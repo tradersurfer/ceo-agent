@@ -3,6 +3,7 @@ const AgentRegistry = require('../sdk/AgentRegistry');
 const JECIRuntime = require('./JECIRuntime');
 const Organization = require('../organization/Organization');
 const { loadRuntimeRegistries } = require('./RegistryLoader');
+const frameworkCatalog = require('./frameworks/catalog');
 
 const SESSION_PROJECTS = Object.freeze(['cli-session', 'web-session']);
 
@@ -77,6 +78,7 @@ function createRuntime(config, options = {}) {
   runtime.skillRegistry = connectedRegistries.skillRegistry;
   runtime.skillExecutor = connectedRegistries.skillExecutor;
   runtime.workflowRuntime = connectedRegistries.workflowRuntime;
+  runtime.frameworkCatalog = frameworkCatalog;
   runtime.registryCatalog = {
     agents: activeAgents,
     roles: organization.listRoles().map(role => ({
