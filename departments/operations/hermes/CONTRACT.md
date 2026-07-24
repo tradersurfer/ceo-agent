@@ -47,10 +47,10 @@ These names define validation eligibility only. They are not proof that correspo
 - `executionConnected` is always `false`.
 - `HERMES_RUNTIME_PATH` and `HERMES_APPLICATION_PATH` are metadata only.
 - The optional `hermes-agent` submodule does not connect itself to CEO Agent.
-- `core/BridgeExecutors.js` does not register Hermes as a WorkflowRuntime executor.
-- The dispatch handler currently returns a Hermes `queued` placeholder directly; it does not call `HermesBridge.runTask()`.
+- `core/BridgeExecutors.js` registers Hermes as a WorkflowRuntime executor for its allowed task types.
+- The dispatch handler calls `HermesBridge.runTask()` for real; there is no hardcoded `queued` placeholder.
 
-Therefore, `queued` never means executed, and a workflow definition containing an unregistered Hermes task type will fail with no executor.
+Therefore, `queued` never means executed: the bridge validates and queues without running the external runtime, so a Hermes workflow step resolves to failure (validated but not executed) rather than succeeding.
 
 ## Outputs
 

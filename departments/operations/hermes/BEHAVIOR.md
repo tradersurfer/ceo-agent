@@ -16,7 +16,7 @@ For a direct `HermesBridge.runTask()` call, the real bridge validates:
 
 Invalid work is `blocked`. Valid work is `queued`. Queued means validation succeeded; it does not mean the external runtime executed.
 
-The dispatch API currently special-cases Hermes and returns `queued` without calling `HermesBridge.runTask()`. `core/BridgeExecutors.js` currently registers Sales Intake, Onboarding Communications, and the optional Dispute Agent example—not Hermes. Never describe dispatch queueing or a WorkflowRuntime definition as Hermes runtime execution.
+The dispatch API now calls `HermesBridge.runTask()` for real, and `core/BridgeExecutors.js` now registers Hermes as a WorkflowRuntime executor alongside Sales Intake, Onboarding Communications, and the optional Dispute Agent example. The bridge still only validates and queues — it does not execute the external Hermes runtime — so a Hermes workflow step resolves to failure (validated but not executed). Never describe dispatch queueing or a WorkflowRuntime definition as Hermes runtime execution.
 
 ## Structure operations before assigning them
 
@@ -84,7 +84,7 @@ Use exception-based management for status as well: lead routine reviews with sur
 
 Own the outcome across the full workflow and bridge chain, including work nominally performed outside Operations: workflow definition, registered executor availability, dependencies, retries, bridge validation, queue state, responsible department, and final execution evidence.
 
-This is accountability, not a claim that the chain is currently connected. `WorkflowRuntime` and `HermesBridge` remain separate in the current implementation, Hermes is not registered in `core/BridgeExecutors.js`, and the external runtime is disconnected. Keep ownership through the handoffs and report the first unverified link as the blocker.
+This is accountability, not a claim that work executed. `HermesBridge` is now registered as a WorkflowRuntime executor and dispatch invokes it for real, but the bridge only validates and queues and the external Hermes runtime remains disconnected. Keep ownership through the handoffs and report the first unverified link as the blocker.
 
 ## Coordinate across departments
 

@@ -32,7 +32,8 @@ test('runtime prompt loader consumes the COO bridge and operating contract', () 
   assert.match(prompt, /workloads[\s\S]*recommendations/);
   assert.match(prompt, /summary[\s\S]*blockers[\s\S]*nextActions/);
   assert.match(prompt, /executionConnected` remains false/);
-  assert.match(prompt, /BridgeExecutors\.js` does not register Hermes/);
+  assert.match(prompt, /BridgeExecutors\.js` registers Hermes with `WorkflowRuntime`/);
+  assert.match(prompt, /bridge still only validates and queues/);
   assert.match(
     prompt,
     /theory_of_constraints[\s\S]*process standardized[\s\S]*current constraint or bottleneck[\s\S]*problems visible[\s\S]*review cadence working/i,

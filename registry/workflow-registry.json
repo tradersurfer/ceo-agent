@@ -25,6 +25,18 @@
     "letter_package",
     "email_sequence",
     "agent_loop_trigger",
-    "crm_action"
+    "crm_action",
+    "cron_create",
+    "webhook_subscribe",
+    "api_trigger",
+    "workflow_execution",
+    "skill_chain",
+    "sandbox_execution",
+    "system_monitoring",
+    "alert_dispatch",
+    "scheduled_job",
+    "file_processing",
+    "memory_lookup",
+    "automation_run"
   ]
 }
