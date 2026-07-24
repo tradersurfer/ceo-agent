@@ -104,6 +104,13 @@
         "id": { "$ref": "#/$defs/id" },
         "capability": { "$ref": "#/$defs/id" },
         "inputSchema": { "type": "object" },
+        "outputSchema": { "type": "object" },
+        "permissions": {
+          "type": "object",
+          "properties": {
+            "requiresAgentAssignment": { "type": "boolean" }
+          }
+        },
         "handler": { "type": "string", "minLength": 1 },
         "risk": { "enum": ["safe", "review_required"] }
       }

@@ -30,6 +30,140 @@
       },
       "handler": "core/skills/exampleSkills.js#registerExampleSkills",
       "risk": "safe"
+    },
+    {
+      "id": "task_decomposition",
+      "capability": "management_planning",
+      "inputSchema": {
+        "objective": { "type": "string", "required": true },
+        "deliverables": { "type": "array", "required": false },
+        "constraints": { "type": "array", "required": false }
+      },
+      "outputSchema": {
+        "objective": { "type": "string", "required": true },
+        "tasks": { "type": "array", "required": true },
+        "assumptions": { "type": "array", "required": true }
+      },
+      "permissions": { "requiresAgentAssignment": true },
+      "handler": "core/skills/managerSkills.js#registerManagerSkills",
+      "risk": "safe"
+    },
+    {
+      "id": "delegation_brief",
+      "capability": "management_delegation",
+      "inputSchema": {
+        "task": { "type": "string", "required": true },
+        "assignee": { "type": "string", "required": true },
+        "desiredOutcome": { "type": "string", "required": true },
+        "context": { "type": "string", "required": false },
+        "deadline": { "type": "string", "required": false }
+      },
+      "outputSchema": { "brief": { "type": "object", "required": true } },
+      "permissions": { "requiresAgentAssignment": true },
+      "handler": "core/skills/managerSkills.js#registerManagerSkills",
+      "risk": "safe"
+    },
+    {
+      "id": "priority_scoring",
+      "capability": "management_prioritization",
+      "inputSchema": { "items": { "type": "array", "required": true } },
+      "outputSchema": { "rankedItems": { "type": "array", "required": true } },
+      "permissions": { "requiresAgentAssignment": true },
+      "handler": "core/skills/managerSkills.js#registerManagerSkills",
+      "risk": "safe"
+    },
+    {
+      "id": "decision_memo",
+      "capability": "management_decision_support",
+      "inputSchema": {
+        "decision": { "type": "string", "required": true },
+        "options": { "type": "array", "required": true },
+        "recommendation": { "type": "string", "required": true },
+        "rationale": { "type": "string", "required": true },
+        "risks": { "type": "array", "required": false }
+      },
+      "outputSchema": { "memo": { "type": "object", "required": true } },
+      "permissions": { "requiresAgentAssignment": true },
+      "handler": "core/skills/managerSkills.js#registerManagerSkills",
+      "risk": "safe"
+    },
+    {
+      "id": "status_synthesis",
+      "capability": "management_reporting",
+      "inputSchema": { "updates": { "type": "array", "required": true } },
+      "outputSchema": {
+        "summary": { "type": "object", "required": true },
+        "blockers": { "type": "array", "required": true },
+        "nextActions": { "type": "array", "required": true }
+      },
+      "permissions": { "requiresAgentAssignment": true },
+      "handler": "core/skills/managerSkills.js#registerManagerSkills",
+      "risk": "safe"
+    },
+    {
+      "id": "escalation_assessment",
+      "capability": "management_escalation",
+      "inputSchema": {
+        "issue": { "type": "string", "required": true },
+        "impact": { "type": "number", "required": true },
+        "urgency": { "type": "number", "required": true },
+        "reversible": { "type": "boolean", "required": true },
+        "withinAuthority": { "type": "boolean", "required": true }
+      },
+      "outputSchema": { "assessment": { "type": "object", "required": true } },
+      "permissions": { "requiresAgentAssignment": true },
+      "handler": "core/skills/managerSkills.js#registerManagerSkills",
+      "risk": "safe"
+    },
+    {
+      "id": "department_capability_lookup",
+      "capability": "management_org_lookup",
+      "inputSchema": { "query": { "type": "string", "required": true } },
+      "outputSchema": { "matches": { "type": "array", "required": true } },
+      "permissions": { "requiresAgentAssignment": true },
+      "handler": "core/skills/managerSkills.js#registerManagerSkills",
+      "risk": "safe"
+    },
+    {
+      "id": "workload_balancing",
+      "capability": "management_capacity",
+      "inputSchema": { "assignments": { "type": "array", "required": true } },
+      "outputSchema": {
+        "workloads": { "type": "array", "required": true },
+        "recommendations": { "type": "array", "required": true }
+      },
+      "permissions": { "requiresAgentAssignment": true },
+      "handler": "core/skills/managerSkills.js#registerManagerSkills",
+      "risk": "safe"
+    },
+    {
+      "id": "quality_review",
+      "capability": "management_quality",
+      "inputSchema": {
+        "artifact": { "type": "string", "required": true },
+        "criteria": { "type": "array", "required": true },
+        "passThreshold": { "type": "number", "required": false }
+      },
+      "outputSchema": { "review": { "type": "object", "required": true } },
+      "permissions": { "requiresAgentAssignment": true },
+      "handler": "core/skills/managerSkills.js#registerManagerSkills",
+      "risk": "safe"
+    },
+    {
+      "id": "budget_token_allocation",
+      "capability": "management_budgeting",
+      "inputSchema": {
+        "totalTokens": { "type": "number", "required": true },
+        "workItems": { "type": "array", "required": true }
+      },
+      "outputSchema": {
+        "allocations": { "type": "array", "required": true },
+        "totalAllocated": { "type": "number", "required": true },
+        "unusedTokens": { "type": "number", "required": true }
+      },
+      "permissions": { "requiresAgentAssignment": true },
+      "handler": "core/skills/managerSkills.js#registerManagerSkills",
+      "risk": "safe"
     }
   ]
 }
