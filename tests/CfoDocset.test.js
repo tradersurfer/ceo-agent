@@ -40,4 +40,14 @@ test('runtime prompt loader consumes the CFO financial operating contract', () =
   assert.match(prompt, /priority_scoring/);
   assert.match(prompt, /rankedItems/);
   assert.match(prompt, /State the gap; do not guess/);
+  assert.match(prompt, /number integrity as a hard gate/i);
+  assert.match(prompt, /traceable to a supplied source input/i);
+  assert.match(prompt, /driver-based rolling-forecasting posture/i);
+  assert.match(prompt, /not currently assigned `task_decomposition`/i);
+  assert.match(prompt, /decision_memo/);
+  assert.match(prompt, /commercial or operational implication/i);
+  assert.match(prompt, /base case and downside case/i);
+  assert.match(prompt, /insight → implication → recommendation/i);
+  assert.match(prompt, /risk, not a flat dollar threshold/i);
+  assert.match(prompt, /quality_review[\s\S]*review\.passed[\s\S]*review\.gaps/);
 });
