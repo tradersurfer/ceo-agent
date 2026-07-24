@@ -34,6 +34,7 @@ const AgentRegistry = require('../sdk/AgentRegistry');
 const OpenRouterClient = require('../sdk/OpenRouterClient');
 const { loadAgentPrompt } = require('../sdk/PromptLoader');
 const JECIRuntime = require('../core/JECIRuntime');
+const { friendlyMessageFor } = require('../lib/userMessages');
 
 function loadConfig() {
   if (!fs.existsSync(CONFIG_PATH)) {
@@ -129,7 +130,7 @@ async function main() {
       console.log('done.');
     } catch (err) {
       console.log('failed.');
-      console.log(`    (${err.message}) — falling back to routing-only mode.`);
+      console.log(`    ${friendlyMessageFor('model_resolution_failed', err.message)}`);
     }
     console.log('');
   }
@@ -260,7 +261,7 @@ async function main() {
 
     if (decision.status !== 'routed') {
       console.log('');
-      console.log(`[${decision.status}] ${decision.reason || 'Could not route this message.'}`);
+      console.log(friendlyMessageFor(decision.status, decision.reason));
       console.log('');
       rl.prompt();
       return;
@@ -271,7 +272,7 @@ async function main() {
     console.log(`(routed to ${agent.name})`);
 
     if (!liveModelsResolved) {
-      console.log('  Live responses are not enabled — set OPENROUTER_API_KEY to talk to the model.');
+      console.log(`  ${friendlyMessageFor('no_api_key')}`);
       console.log('');
       rl.prompt();
       return;
@@ -281,7 +282,7 @@ async function main() {
     const apiModelId = runtime.modelBroker.getApiModelId(roleForAgent, config.costMode);
 
     if (!apiModelId) {
-      console.log(`  No resolved model available for this agent role at cost mode "${config.costMode}".`);
+      console.log(`  ${friendlyMessageFor('no_model')}`);
       console.log('');
       rl.prompt();
       return;
@@ -301,7 +302,7 @@ async function main() {
       if (usageLine) console.log(`\n  ${usageLine}`);
       console.log('');
     } catch (err) {
-      console.log(`  Model call failed: ${err.message}`);
+      console.log(`  ${friendlyMessageFor('model_call_failed', err.message)}`);
       console.log('');
     }
 
@@ -318,4 +319,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = { buildActiveAgentList, buildConfiguredAgentList };
+module.exports = { buildActiveAgentList, buildConfiguredAgentList, main };

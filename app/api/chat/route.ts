@@ -1,10 +1,12 @@
 import { NextResponse } from 'next/server';
 const { getRuntime, ensureModelsResolved, openRouterClient, buildSystemPrompt } = require('../../../lib/ceoAgentServer');
+const { friendlyMessageFor } = require('../../../lib/userMessages');
 
 export async function POST(request: Request) {
   const { runtime, config } = getRuntime();
   if (!runtime) {
-    return NextResponse.json({ status: 'not_configured', reason: 'Run setup first (npm run setup) before using the web dashboard.' });
+    const reason = 'Run setup first (npm run setup) before using the web dashboard.';
+    return NextResponse.json({ status: 'not_configured', reason, userMessage: friendlyMessageFor('not_configured', reason) });
   }
 
   let body: { message?: string };
@@ -38,7 +40,8 @@ export async function POST(request: Request) {
   }
 
   if (decision.status !== 'routed') {
-    return NextResponse.json({ status: decision.status, reason: decision.reason || 'Could not route this message.' });
+    const reason = decision.reason || 'Could not route this message.';
+    return NextResponse.json({ status: decision.status, reason, userMessage: friendlyMessageFor(decision.status, reason) });
   }
 
   const agent = decision.agent;
@@ -47,18 +50,21 @@ export async function POST(request: Request) {
   try {
     modelsReady = await ensureModelsResolved(runtime);
   } catch (err) {
-    return NextResponse.json({ status: 'model_resolution_failed', agent: agent.name, reason: err instanceof Error ? err.message : String(err) });
+    const reason = err instanceof Error ? err.message : String(err);
+    return NextResponse.json({ status: 'model_resolution_failed', agent: agent.name, reason, userMessage: friendlyMessageFor('model_resolution_failed', reason) });
   }
 
   if (!modelsReady) {
-    return NextResponse.json({ status: 'no_api_key', agent: agent.name, reason: 'OPENROUTER_API_KEY is not set. Add it in Settings.' });
+    const reason = 'OPENROUTER_API_KEY is not set. Add it in Settings.';
+    return NextResponse.json({ status: 'no_api_key', agent: agent.name, reason, userMessage: friendlyMessageFor('no_api_key', reason) });
   }
 
   const roleForAgent = agent.department === 'technology' || agent.lane === 'technology' ? 'codex' : 'claude';
   const apiModelId = runtime.modelBroker.getApiModelId(roleForAgent, config.costMode);
 
   if (!apiModelId) {
-    return NextResponse.json({ status: 'no_model', agent: agent.name, reason: `No resolved model available at cost mode "${config.costMode}".` });
+    const reason = `No resolved model available at cost mode "${config.costMode}".`;
+    return NextResponse.json({ status: 'no_model', agent: agent.name, reason, userMessage: friendlyMessageFor('no_model', reason) });
   }
 
   try {
@@ -71,6 +77,7 @@ export async function POST(request: Request) {
     });
     return NextResponse.json({ status: 'ok', agentId: agent.id, agentName: agent.name, text, usage });
   } catch (err) {
-    return NextResponse.json({ status: 'model_call_failed', agent: agent.name, reason: err instanceof Error ? err.message : String(err) });
+    const reason = err instanceof Error ? err.message : String(err);
+    return NextResponse.json({ status: 'model_call_failed', agent: agent.name, reason, userMessage: friendlyMessageFor('model_call_failed', reason) });
   }
 }
