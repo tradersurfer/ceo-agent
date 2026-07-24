@@ -1,4 +1,4 @@
-# CEO Agent 👔
+![CEO Agent — AI Executive Operating System](assets/banner.jpeg)
 
 <p align="center">
   <b>The AI that runs your AI workforce.</b>
