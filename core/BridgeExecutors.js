@@ -1,5 +1,5 @@
-const SalesIntakeBridge = require('../departments/finance/credit-office/src/SalesIntakeBridge');
-const OnboardingCommsBridge = require('../departments/finance/credit-office/src/OnboardingCommsBridge');
+const SalesIntakeBridge = require('../departments/marketing/sales-intake/src/SalesIntakeBridge');
+const OnboardingCommsBridge = require('../departments/marketing/onboarding-comms/src/OnboardingCommsBridge');
 const DisputeAgentBridge = require('../examples/dispute-agent/src/DisputeAgentBridge');
 
 /**

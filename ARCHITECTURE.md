@@ -38,8 +38,8 @@ more automatable agent bridges reporting to that head.
 
 **Note on "Offices":** an earlier draft of this document described bundled
 "Office products" (`offices/<id>/`) as a core platform concept. That model
-belongs to a separate product — Agent-JECI's BIB Marketplace — not to CEO
-Agent. CEO Agent's public scaffold does not include an `offices/` concept;
+belongs to a separate marketplace product, not to CEO Agent. CEO Agent's
+public scaffold does not include an `offices/` concept;
 the C-suite department structure serves the role that "Offices" played in
 that other system. If this repo ever needs office-style bundling in the
 future, that is a distinct, deliberate decision — not an inherited default.
@@ -57,7 +57,8 @@ department head in `organization/Organization.js` and are registered in
 
 Example structure:
 - `departments/operations/hermes/` — the Chief Operating Officer and operations execution bridge
-- `departments/finance/credit-office/` — sales intake and onboarding communications
+- `departments/marketing/sales-intake/` — sales intake automation
+- `departments/marketing/onboarding-comms/` — onboarding communications automation
 - `examples/dispute-agent/` — optional regulated-domain reference implementation, not in the default roster
 
 Agent products expose a bridge interface. Tenants do not write bridge code —

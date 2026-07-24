@@ -11,9 +11,7 @@ ceo-agent.config.json
 .next/
 .openclaw/
 docs/
-/credit-office/
 tenants/
-offices/credit-office/
 memory/
 skills-lock.json
 node_modules/
