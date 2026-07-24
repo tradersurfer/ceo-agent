@@ -10,7 +10,7 @@
     "ceo-agent": "./bin/chat.js"
   },
   "scripts": {
-    "test": "node --test tests/SkillExecutor.test.js tests/ManagerSkills.test.js tests/CustomAgents.test.js tests/WorkflowRuntime.test.js tests/BridgeExecutors.test.js tests/RuntimeParity.test.js tests/UserMessages.test.js tests/RegistryDrift.test.js tests/ModelResolver.test.js",
+    "test": "node --test tests/SkillExecutor.test.js tests/ManagerSkills.test.js tests/CustomAgents.test.js tests/WorkflowRuntime.test.js tests/BridgeExecutors.test.js tests/RuntimeParity.test.js tests/UserMessages.test.js tests/RegistryDrift.test.js tests/ModelResolver.test.js tests/FrameworkCatalog.test.js tests/CeoDocset.test.js",
     "setup": "node bin/setup.js",
     "start": "node bin/chat.js",
     "web": "next dev -H 127.0.0.1",
