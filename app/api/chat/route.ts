@@ -1,8 +1,18 @@
 import { NextResponse } from 'next/server';
+import { checkRateLimit } from '../dispatch/handler';
 const { getRuntime, ensureModelsResolved, openRouterClient, buildSystemPrompt } = require('../../../lib/ceoAgentServer');
 const { friendlyMessageFor } = require('../../../lib/userMessages');
 
 export async function POST(request: Request) {
+  const clientKey = request.headers.get('x-forwarded-for') || 'unknown';
+  const rateLimit = checkRateLimit(clientKey);
+  if (!rateLimit.allowed) {
+    return NextResponse.json({
+      error: 'Rate limit exceeded. Try again shortly.',
+      userMessage: "You're sending messages faster than I can keep up — give it a moment and try again.",
+    }, { status: 429 });
+  }
+
   const { runtime, config } = getRuntime();
   if (!runtime) {
     const reason = 'Run setup first (npm run setup) before using the web dashboard.';
