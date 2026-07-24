@@ -3,6 +3,7 @@ const path = require('path');
 const { SkillRegistry } = require('./SkillRegistry');
 const { SkillExecutor } = require('./SkillExecutor');
 const { registerExampleSkills } = require('./skills/exampleSkills');
+const { registerManagerSkills } = require('./skills/managerSkills');
 const { WorkflowRuntime } = require('./WorkflowRuntime');
 const { registerBridgeExecutors } = require('./BridgeExecutors');
 
@@ -41,7 +42,13 @@ function loadRuntimeRegistries(options = {}) {
 
   const skillRegistry = new SkillRegistry();
   registerExampleSkills(skillRegistry);
-  const skillExecutor = new SkillExecutor(skillRegistry);
+  registerManagerSkills(skillRegistry, { organization: options.organization });
+  const skillExecutor = new SkillExecutor(skillRegistry, {
+    agentResolver: options.organization
+      ? agentId => options.organization.findAgent(agentId)
+      : null,
+    audit: options.skillAudit,
+  });
 
   const workflowRuntime = new WorkflowRuntime(options.workflowRuntimeOptions);
   registerBridgeExecutors(workflowRuntime, options.bridgeOptions);

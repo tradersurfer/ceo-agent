@@ -11,10 +11,17 @@ class SkillRegistry {
    * @param {object} definition.inputSchema Simple schema: { field: { type, required } }.
    * @param {Function} definition.handler async (input) => result.
    */
-  register(name, { capability, inputSchema, handler }) {
+  register(name, { capability, inputSchema, outputSchema, permissions, handler }) {
     if (!name || typeof name !== 'string') throw new TypeError('Skill name is required.');
     if (typeof handler !== 'function') throw new TypeError('Skill handler must be a function.');
-    this.skills.set(name, { name, capability, inputSchema: inputSchema || {}, handler });
+    this.skills.set(name, {
+      name,
+      capability,
+      inputSchema: inputSchema || {},
+      outputSchema: outputSchema || {},
+      permissions: permissions || { requiresAgentAssignment: false },
+      handler,
+    });
   }
 
   get(name) {
@@ -22,7 +29,13 @@ class SkillRegistry {
   }
 
   list() {
-    return [...this.skills.values()].map(s => ({ name: s.name, capability: s.capability, inputSchema: s.inputSchema }));
+    return [...this.skills.values()].map(s => ({
+      name: s.name,
+      capability: s.capability,
+      inputSchema: s.inputSchema,
+      outputSchema: s.outputSchema,
+      permissions: s.permissions,
+    }));
   }
 
   findByCapability(capability) {

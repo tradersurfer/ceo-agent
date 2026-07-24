@@ -24,6 +24,7 @@ test('Organization and agent registry match on canonical agent state', () => {
     assert.equal(actual.role, expected.role, `${id} role drift`);
     assert.equal(actual.reports_to, expected.reportsTo, `${id} reporting drift`);
     assert.deepEqual(sorted(actual.capabilities), sorted(expected.capabilities), `${id} capability drift`);
+    assert.deepEqual(sorted(actual.skills || []), sorted(expected.skills), `${id} skill assignment drift`);
   }
 });
 
@@ -42,8 +43,20 @@ test('project, skill, tool, and workflow registries match connected runtime stat
 
   assert.deepEqual(sorted(projects.projects.map(project => project.runtimeId)), sorted(SESSION_PROJECTS));
   assert.deepEqual(
-    skills.skills.map(skill => ({ id: skill.id, capability: skill.capability, inputSchema: skill.inputSchema })),
-    runtime.skillRegistry.list().map(skill => ({ id: skill.name, capability: skill.capability, inputSchema: skill.inputSchema })),
+    skills.skills.map(skill => ({
+      id: skill.id,
+      capability: skill.capability,
+      inputSchema: skill.inputSchema,
+      outputSchema: skill.outputSchema || {},
+      permissions: skill.permissions || { requiresAgentAssignment: false },
+    })),
+    runtime.skillRegistry.list().map(skill => ({
+      id: skill.name,
+      capability: skill.capability,
+      inputSchema: skill.inputSchema,
+      outputSchema: skill.outputSchema,
+      permissions: skill.permissions,
+    })),
   );
 
   const toolActions = new Set(tools.tools.flatMap(tool => tool.actions));
