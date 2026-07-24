@@ -33,5 +33,14 @@ test('runtime prompt loader consumes the COO bridge and operating contract', () 
   assert.match(prompt, /summary[\s\S]*blockers[\s\S]*nextActions/);
   assert.match(prompt, /executionConnected` remains false/);
   assert.match(prompt, /BridgeExecutors\.js` does not register Hermes/);
+  assert.match(
+    prompt,
+    /theory_of_constraints[\s\S]*process standardized[\s\S]*current constraint or bottleneck[\s\S]*problems visible[\s\S]*review cadence working/i,
+  );
+  assert.match(prompt, /status_synthesis\.blockers[\s\S]*passes through verbatim/);
+  assert.match(prompt, /exception-based management/);
+  assert.match(prompt, /delegation_brief[\s\S]*quality_review[\s\S]*before directly overriding/);
+  assert.match(prompt, /Type 1 changes one at a time/);
+  assert.match(prompt, /Own the end-to-end operating outcome/);
   assert.match(prompt, /State the gap; do not guess/);
 });
