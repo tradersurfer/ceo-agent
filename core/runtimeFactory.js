@@ -53,8 +53,10 @@ function createRuntime(config, options = {}) {
 
   const connectedRegistries = loadRuntimeRegistries({
     root,
+    organization,
     bridgeOptions: options.bridgeOptions,
     workflowRuntimeOptions: options.workflowRuntimeOptions,
+    skillAudit: options.skillAudit,
   });
 
   const runtime = new JECIRuntime({

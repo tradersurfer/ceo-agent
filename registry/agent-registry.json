@@ -66,6 +66,18 @@
         "escalation_management",
         "agent_registry_management"
       ],
+      "skills": [
+        "task_decomposition",
+        "delegation_brief",
+        "priority_scoring",
+        "decision_memo",
+        "status_synthesis",
+        "escalation_assessment",
+        "department_capability_lookup",
+        "workload_balancing",
+        "quality_review",
+        "budget_token_allocation"
+      ],
       "authorized_projects": "Configured per install via CEO_AGENT_PROJECTS env var.",
       "off_limits": [
         "Live financial transactions",
@@ -89,6 +101,14 @@
         "financial_strategy",
         "financial_forecasting"
       ],
+      "skills": [
+        "priority_scoring",
+        "decision_memo",
+        "status_synthesis",
+        "escalation_assessment",
+        "quality_review",
+        "budget_token_allocation"
+      ],
       "authorized_projects": "Configured per install via CEO_AGENT_PROJECTS env var.",
       "off_limits": [
         "Live financial transactions without approval",
@@ -108,6 +128,17 @@
       "capabilities": [
         "technology_strategy",
         "software_development"
+      ],
+      "skills": [
+        "task_decomposition",
+        "delegation_brief",
+        "priority_scoring",
+        "decision_memo",
+        "status_synthesis",
+        "escalation_assessment",
+        "workload_balancing",
+        "quality_review",
+        "budget_token_allocation"
       ],
       "authorized_projects": "Configured per install via CEO_AGENT_PROJECTS env var.",
       "off_limits": [
@@ -132,6 +163,17 @@
         "marketing_strategy",
         "content_creation"
       ],
+      "skills": [
+        "task_decomposition",
+        "delegation_brief",
+        "priority_scoring",
+        "decision_memo",
+        "status_synthesis",
+        "escalation_assessment",
+        "workload_balancing",
+        "quality_review",
+        "budget_token_allocation"
+      ],
       "authorized_projects": "Configured per install via CEO_AGENT_PROJECTS env var.",
       "off_limits": [
         "Overriding the CEO Agent"
@@ -149,6 +191,16 @@
       "supervises": [],
       "capabilities": [
         "people_strategy"
+      ],
+      "skills": [
+        "delegation_brief",
+        "priority_scoring",
+        "decision_memo",
+        "status_synthesis",
+        "escalation_assessment",
+        "department_capability_lookup",
+        "workload_balancing",
+        "quality_review"
       ],
       "authorized_projects": "Configured per install via CEO_AGENT_PROJECTS env var.",
       "off_limits": [
@@ -168,6 +220,13 @@
       "capabilities": [
         "legal_strategy",
         "regulatory_compliance"
+      ],
+      "skills": [
+        "priority_scoring",
+        "decision_memo",
+        "status_synthesis",
+        "escalation_assessment",
+        "quality_review"
       ],
       "authorized_projects": "Configured per install via CEO_AGENT_PROJECTS env var.",
       "off_limits": [
@@ -205,6 +264,17 @@
         "file_processing",
         "memory_lookup",
         "automation_run"
+      ],
+      "skills": [
+        "task_decomposition",
+        "delegation_brief",
+        "priority_scoring",
+        "status_synthesis",
+        "escalation_assessment",
+        "department_capability_lookup",
+        "workload_balancing",
+        "quality_review",
+        "budget_token_allocation"
       ],
       "authorized_projects": "Configured per install via CEO_AGENT_PROJECTS env var.",
       "off_limits": [
