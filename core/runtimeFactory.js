@@ -4,6 +4,7 @@ const JECIRuntime = require('./JECIRuntime');
 const Organization = require('../organization/Organization');
 const { loadRuntimeRegistries } = require('./RegistryLoader');
 const frameworkCatalog = require('./frameworks/catalog');
+const { createWorkflowPersistence } = require('./persistence');
 
 const SESSION_PROJECTS = Object.freeze(['cli-session', 'web-session']);
 
@@ -51,11 +52,17 @@ function createRuntime(config, options = {}) {
     reportsTo: agent.reportsTo || agent.reports_to || null,
   });
 
+  // Persistent workflow store + audit log when Supabase is configured; falls
+  // back to WorkflowRuntime's in-memory defaults otherwise (createWorkflowPersistence
+  // returns null when SUPABASE_URL/SUPABASE_SERVICE_ROLE_KEY are absent).
+  // An explicitly injected workflowRuntimeOptions (tests/advanced installs) wins.
+  const workflowRuntimeOptions = options.workflowRuntimeOptions || createWorkflowPersistence() || undefined;
+
   const connectedRegistries = loadRuntimeRegistries({
     root,
     organization,
     bridgeOptions: options.bridgeOptions,
-    workflowRuntimeOptions: options.workflowRuntimeOptions,
+    workflowRuntimeOptions,
     skillAudit: options.skillAudit,
   });
 

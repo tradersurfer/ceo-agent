@@ -119,7 +119,19 @@ class WorkflowRuntime {
   }
 
   async _record(record, event, step, data) {
-    const entry = { event, workflowId: record.workflowId, runId: record.id, stepId: step && step.id, ...data };
+    const context = record.context || {};
+    const entry = {
+      event,
+      workflowId: record.workflowId,
+      runId: record.id,
+      stepId: step && step.id,
+      // Carry tenant/agent from run context when present so a persistent audit
+      // log is queryable by those dimensions. Omitted when absent, so in-memory
+      // audit entries and existing consumers are unaffected.
+      ...(context.tenantId != null ? { tenantId: context.tenantId } : {}),
+      ...(context.agentId != null ? { agentId: context.agentId } : {}),
+      ...data,
+    };
     this.eventBus.emit(event, entry);
     await this.audit.append(entry);
   }
