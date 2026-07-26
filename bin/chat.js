@@ -15,6 +15,24 @@ const cyan = text => paint(36, text);
 const gray = text => paint(90, text);
 const bold = text => paint(1, text);
 
+// Markdown rendering for agent responses: only in color-capable TTYs — the
+// same gate as every other ANSI-styled output in this file. In non-TTY/
+// NO_COLOR contexts, print the raw text unchanged (the prior behavior),
+// rather than emitting HTML tags a plain-text renderer would produce.
+let renderMarkdown = text => text;
+if (colorEnabled) {
+  const { marked } = require('marked');
+  const { markedTerminal } = require('marked-terminal');
+  marked.use(markedTerminal());
+  renderMarkdown = text => {
+    try {
+      return marked.parse(text).trimEnd();
+    } catch {
+      return text;
+    }
+  };
+}
+
 function loadEnv() {
   if (!fs.existsSync(ENV_PATH)) return;
   const lines = fs.readFileSync(ENV_PATH, 'utf8').split('\n');
@@ -265,7 +283,7 @@ async function main() {
         ],
       });
       console.log('');
-      console.log(text.trim());
+      console.log(renderMarkdown(text.trim()));
       const usageLine = formatUsageLine(usage);
       if (usageLine) console.log(`\n  ${usageLine}`);
       console.log('');
