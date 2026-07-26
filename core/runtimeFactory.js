@@ -5,6 +5,7 @@ const Organization = require('../organization/Organization');
 const { loadRuntimeRegistries } = require('./RegistryLoader');
 const frameworkCatalog = require('./frameworks/catalog');
 const { createWorkflowPersistence } = require('./persistence');
+const { WorkflowScheduler } = require('./WorkflowScheduler');
 
 const SESSION_PROJECTS = Object.freeze(['cli-session', 'web-session']);
 
@@ -87,6 +88,18 @@ function createRuntime(config, options = {}) {
   runtime.skillRegistry = connectedRegistries.skillRegistry;
   runtime.skillExecutor = connectedRegistries.skillExecutor;
   runtime.workflowRuntime = connectedRegistries.workflowRuntime;
+  // Constructed (never auto-started) only when a caller supplies a
+  // workflowResolver — this scaffold ships no pre-built workflow
+  // definitions, so there is nothing to poll by default. Installs that
+  // define real workflows opt in explicitly via options.schedulerOptions
+  // and call .start(intervalMs) themselves.
+  runtime.workflowScheduler = options.schedulerOptions && options.schedulerOptions.workflowResolver
+    ? new WorkflowScheduler({
+      runtime: connectedRegistries.workflowRuntime,
+      workflowResolver: options.schedulerOptions.workflowResolver,
+      clock: options.schedulerOptions.clock,
+    })
+    : null;
   runtime.frameworkCatalog = frameworkCatalog;
   runtime.registryCatalog = {
     agents: activeAgents,

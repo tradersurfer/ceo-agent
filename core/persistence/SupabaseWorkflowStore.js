@@ -85,6 +85,21 @@ class SupabaseWorkflowStore {
     this._throwIfError(error);
     return data ? clone(data.record) : null;
   }
+
+  /**
+   * Lists every run currently in `waiting` status, filtered server-side on
+   * the indexed `status` column. Callers (the scheduler) further filter by
+   * each run's per-step `scheduledFor` — this method only narrows by status.
+   * @returns {Promise<object[]>} Waiting run records.
+   */
+  async listWaiting() {
+    const { data, error } = await this.supabase
+      .from(this.table)
+      .select('record')
+      .eq('status', 'waiting');
+    this._throwIfError(error);
+    return (data || []).map(row => clone(row.record));
+  }
 }
 
 module.exports = { SupabaseWorkflowStore, WORKFLOW_RUNS_TABLE };
