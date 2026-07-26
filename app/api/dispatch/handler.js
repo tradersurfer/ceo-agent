@@ -1,4 +1,5 @@
 const crypto = require('crypto');
+const { InMemoryRateLimiter, createRateLimiter } = require('../../../core/RateLimiter');
 const MemoryClient = require('../../../sdk/MemoryClient');
 const SalesIntakeBridge = require('../../../departments/marketing/sales-intake/src/SalesIntakeBridge');
 const OnboardingCommsBridge = require('../../../departments/marketing/onboarding-comms/src/OnboardingCommsBridge');
@@ -21,32 +22,20 @@ const BRIDGE_FACTORIES = {
   hermes: () => new HermesBridge(),
 };
 
-// In-memory sliding-window rate limiter. Suitable for a single-instance
-// deployment (the default for this scaffold). Multi-instance/production
-// deployments should replace this with a shared store (Redis, etc.) —
-// noted in SECURITY.md.
-const RATE_LIMIT_WINDOW_MS = 60_000;
-const RATE_LIMIT_MAX_REQUESTS = 30;
-const requestLog = new Map(); // key -> array of timestamps
+// Rate limiter: shared Supabase-backed limiter when configured (multi-
+// instance/production deployments), falling back to the in-memory
+// sliding-window limiter for single-instance installs — same
+// optional/lazy pattern as the workflow persistence conformers.
+// Constructed once at module load, not per-request.
+const rateLimiter = createRateLimiter() || new InMemoryRateLimiter();
 
 /**
  * Checks and records a rate-limit hit for a given key (e.g. caller IP).
  * @param {string} key Identifying key for the caller.
- * @returns {{allowed: boolean, remaining: number}}
+ * @returns {Promise<{allowed: boolean, remaining: number}>}
  */
 function checkRateLimit(key) {
-  const now = Date.now();
-  const windowStart = now - RATE_LIMIT_WINDOW_MS;
-  const timestamps = (requestLog.get(key) || []).filter(t => t > windowStart);
-
-  if (timestamps.length >= RATE_LIMIT_MAX_REQUESTS) {
-    requestLog.set(key, timestamps);
-    return { allowed: false, remaining: 0 };
-  }
-
-  timestamps.push(now);
-  requestLog.set(key, timestamps);
-  return { allowed: true, remaining: RATE_LIMIT_MAX_REQUESTS - timestamps.length };
+  return rateLimiter.check(key);
 }
 
 /**

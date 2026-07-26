@@ -12,7 +12,7 @@ const { getRuntime } = require('../../../lib/ceoAgentServer');
  */
 export async function POST(request: Request) {
   const clientKey = request.headers.get('x-forwarded-for') || 'unknown';
-  const rateLimit = checkRateLimit(clientKey);
+  const rateLimit = await checkRateLimit(clientKey);
   if (!rateLimit.allowed) {
     return NextResponse.json({ error: 'Rate limit exceeded. Try again shortly.' }, { status: 429 });
   }
