@@ -5,6 +5,15 @@
 - **Tracking issue:** [#36](https://github.com/tradersurfer/ceo-agent/issues/36)
 - **Related:** [#27](https://github.com/tradersurfer/ceo-agent/issues/27) (bridge wiring, merged), `SECURITY.md`
 
+> **Amended by [`ADR-001a`](./ADR-001a-hermes-gateway-client-model.md)**
+> (2026-07-26): the upstream submodule audit this ADR's *Prerequisite* section
+> called for (issue #40) found that Hermes is a persistent gateway service with
+> its own multi-backend sandboxing already built in, not a bounded per-task
+> script. ADR-001a supersedes the *Option B subprocess-supervisor* decision and
+> its *Prerequisite*/*What implementation would take* sections below — read it
+> first. The isolation reasoning here (Options A/C/D, the default-deny framing,
+> credential-scoping principles) remains valid background and is unchanged.
+
 > This is the repository's first ADR. There was no prior `docs/adr/` directory;
 > the roadmap's later `ADR-006` (multi-provider SDK strategy) has not yet been
 > written. This document establishes the canonical Context / Decision /
