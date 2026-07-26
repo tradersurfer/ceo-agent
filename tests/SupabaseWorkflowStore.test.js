@@ -81,6 +81,32 @@ test('matches the InMemoryWorkflowStore save/get contract', async () => {
   assert.equal(await supa.get('nope'), await mem.get('nope'));
 });
 
+test('listWaiting returns only waiting runs, filtered server-side by status', async () => {
+  const supabase = makeFakeSupabase();
+  const store = new SupabaseWorkflowStore({ supabase });
+  await store.save(sampleRecord({ id: 'wf:1', status: 'waiting' }));
+  await store.save(sampleRecord({ id: 'wf:2', status: 'completed' }));
+  await store.save(sampleRecord({ id: 'wf:3', status: 'waiting' }));
+
+  const waiting = await store.listWaiting();
+  assert.deepEqual(waiting.map(record => record.id).sort(), ['wf:1', 'wf:3']);
+  assert.ok(waiting.every(record => record.status === 'waiting'));
+});
+
+test('listWaiting matches the InMemoryWorkflowStore contract', async () => {
+  const supabase = makeFakeSupabase();
+  const supa = new SupabaseWorkflowStore({ supabase });
+  const mem = new InMemoryWorkflowStore();
+  await supa.save(sampleRecord({ id: 'wf:1', status: 'waiting' }));
+  await mem.save(sampleRecord({ id: 'wf:1', status: 'waiting' }));
+  await supa.save(sampleRecord({ id: 'wf:2', status: 'running' }));
+  await mem.save(sampleRecord({ id: 'wf:2', status: 'running' }));
+
+  const supaWaiting = (await supa.listWaiting()).map(record => record.id).sort();
+  const memWaiting = (await mem.listWaiting()).map(record => record.id).sort();
+  assert.deepEqual(supaWaiting, memWaiting);
+});
+
 test('requires credentials when no client is injected', () => {
   const saved = { url: process.env.SUPABASE_URL, key: process.env.SUPABASE_SERVICE_ROLE_KEY };
   delete process.env.SUPABASE_URL;

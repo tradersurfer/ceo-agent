@@ -6,6 +6,11 @@ class InMemoryWorkflowStore {
   constructor() { this.records = new Map(); }
   async save(record) { this.records.set(record.id, JSON.parse(JSON.stringify(record))); return this.get(record.id); }
   async get(id) { const record = this.records.get(id); return record ? JSON.parse(JSON.stringify(record)) : null; }
+  async listWaiting() {
+    return [...this.records.values()]
+      .filter(record => record.status === 'waiting')
+      .map(record => JSON.parse(JSON.stringify(record)));
+  }
 }
 
 class InMemoryAuditLog {
