@@ -85,6 +85,35 @@ class SupabaseWorkflowStore {
     this._throwIfError(error);
     return data ? clone(data.record) : null;
   }
+
+  _isUniqueViolation(error) {
+    if (!error) return false;
+    if (error.code === '23505') return true;
+    return /duplicate key|unique constraint/i.test(error.message || '');
+  }
+
+  /**
+   * Atomically creates a run only if its id is absent, using a real INSERT
+   * (not upsert) so a Postgres unique-constraint violation on `id` is the
+   * actual conditional-insert primitive — atomic across concurrent
+   * connections, unlike the check-then-upsert race `save()` would have.
+   * @param {object} record Record to create.
+   * @returns {Promise<{record: object, created: boolean}>} The stored record and whether this call created it.
+   */
+  async createIfAbsent(record) {
+    const { error } = await this.supabase
+      .from(this.table)
+      .insert(this._toRow(record));
+
+    if (error) {
+      if (this._isUniqueViolation(error)) {
+        const existing = await this.get(record.id);
+        return { record: existing, created: false };
+      }
+      this._throwIfError(error);
+    }
+    return { record: clone(record), created: true };
+  }
 }
 
 module.exports = { SupabaseWorkflowStore, WORKFLOW_RUNS_TABLE };

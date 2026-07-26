@@ -81,6 +81,49 @@ test('matches the InMemoryWorkflowStore save/get contract', async () => {
   assert.equal(await supa.get('nope'), await mem.get('nope'));
 });
 
+test('createIfAbsent creates a run once and reports created: true', async () => {
+  const supabase = makeFakeSupabase();
+  const store = new SupabaseWorkflowStore({ supabase });
+  const record = sampleRecord();
+
+  const result = await store.createIfAbsent(record);
+  assert.equal(result.created, true);
+  assert.deepEqual(result.record, record);
+
+  const rows = supabase._rows('workflow_runs');
+  assert.equal(rows.length, 1);
+  assert.equal(rows[0].id, 'wf:1');
+});
+
+test('createIfAbsent on an existing id returns the stored record with created: false, unmodified', async () => {
+  const supabase = makeFakeSupabase();
+  const store = new SupabaseWorkflowStore({ supabase });
+  await store.createIfAbsent(sampleRecord({ status: 'running' }));
+
+  const result = await store.createIfAbsent(sampleRecord({ status: 'completed' }));
+  assert.equal(result.created, false);
+  assert.equal(result.record.status, 'running');
+
+  const rows = supabase._rows('workflow_runs');
+  assert.equal(rows.length, 1);
+  assert.equal(rows[0].status, 'running');
+});
+
+test('createIfAbsent matches the InMemoryWorkflowStore contract for both the winner and the loser', async () => {
+  const supabase = makeFakeSupabase();
+  const supa = new SupabaseWorkflowStore({ supabase });
+  const mem = new InMemoryWorkflowStore();
+  const record = sampleRecord();
+
+  const supaFirst = await supa.createIfAbsent(record);
+  const memFirst = await mem.createIfAbsent(record);
+  assert.deepEqual(supaFirst, memFirst);
+
+  const supaSecond = await supa.createIfAbsent(sampleRecord({ status: 'completed' }));
+  const memSecond = await mem.createIfAbsent(sampleRecord({ status: 'completed' }));
+  assert.deepEqual(supaSecond, memSecond);
+});
+
 test('requires credentials when no client is injected', () => {
   const saved = { url: process.env.SUPABASE_URL, key: process.env.SUPABASE_SERVICE_ROLE_KEY };
   delete process.env.SUPABASE_URL;
