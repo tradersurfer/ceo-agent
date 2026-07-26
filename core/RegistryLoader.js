@@ -39,7 +39,30 @@ function loadRuntimeRegistries(options = {}) {
       readRegistry(registryRoot, type, fileName),
     ]),
   );
+  const path = require('path');
+  const newSkillConfig = require('./skills/registry.json');
 
+  newSkillConfig.skills.forEach(skillDef => {
+    try {
+      // __dirname is C:\Projects\ceo-agent-public\core
+      // skillDef.modulePath is something like "./marketing/copywriter.js"
+      // Resolves accurately to C:\Projects\ceo-agent-public\core\skills\marketing\copywriter.js
+      const absoluteModulePath = path.resolve(__dirname, 'skills', skillDef.modulePath);
+      const modulePayload = require(absoluteModulePath);
+    
+      skillRegistry.register({
+        id: skillDef.id,
+        capability: skillDef.capability,
+        inputSchema: skillDef.inputSchema,
+        outputSchema: skillDef.outputSchema || {},
+        permissions: skillDef.permissions || {},
+        handler: modulePayload.handler,
+        risk: skillDef.risk || 'safe'
+      });
+    } catch (err) {
+      console.error(`[Boot Error] Failed to map decoupled tool framework component: ${skillDef.id}`, err);
+    }
+  });
   const skillRegistry = new SkillRegistry();
   registerExampleSkills(skillRegistry);
   registerManagerSkills(skillRegistry, { organization: options.organization });

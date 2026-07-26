@@ -1,0 +1,63 @@
+{
+  "registryType": "skills",
+  "skills": [
+    {
+      "id": "copywriter",
+      "capability": "content_creation",
+      "inputSchema": {
+        "prompt": { "type": "string", "required": true },
+        "tone": { "type": "string", "required": false }
+      },
+      "outputSchema": {
+        "generatedText": { "type": "string", "required": true }
+      },
+      "permissions": { "requiresAgentAssignment": true },
+      "handler": "core/skills/marketing/copywriter.js",
+      "risk": "safe"
+    },
+    {
+      "id": "seo_analyzer",
+      "capability": "marketing_strategy",
+      "inputSchema": {
+        "targetUrl": { "type": "string", "required": true },
+        "keywords": { "type": "array", "required": true }
+      },
+      "outputSchema": {
+        "score": { "type": "number", "required": true },
+        "recommendations": { "type": "array", "required": true }
+      },
+      "permissions": { "requiresAgentAssignment": true },
+      "handler": "core/skills/marketing/seo-analyzer.js",
+      "risk": "safe"
+    },
+    {
+      "id": "market_trends",
+      "capability": "financial_forecasting",
+      "inputSchema": {
+        "assetClass": { "type": "string", "required": true },
+        "timeframeDays": { "type": "number", "required": true }
+      },
+      "outputSchema": {
+        "trendDirection": { "type": "string", "required": true },
+        "computedMetrics": { "type": "object", "required": true }
+      },
+      "permissions": { "requiresAgentAssignment": false },
+      "handler": "core/skills/data/market-trends.js",
+      "risk": "safe"
+    },
+    {
+      "id": "vector_search",
+      "capability": "project_memory",
+      "inputSchema": {
+        "queryText": { "type": "string", "required": true },
+        "limit": { "type": "number", "required": false }
+      },
+      "outputSchema": {
+        "matches": { "type": "array", "required": true }
+      },
+      "permissions": { "requiresAgentAssignment": false },
+      "handler": "core/skills/data/vector-search.js",
+      "risk": "safe"
+    }
+  ]
+}
