@@ -164,6 +164,27 @@
       "permissions": { "requiresAgentAssignment": true },
       "handler": "core/skills/managerSkills.js#registerManagerSkills",
       "risk": "safe"
+    },
+    {
+      "id": "scope_creep_detection",
+      "capability": "code_review_scope_analysis",
+      "inputSchema": {
+        "diffText": { "type": "string", "required": true },
+        "intent": { "type": "string", "required": true },
+        "hunkThreshold": { "type": "number", "required": false }
+      },
+      "outputSchema": {
+        "intent": { "type": "string", "required": true },
+        "inScope": { "type": "array", "required": true },
+        "likelyCreep": { "type": "array", "required": true },
+        "newDependencies": { "type": "array", "required": true },
+        "apiRenames": { "type": "array", "required": true },
+        "configEdits": { "type": "array", "required": true },
+        "stats": { "type": "object", "required": true }
+      },
+      "permissions": { "requiresAgentAssignment": true },
+      "handler": "core/skills/scopeCreepSkill.js#registerScopeCreepSkill",
+      "risk": "safe"
     }
   ]
 }

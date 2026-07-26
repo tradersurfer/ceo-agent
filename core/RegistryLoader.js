@@ -4,6 +4,7 @@ const { SkillRegistry } = require('./SkillRegistry');
 const { SkillExecutor } = require('./SkillExecutor');
 const { registerExampleSkills } = require('./skills/exampleSkills');
 const { registerManagerSkills } = require('./skills/managerSkills');
+const { registerScopeCreepSkill } = require('./skills/scopeCreepSkill');
 const { WorkflowRuntime } = require('./WorkflowRuntime');
 const { registerBridgeExecutors } = require('./BridgeExecutors');
 
@@ -43,6 +44,7 @@ function loadRuntimeRegistries(options = {}) {
   const skillRegistry = new SkillRegistry();
   registerExampleSkills(skillRegistry);
   registerManagerSkills(skillRegistry, { organization: options.organization });
+  registerScopeCreepSkill(skillRegistry);
   const skillExecutor = new SkillExecutor(skillRegistry, {
     agentResolver: options.organization
       ? agentId => options.organization.findAgent(agentId)
