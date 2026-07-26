@@ -186,7 +186,7 @@ Seven departments, standard C-suite model. Hermes fills the COO seat directly, a
 | `departments/marketing/sales-intake/` | Marketing-owned sales intake bridge |
 | `departments/marketing/onboarding-comms/` | Marketing-owned onboarding communications bridge |
 | `examples/dispute-agent/` | Optional domain-specific reference implementation; not in the default roster |
-| `tests/` | Six automated suites with 33 tests covering workflows, bridges, skills, custom agents, runtime parity, and user messages |
+| `tests/` | 27 automated suites with 166 tests covering workflows, bridges, skills, persistence, scheduling, rate limiting, health reporting, custom agents, runtime parity, and user messages |
 | `ARCHITECTURE.md` | The full department and agent product model |
 | `SECURITY.md` | Current security posture, known limitations, and installer responsibilities |
 | `TASK_ROUTER.md`, `BEHAVIOR.md`, `ORGANIZATION-STRUCTURE.md` | Reference behavior and routing specifications |
@@ -219,8 +219,12 @@ Available through both the CLI and the local-only web dashboard.
 - [x] Safe skill-registry and executor proof of concept
 - [x] Cost and token optimization with dual-tier models, prompt caching, and usage visibility
 - [x] Security hardening and documented limitations
-- [ ] Persistent workflow storage and delayed-step scheduler
-- [ ] Multi-instance/shared rate limiting for hosted deployments
+- [x] Persistent workflow storage and audit log (Supabase-backed)
+- [x] Scheduler for delayed workflow steps
+- [x] Idempotency / duplicate-execution protection
+- [x] Multi-instance/shared rate limiting for hosted deployments (Supabase-backed)
+- [x] Health checks and observability
+- [x] Curated department skills: scope-creep detection, schema markup generation, content-quality analysis
 - [ ] Direct-provider adapter evaluation beyond OpenRouter
 - [ ] Marketplace listing
 
@@ -230,7 +234,7 @@ Some install-specific pieces remain configurable by design: production runtime U
 
 ## Security
 
-The included web commands bind to `127.0.0.1` by default. The dispatch and chat APIs include in-memory request throttling, but hosted or multi-instance deployments need shared rate limiting, TLS termination, authentication appropriate to their environment, and a reviewed secrets-management process.
+The included web commands bind to `127.0.0.1` by default. The dispatch and chat APIs rate-limit by caller: an in-memory sliding window by default, and a Supabase-backed shared limiter automatically when `SUPABASE_URL`/`SUPABASE_SERVICE_ROLE_KEY` are configured, for multi-instance deployments. Hosted deployments still need TLS termination, authentication appropriate to their environment, and a reviewed secrets-management process.
 
 See [`SECURITY.md`](./SECURITY.md) before deploying beyond a single local machine.
 
