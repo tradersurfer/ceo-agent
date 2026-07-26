@@ -138,7 +138,8 @@
         "escalation_assessment",
         "workload_balancing",
         "quality_review",
-        "budget_token_allocation"
+        "budget_token_allocation",
+        "scope_creep_detection"
       ],
       "authorized_projects": "Configured per install via CEO_AGENT_PROJECTS env var.",
       "off_limits": [
