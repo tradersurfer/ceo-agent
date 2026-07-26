@@ -156,3 +156,64 @@ test('records audit entries for step lifecycle events', async () => {
   assert.ok(events.includes('workflow.step.completed'));
   assert.ok(events.includes('workflow.completed'));
 });
+
+test('a repeated execute() with the same id returns the existing run instead of double-running', async () => {
+  const runtime = makeRuntime();
+  let executionCount = 0;
+  runtime.registerExecutor('noop', async () => { executionCount += 1; return { status: 'ok', value: executionCount }; });
+  const workflow = { id: 'wf-idempotent', steps: [{ id: 'step1', type: 'noop' }] };
+
+  const first = await runtime.execute({ workflow, id: 'shared-key' });
+  const second = await runtime.execute({ workflow, id: 'shared-key' });
+
+  assert.equal(executionCount, 1);
+  assert.equal(first.id, 'shared-key');
+  assert.equal(second.id, 'shared-key');
+  assert.equal(first.status, 'completed');
+  assert.equal(second.status, 'completed');
+  assert.equal(second.outputs.step1.value, 1);
+});
+
+test('execute() calls with different ids each run independently', async () => {
+  const runtime = makeRuntime();
+  let executionCount = 0;
+  runtime.registerExecutor('noop', async () => { executionCount += 1; return { status: 'ok' }; });
+  const workflow = { id: 'wf-distinct', steps: [{ id: 'step1', type: 'noop' }] };
+
+  const first = await runtime.execute({ workflow, id: 'key-a' });
+  const second = await runtime.execute({ workflow, id: 'key-b' });
+
+  assert.equal(executionCount, 2);
+  assert.notEqual(first.id, second.id);
+  assert.equal(first.status, 'completed');
+  assert.equal(second.status, 'completed');
+});
+
+test('concurrent execute() calls with the same id produce exactly one winner', async () => {
+  const runtime = makeRuntime();
+  let executionCount = 0;
+  runtime.registerExecutor('noop', async () => { executionCount += 1; return { status: 'ok' }; });
+  const workflow = { id: 'wf-concurrent', steps: [{ id: 'step1', type: 'noop' }] };
+
+  const [first, second] = await Promise.all([
+    runtime.execute({ workflow, id: 'race-key' }),
+    runtime.execute({ workflow, id: 'race-key' }),
+  ]);
+
+  // Exactly one of the two calls actually ran the workflow: the loser's
+  // synchronous createIfAbsent() check loses the race before the winner's
+  // _run() has necessarily finished, so the loser may legitimately observe
+  // the winner's in-flight 'running' snapshot rather than its eventual
+  // 'completed' state — the same behavior a real idempotency-key system
+  // (e.g. "request already in progress") would give a concurrent duplicate.
+  // What must always hold is: exactly one execution, and both calls resolve
+  // to the same run id.
+  assert.equal(executionCount, 1);
+  assert.equal(first.id, 'race-key');
+  assert.equal(second.id, 'race-key');
+  assert.ok(['running', 'completed'].includes(first.status));
+  assert.ok(['running', 'completed'].includes(second.status));
+
+  const finalRecord = await runtime.store.get('race-key');
+  assert.equal(finalRecord.status, 'completed');
+});
