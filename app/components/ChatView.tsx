@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 type Message = {
   role: 'user' | 'agent' | 'system';
@@ -57,7 +59,11 @@ export default function ChatView({ config }: { config: any }) {
         {messages.map((m, i) => (
           <div key={i} className={`chat-bubble chat-${m.role}`}>
             {m.role === 'agent' && <div className="chat-agent-label">{m.agentName}</div>}
-            <div className="chat-text">{m.text}</div>
+            <div className="chat-text">
+              {m.role === 'agent'
+                ? <ReactMarkdown remarkPlugins={[remarkGfm]}>{m.text}</ReactMarkdown>
+                : m.text}
+            </div>
             {m.usage && m.usage.promptTokens != null && (
               <div className="chat-usage">{m.usage.promptTokens} prompt &middot; {m.usage.completionTokens} completion</div>
             )}
