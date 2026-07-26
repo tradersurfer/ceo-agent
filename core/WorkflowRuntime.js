@@ -6,6 +6,27 @@ class InMemoryWorkflowStore {
   constructor() { this.records = new Map(); }
   async save(record) { this.records.set(record.id, JSON.parse(JSON.stringify(record))); return this.get(record.id); }
   async get(id) { const record = this.records.get(id); return record ? JSON.parse(JSON.stringify(record)) : null; }
+  async listWaiting() {
+    return [...this.records.values()]
+      .filter(record => record.status === 'waiting')
+      .map(record => JSON.parse(JSON.stringify(record)));
+  }
+  /**
+   * Atomically creates a record only if its id is absent. The has()-check and
+   * set() below run synchronously with no intervening await, so even
+   * concurrently-issued calls with the same id resolve deterministically —
+   * whichever call's synchronous body runs first wins, per JS's run-to-
+   * completion semantics between await points.
+   * @param {object} record Record to create.
+   * @returns {Promise<{record: object, created: boolean}>} The stored record and whether this call created it.
+   */
+  async createIfAbsent(record) {
+    if (this.records.has(record.id)) {
+      return { record: JSON.parse(JSON.stringify(this.records.get(record.id))), created: false };
+    }
+    this.records.set(record.id, JSON.parse(JSON.stringify(record)));
+    return { record: JSON.parse(JSON.stringify(this.records.get(record.id))), created: true };
+  }
 }
 
 class InMemoryAuditLog {
@@ -50,6 +71,18 @@ class WorkflowRuntime {
       createdAt: now.toISOString(),
       updatedAt: now.toISOString(),
     };
+
+    // id doubles as the idempotency key (per ADR-002: "accept an idempotency
+    // key, or reuse run id"). createIfAbsent() dedupes atomically at the
+    // store; a retried or multi-instance execute() call with the same id
+    // returns the winner's current state instead of starting a second run.
+    // Stores that don't implement createIfAbsent() (custom injected stores)
+    // fall back to the prior unconditional-save behavior.
+    if (typeof this.store.createIfAbsent === 'function') {
+      const { record: stored, created } = await this.store.createIfAbsent(record);
+      if (!created) return clone(stored);
+      return this._run(stored, workflow);
+    }
     await this.store.save(record);
     return this._run(record, workflow);
   }

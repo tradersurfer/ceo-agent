@@ -34,6 +34,11 @@ class FakeQuery {
     if (this._op === 'insert') {
       const row = { ...this._payload };
       if (row.id == null) row.id = rows.length + 1;
+      if (rows.some(existing => existing.id === row.id)) {
+        const error = new Error(`duplicate key value violates unique constraint "${this.table}_pkey"`);
+        error.code = '23505';
+        throw error;
+      }
       rows.push(row);
       return [row];
     }
