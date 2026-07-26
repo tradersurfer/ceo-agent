@@ -5,7 +5,7 @@ This document describes the current security model of the CEO Agent scaffold hon
 ## What's handled
 
 - **Dispatch API authentication** — `/api/dispatch` requires a `x-dispatch-secret` header matching `DISPATCH_SECRET` from your `.env`, checked with a timing-safe comparison (`crypto.timingSafeEqual`).
-- **Rate limiting** — the dispatch endpoint limits each caller (by IP) to 30 requests/minute using an in-memory sliding window. This is sufficient for a single-instance deployment.
+- **Rate limiting** — the dispatch and chat endpoints limit each caller (by IP) to 30 requests/minute. In-memory sliding window by default (sufficient for a single-instance deployment); a Supabase-backed shared limiter (`core/RateLimiter.js`) is used automatically when `SUPABASE_URL`/`SUPABASE_SERVICE_ROLE_KEY` are configured, for multi-instance deployments. The shared limiter is a count-then-insert sliding window, not a database-transaction-guarded atomic counter — under genuinely concurrent multi-instance bursts at the exact edge of the limit, a narrow, bounded overshoot is possible. It shares state across instances, which the in-memory limiter cannot do at all; it does not claim hard atomicity.
 - **Secrets never committed** — `.env` and `ceo-agent.config.json` are gitignored by default. Never commit real API keys, webhook secrets, or tokens.
 - **Secrets never logged** — the setup wizard and chat IDE never echo back API keys or tokens in console output.
 - **Task-type allowlisting** — every agent bridge (`SalesIntakeBridge`, `OnboardingCommsBridge`, `DisputeAgentBridge`, `HermesBridge`) only accepts pre-approved task types, approvers, and projects, configured via env vars (`CEO_AGENT_APPROVERS`, `CEO_AGENT_PROJECTS`).
@@ -14,7 +14,6 @@ This document describes the current security model of the CEO Agent scaffold hon
 
 ## What's NOT yet handled — you are responsible for these
 
-- **Multi-instance rate limiting** — the in-memory limiter resets per process and doesn't share state across multiple server instances. If you deploy behind a load balancer with multiple instances, replace it with a shared store (Redis, etc.) before relying on it.
 - **Model API key rotation** — this scaffold doesn't rotate or manage OpenRouter/model provider keys. Rotate them yourself if compromised.
 - **Sandboxing of agent execution** — Hermes and other agent runtimes are not sandboxed by this scaffold. If you wire a real Hermes runtime, apply your own process isolation.
 - **Dependency auditing** — run `npm audit` yourself before production use; this scaffold doesn't automate it.
