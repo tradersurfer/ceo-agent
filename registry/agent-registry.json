@@ -173,7 +173,12 @@
         "escalation_assessment",
         "workload_balancing",
         "quality_review",
-        "budget_token_allocation"
+        "budget_token_allocation",
+        "schema_reservation_markup",
+        "schema_order_markup",
+        "schema_discussion_markup",
+        "schema_profile_markup",
+        "content_quality_analysis"
       ],
       "authorized_projects": "Configured per install via CEO_AGENT_PROJECTS env var.",
       "off_limits": [

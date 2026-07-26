@@ -185,6 +185,99 @@
       "permissions": { "requiresAgentAssignment": true },
       "handler": "core/skills/scopeCreepSkill.js#registerScopeCreepSkill",
       "risk": "safe"
+    },
+    {
+      "id": "schema_reservation_markup",
+      "capability": "marketing_schema_markup",
+      "inputSchema": {
+        "provider": { "type": "string", "required": true },
+        "start": { "type": "string", "required": true },
+        "end": { "type": "string", "required": false },
+        "partySize": { "type": "number", "required": false },
+        "reservationId": { "type": "string", "required": false },
+        "reservationForName": { "type": "string", "required": false },
+        "customerName": { "type": "string", "required": false },
+        "customerEmail": { "type": "string", "required": false },
+        "kind": { "type": "string", "required": false }
+      },
+      "outputSchema": { "jsonLd": { "type": "object", "required": true } },
+      "permissions": { "requiresAgentAssignment": true },
+      "handler": "core/skills/schemaMarkupSkills.js#registerSchemaMarkupSkills",
+      "risk": "safe"
+    },
+    {
+      "id": "schema_order_markup",
+      "capability": "marketing_schema_markup",
+      "inputSchema": {
+        "merchant": { "type": "string", "required": true },
+        "orderUrl": { "type": "string", "required": true },
+        "name": { "type": "string", "required": false },
+        "acceptedPaymentMethod": { "type": "array", "required": false },
+        "deliveryMethod": { "type": "array", "required": false }
+      },
+      "outputSchema": { "jsonLd": { "type": "object", "required": true } },
+      "permissions": { "requiresAgentAssignment": true },
+      "handler": "core/skills/schemaMarkupSkills.js#registerSchemaMarkupSkills",
+      "risk": "safe"
+    },
+    {
+      "id": "schema_discussion_markup",
+      "capability": "marketing_schema_markup",
+      "inputSchema": {
+        "headline": { "type": "string", "required": true },
+        "author": { "type": "string", "required": true },
+        "url": { "type": "string", "required": true },
+        "datePublished": { "type": "string", "required": true },
+        "text": { "type": "string", "required": false },
+        "dateModified": { "type": "string", "required": false },
+        "commentCount": { "type": "number", "required": false },
+        "likes": { "type": "number", "required": false }
+      },
+      "outputSchema": { "jsonLd": { "type": "object", "required": true } },
+      "permissions": { "requiresAgentAssignment": true },
+      "handler": "core/skills/schemaMarkupSkills.js#registerSchemaMarkupSkills",
+      "risk": "safe"
+    },
+    {
+      "id": "schema_profile_markup",
+      "capability": "marketing_schema_markup",
+      "inputSchema": {
+        "name": { "type": "string", "required": true },
+        "url": { "type": "string", "required": true },
+        "description": { "type": "string", "required": false },
+        "sameAs": { "type": "array", "required": false },
+        "knowsAbout": { "type": "array", "required": false },
+        "worksFor": { "type": "string", "required": false },
+        "image": { "type": "string", "required": false },
+        "jobTitle": { "type": "string", "required": false }
+      },
+      "outputSchema": { "jsonLd": { "type": "object", "required": true } },
+      "permissions": { "requiresAgentAssignment": true },
+      "handler": "core/skills/schemaMarkupSkills.js#registerSchemaMarkupSkills",
+      "risk": "safe"
+    },
+    {
+      "id": "content_quality_analysis",
+      "capability": "marketing_content_quality",
+      "inputSchema": {
+        "text": { "type": "string", "required": true },
+        "threshold": { "type": "number", "required": false }
+      },
+      "outputSchema": {
+        "fillerScore": { "type": "number", "required": true },
+        "aiPatternScore": { "type": "number", "required": true },
+        "informationDensity": { "type": "number", "required": true },
+        "repetitionScore": { "type": "number", "required": true },
+        "overallQuality": { "type": "number", "required": true },
+        "flags": { "type": "array", "required": true },
+        "matches": { "type": "object", "required": true },
+        "tokens": { "type": "number", "required": true },
+        "uniqueTokens": { "type": "number", "required": true },
+        "passesThreshold": { "type": "boolean", "required": true }
+      },
+      "permissions": { "requiresAgentAssignment": true },
+      "handler": "core/skills/contentQualitySkill.js#registerContentQualitySkill",
+      "risk": "safe"
     }
   ]
 }
