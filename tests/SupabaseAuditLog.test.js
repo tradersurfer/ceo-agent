@@ -75,3 +75,64 @@ test('query honors the limit', async () => {
   for (let i = 0; i < 5; i++) await audit.append(entry({ stepId: `s${i}`, timestamp: `2026-07-2${i}T00:00:00.000Z` }));
   assert.equal((await audit.query({ limit: 2 })).length, 2);
 });
+
+function skillEntry(overrides = {}) {
+  return {
+    event: 'skill.execution.succeeded',
+    skillName: 'generate_pdf',
+    agentId: 'cmo_agent',
+    status: 'ok',
+    reason: null,
+    tenantId: 'tenant-a',
+    timestamp: '2026-07-27T00:00:00.000Z',
+    ...overrides,
+  };
+}
+
+test('a skill_audit-configured instance writes skill-shaped columns to its own table', async () => {
+  const supabase = makeFakeSupabase();
+  const audit = new SupabaseAuditLog({ supabase, table: 'skill_audit', entryColumns: ['skillName', 'status', 'reason'] });
+  await audit.append(skillEntry());
+
+  // Nothing leaked into workflow_audit.
+  assert.equal(supabase._rows('workflow_audit').length, 0);
+
+  const rows = supabase._rows('skill_audit');
+  assert.equal(rows.length, 1);
+  assert.equal(rows[0].event, 'skill.execution.succeeded');
+  assert.equal(rows[0].skill_name, 'generate_pdf');
+  assert.equal(rows[0].status, 'ok');
+  assert.equal(rows[0].reason, null);
+  assert.equal(rows[0].tenant_id, 'tenant-a');
+  assert.equal(rows[0].agent_id, 'cmo_agent');
+  // No workflow-shaped columns on a skill_audit row.
+  assert.equal('workflow_id' in rows[0], false);
+  assert.equal('run_id' in rows[0], false);
+  assert.equal('step_id' in rows[0], false);
+  assert.deepEqual(rows[0].data, {});
+});
+
+test('skill_audit query filters by skillName and status', async () => {
+  const supabase = makeFakeSupabase();
+  const audit = new SupabaseAuditLog({ supabase, table: 'skill_audit', entryColumns: ['skillName', 'status', 'reason'] });
+  await audit.append(skillEntry({ skillName: 'generate_pdf', status: 'ok' }));
+  await audit.append(skillEntry({ skillName: 'generate_docx', status: 'failed', reason: 'timeout' }));
+
+  assert.equal((await audit.query({ skillName: 'generate_pdf' })).length, 1);
+  assert.equal((await audit.query({ status: 'failed' }))[0].skill_name, 'generate_docx');
+  assert.equal((await audit.query({ tenantId: 'tenant-a' })).length, 2);
+});
+
+test('a workflow_audit instance and a skill_audit instance sharing one client stay isolated by table', async () => {
+  const supabase = makeFakeSupabase();
+  const workflowAudit = new SupabaseAuditLog({ supabase });
+  const skillAudit = new SupabaseAuditLog({ supabase, table: 'skill_audit', entryColumns: ['skillName', 'status', 'reason'] });
+
+  await workflowAudit.append(entry());
+  await skillAudit.append(skillEntry());
+
+  assert.equal((await workflowAudit.query({})).length, 1);
+  assert.equal((await skillAudit.query({})).length, 1);
+  assert.equal(supabase._rows('workflow_audit').length, 1);
+  assert.equal(supabase._rows('skill_audit').length, 1);
+});

@@ -3,6 +3,7 @@ const assert = require('node:assert');
 const { SkillRegistry } = require('../core/SkillRegistry');
 const { SkillExecutor } = require('../core/SkillExecutor');
 const { registerExampleSkills } = require('../core/skills/exampleSkills');
+const { InMemoryAuditLog } = require('../core/WorkflowRuntime');
 
 function buildExecutor() {
   const registry = new SkillRegistry();
@@ -65,4 +66,20 @@ test('lookup_department reads from the real org chart, read-only', async () => {
   assert.strictEqual(result.status, 'ok');
   assert.strictEqual(result.output.found, true);
   assert.strictEqual(result.output.department.id, 'legal');
+});
+
+test('audit entries include tenantId when the caller supplies it, and omit it otherwise', async () => {
+  const registry = new SkillRegistry();
+  registerExampleSkills(registry);
+  const audit = new InMemoryAuditLog();
+  const executor = new SkillExecutor(registry, { audit });
+
+  await executor.run('format_currency', { amount: 1 }, 5000, { agentId: 'cfo_agent', tenantId: 'tenant-a' });
+  await executor.run('format_currency', { amount: 1 }, 5000, { agentId: 'cfo_agent' });
+
+  const [withTenant, withoutTenant] = audit.list();
+  assert.strictEqual(withTenant.tenantId, 'tenant-a');
+  assert.strictEqual(withTenant.skillName, 'format_currency');
+  assert.strictEqual(withTenant.event, 'skill.execution.succeeded');
+  assert.strictEqual('tenantId' in withoutTenant, false);
 });
