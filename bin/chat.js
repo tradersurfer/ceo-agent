@@ -49,6 +49,7 @@ function loadEnv() {
 loadEnv();
 
 const OpenRouterClient = require('../sdk/OpenRouterClient');
+const AnthropicClient = require('../sdk/AnthropicClient');
 const { loadAgentPrompt } = require('../sdk/PromptLoader');
 const {
   createRuntime,
@@ -59,6 +60,7 @@ const { friendlyMessageFor } = require('../lib/userMessages');
 const { saveUpload, MAX_UPLOAD_BYTES } = require('../lib/uploadStore');
 const { recordUsage } = require('../core/UsageTracker');
 const { resolveRoleForAgent } = require('../core/resolveDepartmentRole');
+const { resolveClientForModel } = require('../core/resolveClientForModel');
 
 function loadConfig() {
   if (!fs.existsSync(CONFIG_PATH)) {
@@ -94,6 +96,7 @@ async function main() {
   const runtime = createRuntime(config, { root: ROOT });
 
   const openRouterClient = new OpenRouterClient();
+  const anthropicClient = new AnthropicClient();
   let liveModelsResolved = false;
 
   console.log('');
@@ -310,8 +313,16 @@ async function main() {
     }
 
     try {
-      const { text, usage } = await openRouterClient.chatCompletion({
-        model: apiModelId,
+      // Dispatch seam (ADR-006): route through a direct provider client when
+      // one is connected for apiModelId's provider, else OpenRouter unchanged
+      // — this does not change role->model resolution (roleForAgent/
+      // apiModelId above), only which client places the already-resolved call.
+      const { client, providerModelId } = resolveClientForModel(apiModelId, {
+        openrouter: openRouterClient,
+        anthropic: process.env.ANTHROPIC_API_KEY ? anthropicClient : null,
+      });
+      const { text, usage } = await client.chatCompletion({
+        model: providerModelId,
         messages: [
           { role: 'system', content: buildSystemPrompt(config, agent) },
           { role: 'user', content: message },

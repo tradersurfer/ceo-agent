@@ -16,11 +16,27 @@
 // documented Phase-2 gap (no live pricing yet for direct-provider models).
 //
 // Hard requirement (scoping doc §3, "not a suggestion"): a provider with no
-// real ProviderClient yet (everything except OpenRouter, today) must render
-// as "connected, not active" and must NEVER show OpenRouter's resolved
-// model data under that provider's label. This component enforces that
-// structurally — it refuses to render the role/tier grid at all unless
-// `active` is true, regardless of what's passed as `catalog`.
+// real ProviderClient yet must render as "connected, not active" and must
+// NEVER show OpenRouter's resolved model data under that provider's label.
+// This component enforces that structurally — it refuses to render the
+// role/tier grid at all unless `active` is true, regardless of what's
+// passed as `catalog`.
+//
+// BYNGE Phase 2 adds a third state this component must also keep distinct:
+// a provider can now be `active` (a real ProviderClient exists and dispatch
+// actually routes through it — see lib/providers.js's ACTIVE_PROVIDER_IDS,
+// which grew a second entry, 'anthropic', in Phase 2's first PR) WITHOUT
+// having its own resolved model catalog the way OpenRouter does — catalog
+// data is still ModelBroker/ModelResolver's OpenRouter-only resolution
+// (ADR-006's catalog-merging is explicitly out of scope for this PR). So
+// `active` alone no longer implies "render the role/tier grid with a
+// catalog" — it's `active && catalog` for that; `active && !catalog` is a
+// new, narrower "direct calls enabled" state below that says dispatch works
+// without claiming a model catalog that doesn't exist yet. The caller
+// (ConnectionsView) is responsible for only ever passing a non-null
+// `catalog` for the provider that actually has one (OpenRouter) — this
+// component still can't independently verify that, so the caller-discipline
+// note in the `catalog` prop doc below still applies.
 
 export type ChatRole = 'claude' | 'codex' | 'gpt' | 'gemini' | 'grok';
 export type CostTier = 'flagship' | 'efficient' | 'cheapest';
@@ -63,11 +79,11 @@ export default function ModelSelector({
 }: {
   /** 'compact' for ChatView's input row, 'expanded' for ConnectionsView's per-provider detail. */
   mode: 'compact' | 'expanded';
-  /** Whether this provider has a real ProviderClient wired into dispatch (OpenRouter only, Phase 1). */
+  /** Whether this provider has a real ProviderClient wired into dispatch (lib/providers.js's ACTIVE_PROVIDER_IDS — OpenRouter and, as of BYNGE Phase 2, Anthropic). Dispatch-active only; does NOT imply a resolved catalog exists (see `catalog`). */
   active: boolean;
   /** Whether an API key is stored for this provider, independent of `active`. */
   connected: boolean;
-  /** Resolved role -> tier catalog. Only ever meaningful (and only ever passed) when `active` is true. */
+  /** Resolved role -> tier catalog. Only ever meaningful when `active` is true, and today only ever real for OpenRouter — ModelBroker/ModelResolver have no other catalog source. Callers MUST pass null/undefined for any other provider, even an active one, or this component will (correctly, given the props it was handed) render that provider's tile with OpenRouter's models under its label. */
   catalog?: RoleCatalog | null;
   value: { role: ChatRole; tier: CostTier };
   onChange: (next: { role: ChatRole; tier: CostTier }) => void;
@@ -90,7 +106,30 @@ export default function ModelSelector({
     );
   }
 
-  const selectedRoleCatalog = catalog ? catalog[value.role] : null;
+  if (!catalog) {
+    // Dispatch is active (a real ProviderClient exists) but there's no
+    // resolved role/tier catalog for this specific provider — today that's
+    // every direct-connected provider except OpenRouter (BYNGE Phase 2:
+    // Anthropic dispatch works, but role/tier selection still only ever
+    // resolves against OpenRouter's catalog — see the module comment above
+    // and ADR-006's catalog-merging non-goal). Render a narrower state that
+    // tells the truth: calls can go out directly, but there's nothing
+    // provider-specific to pick here yet.
+    return (
+      <div className={`model-selector model-selector-direct model-selector-${mode}`} data-testid="model-selector-direct">
+        <span className="model-selector-status">Connected — direct calls enabled</span>
+        {mode === 'expanded' && (
+          <p className="hint">
+            Direct API calls are enabled for this provider. There's no separate model catalog for it yet —
+            role and tier selection still happens on the OpenRouter connection above; when that selection
+            resolves to one of this provider's models, the call routes directly through this key instead of OpenRouter.
+          </p>
+        )}
+      </div>
+    );
+  }
+
+  const selectedRoleCatalog = catalog[value.role];
   const selectedEntry = selectedRoleCatalog ? selectedRoleCatalog[value.tier] : null;
 
   return (

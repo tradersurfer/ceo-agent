@@ -18,7 +18,7 @@ test('buildConnections reports hasKey/active per provider and never leaks the ra
   assert.deepEqual(Object.keys(connections).sort(), ['anthropic', 'google', 'openai', 'openrouter', 'xai'].sort());
 
   assert.equal(connections.openrouter.hasKey, true);
-  assert.equal(connections.openrouter.active, true, 'openrouter is the only active ProviderClient in Phase 1');
+  assert.equal(connections.openrouter.active, true, 'openrouter has a real ProviderClient');
   assert.notEqual(connections.openrouter.keyMasked, env.OPENROUTER_API_KEY, 'masked value must not equal the raw key');
   assert.ok(connections.openrouter.keyMasked.includes('•'));
 
@@ -26,7 +26,7 @@ test('buildConnections reports hasKey/active per provider and never leaks the ra
   assert.equal(connections.anthropic.keyMasked, null);
 });
 
-test('buildConnections marks every non-OpenRouter provider as not active (Phase 2 not built)', () => {
+test('buildConnections marks providers with no ProviderClient yet as not active (openai/google/xai — Phase 2 not built for them)', () => {
   const env = {
     OPENROUTER_API_KEY: 'sk-or-1234567890abcd',
     ANTHROPIC_API_KEY: 'sk-ant-1234567890abcd',
@@ -36,11 +36,27 @@ test('buildConnections marks every non-OpenRouter provider as not active (Phase 
   };
   const connections = buildConnections(env, maskKey);
 
+  // openrouter and anthropic have real ProviderClients (sdk/OpenRouterClient.js,
+  // sdk/AnthropicClient.js) wired into dispatch via core/resolveClientForModel.js.
   assert.equal(connections.openrouter.active, true);
-  for (const providerId of ['anthropic', 'openai', 'google', 'xai']) {
-    assert.equal(connections[providerId].active, false, `${providerId} must not be marked active`);
+  assert.equal(connections.anthropic.active, true, 'anthropic has a real ProviderClient as of BYNGE Phase 2 (sdk/AnthropicClient.js)');
+  for (const providerId of ['openai', 'google', 'xai']) {
+    assert.equal(connections[providerId].active, false, `${providerId} must not be marked active (no ProviderClient yet)`);
     assert.equal(connections[providerId].hasKey, true, `${providerId} should still report a stored key`);
   }
+});
+
+test('buildConnections marks anthropic as not active when no key is stored, even though it has a ProviderClient', () => {
+  const env = { OPENROUTER_API_KEY: 'sk-or-1234567890abcd', ANTHROPIC_API_KEY: '' };
+  const connections = buildConnections(env, maskKey);
+
+  // "active" here is a static capability flag (does a ProviderClient exist
+  // for this provider id) — buildConnections doesn't gate it on hasKey.
+  // This is intentional and matches how it already worked for OpenRouter
+  // pre-Phase-2 (see ModelSelector.tsx: `connected` — key presence — is a
+  // separate, independent prop from `active`).
+  assert.equal(connections.anthropic.active, true);
+  assert.equal(connections.anthropic.hasKey, false);
 });
 
 test('buildCatalog reads resolved tiers (including "cheapest") per role from ModelBroker, defaulting to nulls when unresolved', () => {

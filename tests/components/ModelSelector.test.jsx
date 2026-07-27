@@ -191,6 +191,47 @@ test('clicking a tier chip calls onChange with the current role and the new tier
   assert.deepEqual(received, { role: 'claude', tier: 'efficient' });
 });
 
+// --- BYNGE Phase 2: active-but-no-catalog state (e.g. Anthropic direct
+// dispatch) — must be distinct from both the full grid and the inactive
+// state, and must never render OpenRouter's catalog data. ---------------
+
+test('an active provider with no catalog (e.g. direct Anthropic dispatch) renders "direct calls enabled", never the role/tier grid', () => {
+  render(
+    React.createElement(ModelSelector, {
+      mode: 'expanded',
+      active: true,
+      connected: true,
+      catalog: null,
+      value: { role: 'claude', tier: 'flagship' },
+      onChange: () => {},
+    })
+  );
+
+  assert.ok(screen.getByTestId('model-selector-direct'));
+  assert.ok(screen.getByText('Connected — direct calls enabled'));
+  assert.throws(() => screen.getByTestId('model-selector-active'));
+  assert.throws(() => screen.getByTestId('model-selector-inactive'));
+  // No role/tier chips — there's nothing catalog-backed to pick for this provider yet.
+  assert.throws(() => screen.getByText('Flagship'));
+  assert.throws(() => screen.getByText('Claude'));
+});
+
+test('compact mode\'s "direct calls enabled" state has no expanded hint paragraph', () => {
+  render(
+    React.createElement(ModelSelector, {
+      mode: 'compact',
+      active: true,
+      connected: true,
+      catalog: null,
+      value: { role: 'claude', tier: 'flagship' },
+      onChange: () => {},
+    })
+  );
+
+  assert.ok(screen.getByTestId('model-selector-direct'));
+  assert.throws(() => screen.getByText(/There's no separate model catalog/));
+});
+
 test('compact mode does not render the expanded per-role resolved-model detail panel', () => {
   render(
     React.createElement(ModelSelector, {
