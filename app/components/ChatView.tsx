@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import ModelSelector, { ChatRole, CostTier } from './ModelSelector';
 
 type Message = {
   role: 'user' | 'agent' | 'system';
@@ -21,8 +22,19 @@ export default function ChatView({ config }: { config: any }) {
   const [pendingAttachments, setPendingAttachments] = useState<Attachment[]>([]);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  // null = no override — the department default resolves the role/tier
+  // server-side (core/resolveDepartmentRole.js). Set only when the user
+  // actively picks a model here; this is a per-message, session-only
+  // override, never persisted back to ceo-agent.config.json (where the
+  // selection ultimately "should" live long-term is explicitly flagged as
+  // unresolved in docs/design/BYNGE-connection-scoping.md §3).
+  const [modelOverride, setModelOverride] = useState<{ role: ChatRole; tier: CostTier } | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const defaultTier: CostTier = config.costMode === 'efficient' ? 'efficient' : 'flagship';
+  const selectorValue = modelOverride || { role: 'claude' as ChatRole, tier: defaultTier };
+  const openRouterConnection = config.connections?.openrouter || { hasKey: false, active: true };
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -68,7 +80,11 @@ export default function ChatView({ config }: { config: any }) {
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: text, attachmentIds: attachmentsForThisMessage.map(a => a.fileId) }),
+        body: JSON.stringify({
+          message: text,
+          attachmentIds: attachmentsForThisMessage.map(a => a.fileId),
+          ...(modelOverride ? { role: modelOverride.role, tier: modelOverride.tier } : {}),
+        }),
       });
       const data = await res.json();
 
@@ -145,6 +161,22 @@ export default function ChatView({ config }: { config: any }) {
           disabled={sending}
         />
         <button onClick={send} disabled={sending}>{sending ? 'Sending...' : 'Send'}</button>
+        <div className="chat-model-selector">
+          <ModelSelector
+            mode="compact"
+            active={openRouterConnection.active !== false}
+            connected={!!openRouterConnection.hasKey}
+            catalog={config.catalog || null}
+            value={selectorValue}
+            onChange={setModelOverride}
+            disabled={sending}
+          />
+          {modelOverride && (
+            <button type="button" className="chat-model-reset" onClick={() => setModelOverride(null)}>
+              Use department default
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );

@@ -2,9 +2,16 @@
 const fs = require('fs');
 const path = require('path');
 const readline = require('readline');
+const { setProviderKey } = require('../lib/ceoAgentServer');
 
 const ROOT = path.resolve(__dirname, '..');
 const CONFIG_PATH = path.join(ROOT, 'ceo-agent.config.json');
+// bin/setup.js resolves paths relative to the package root (__dirname)
+// rather than process.cwd(), so it behaves the same no matter where it's
+// invoked from — pass this explicitly to setProviderKey, which otherwise
+// defaults to lib/ceoAgentServer.js's own process.cwd()-based .env path
+// (correct for the Next.js server, which always runs with cwd == project
+// root, but not a safe assumption for a CLI entry point).
 const ENV_PATH = path.join(ROOT, '.env');
 
 const colorEnabled = !process.env.NO_COLOR && process.stdout.isTTY;
@@ -163,17 +170,7 @@ async function main() {
   fs.writeFileSync(CONFIG_PATH, JSON.stringify(config, null, 2) + '\n', 'utf8');
 
   if (openRouterKey) {
-    const envLine = `OPENROUTER_API_KEY=${openRouterKey}\n`;
-    if (fs.existsSync(ENV_PATH)) {
-      const existing = fs.readFileSync(ENV_PATH, 'utf8');
-      if (existing.includes('OPENROUTER_API_KEY=')) {
-        fs.writeFileSync(ENV_PATH, existing.replace(/OPENROUTER_API_KEY=.*/g, envLine.trim()), 'utf8');
-      } else {
-        fs.appendFileSync(ENV_PATH, envLine, 'utf8');
-      }
-    } else {
-      fs.writeFileSync(ENV_PATH, envLine, 'utf8');
-    }
+    setProviderKey('openrouter', openRouterKey, ENV_PATH);
   }
 
   printSummary(config, activeDeptIds);

@@ -19,7 +19,6 @@ export default function SettingsView({ config, onSaved }: { config: any; onSaved
   const [activeDepartments, setActiveDepartments] = useState<string[]>(
     config.activeDepartments.filter((d: string) => d !== 'executive')
   );
-  const [newApiKey, setNewApiKey] = useState('');
   const [saving, setSaving] = useState(false);
   const [savedMessage, setSavedMessage] = useState('');
 
@@ -31,7 +30,6 @@ export default function SettingsView({ config, onSaved }: { config: any; onSaved
     setSaving(true);
     setSavedMessage('');
     const body: any = { agentName, principalName, businessContext, costMode, activeDepartments };
-    if (newApiKey.trim()) body.openRouterApiKey = newApiKey.trim();
 
     const res = await fetch('/api/config', {
       method: 'POST',
@@ -39,7 +37,6 @@ export default function SettingsView({ config, onSaved }: { config: any; onSaved
       body: JSON.stringify(body),
     });
     if (res.ok) {
-      setNewApiKey('');
       setSavedMessage('Saved.');
       onSaved();
     } else {
@@ -78,15 +75,9 @@ export default function SettingsView({ config, onSaved }: { config: any; onSaved
           <option value="efficient">Efficient</option>
         </select>
       </label>
-      <label>
-        OpenRouter API key {config.hasApiKey && <span className="hint">(currently: {config.apiKeyMasked})</span>}
-        <input
-          type="password"
-          value={newApiKey}
-          onChange={e => setNewApiKey(e.target.value)}
-          placeholder={config.hasApiKey ? 'Leave blank to keep current key' : 'Paste your key'}
-        />
-      </label>
+      <p className="hint">
+        Manage provider API keys (OpenRouter, Anthropic, OpenAI, Google, xAI) in the Connections tab.
+      </p>
       <button onClick={save} disabled={saving}>{saving ? 'Saving...' : 'Save changes'}</button>
       {savedMessage && <span className="hint">{savedMessage}</span>}
     </div>

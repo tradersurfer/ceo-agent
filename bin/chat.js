@@ -58,6 +58,7 @@ const {
 const { friendlyMessageFor } = require('../lib/userMessages');
 const { saveUpload, MAX_UPLOAD_BYTES } = require('../lib/uploadStore');
 const { recordUsage } = require('../core/UsageTracker');
+const { resolveRoleForAgent } = require('../core/resolveDepartmentRole');
 
 function loadConfig() {
   if (!fs.existsSync(CONFIG_PATH)) {
@@ -298,7 +299,7 @@ async function main() {
       return;
     }
 
-    const roleForAgent = (agent.department === 'technology' || agent.lane === 'technology') ? 'codex' : 'claude';
+    const roleForAgent = resolveRoleForAgent(agent, config.departmentModelDefaults);
     const apiModelId = runtime.modelBroker.getApiModelId(roleForAgent, config.costMode);
 
     if (!apiModelId) {

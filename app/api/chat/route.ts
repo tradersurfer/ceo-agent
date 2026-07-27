@@ -4,6 +4,8 @@ const { getRuntime, ensureModelsResolved, openRouterClient, buildSystemPrompt } 
 const { friendlyMessageFor } = require('../../../lib/userMessages');
 const { getUploadMetadata } = require('../../../lib/uploadStore');
 const { recordUsage } = require('../../../core/UsageTracker');
+const { resolveRoleForAgent } = require('../../../core/resolveDepartmentRole');
+const { CHAT_ROLES, COST_TIERS } = require('../../../lib/providers');
 
 export async function POST(request: Request) {
   const clientKey = request.headers.get('x-forwarded-for') || 'unknown';
@@ -21,7 +23,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ status: 'not_configured', reason, userMessage: friendlyMessageFor('not_configured', reason) });
   }
 
-  let body: { message?: string; attachmentIds?: unknown };
+  let body: { message?: string; attachmentIds?: unknown; role?: unknown; tier?: unknown };
   try {
     body = await request.json();
   } catch {
@@ -80,11 +82,19 @@ export async function POST(request: Request) {
     return NextResponse.json({ status: 'no_api_key', agent: agent.name, reason, userMessage: friendlyMessageFor('no_api_key', reason) });
   }
 
-  const roleForAgent = agent.department === 'technology' || agent.lane === 'technology' ? 'codex' : 'claude';
-  const apiModelId = runtime.modelBroker.getApiModelId(roleForAgent, config.costMode);
+  // Per-department default (see core/resolveDepartmentRole.js), unless the
+  // caller explicitly requests one of the 5 live OpenRouter roles for this
+  // message — ChatView's <ModelSelector> sends this as a per-message,
+  // session-only override; it is never persisted back to
+  // departmentModelDefaults. Same for cost tier.
+  const requestedRole = typeof body.role === 'string' && CHAT_ROLES.includes(body.role) ? body.role : null;
+  const requestedTier = typeof body.tier === 'string' && COST_TIERS.includes(body.tier) ? body.tier : null;
+  const roleForAgent = requestedRole || resolveRoleForAgent(agent, config.departmentModelDefaults);
+  const costTier = requestedTier || config.costMode;
+  const apiModelId = runtime.modelBroker.getApiModelId(roleForAgent, costTier);
 
   if (!apiModelId) {
-    const reason = `No resolved model available at cost mode "${config.costMode}".`;
+    const reason = `No resolved model available for role "${roleForAgent}" at cost tier "${costTier}".`;
     return NextResponse.json({ status: 'no_model', agent: agent.name, reason, userMessage: friendlyMessageFor('no_model', reason) });
   }
 
@@ -99,10 +109,10 @@ export async function POST(request: Request) {
     recordUsage(runtime.usageAudit, {
       model: apiModelId,
       role: roleForAgent,
-      costTier: config.costMode,
+      costTier,
       agentId: agent.id,
       usage,
-      pricing: runtime.modelBroker.getPricing(roleForAgent, config.costMode),
+      pricing: runtime.modelBroker.getPricing(roleForAgent, costTier),
     }).catch(() => {}); // best-effort — never let audit persistence disrupt the chat response
     return NextResponse.json({
       status: 'ok',
@@ -110,6 +120,8 @@ export async function POST(request: Request) {
       agentName: agent.name,
       text,
       usage,
+      role: roleForAgent,
+      tier: costTier,
       attachments: attachments.map(a => ({ fileId: a.fileId, filename: a.metadata!.filename, size: a.metadata!.size })),
     });
   } catch (err) {

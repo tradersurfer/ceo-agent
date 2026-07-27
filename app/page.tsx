@@ -7,8 +7,9 @@ import OrgView from './components/OrgView';
 import StatusView from './components/StatusView';
 import SettingsView from './components/SettingsView';
 import AddAgentView from './components/AddAgentView';
+import ConnectionsView from './components/ConnectionsView';
 
-type Tab = 'chat' | 'org' | 'status' | 'add' | 'settings';
+type Tab = 'chat' | 'org' | 'status' | 'add' | 'connections' | 'settings';
 
 export default function Home() {
   const [tab, setTab] = useState<Tab>('chat');
@@ -49,6 +50,7 @@ export default function Home() {
         {tab === 'org' && <OrgView />}
         {tab === 'status' && <StatusView />}
         {tab === 'add' && <AddAgentView onCreated={refreshConfig} />}
+        {tab === 'connections' && <ConnectionsView config={config} onSaved={refreshConfig} />}
         {tab === 'settings' && <SettingsView config={config} onSaved={refreshConfig} />}
       </main>
     </div>
