@@ -28,6 +28,27 @@ time if the direction doesn't fit.
 - Follow the existing code style (no new linter, just match what's there)
 - Update relevant docs (`README.md`, `docs/`) if the change affects setup,
   configuration, or behavior a user would notice
+- **If the change touches `app/`, `lib/`, or adds a new dependency reachable
+  from a web route, actually boot `npm run web` (or the dev server) and hit
+  at least one real request path before marking the PR ready.** `npm test`
+  and `next build` are necessary but not sufficient — both have shipped a
+  runtime crash undetected on this project:
+  - PR #42 added a `require('path')` inside `loadRuntimeRegistries()` that
+    shadowed the module-level `path` import via temporal-dead-zone hoisting,
+    crashing the entire runtime-construction path (CLI, web, dispatch) with
+    `Cannot access 'path' before initialization`. `npm run web:build` passed
+    anyway, because Next's static build never calls
+    `loadRuntimeRegistries()` — a green build didn't mean the app worked.
+  - PR #59 added `docx` as a dependency. It contains a `require()` pattern
+    webpack can't statically analyze, breaking every web route that
+    transitively imports it through `core/RegistryLoader.js` — nearly the
+    whole dashboard (chat, health, status, org, dispatch). It shipped
+    because verification was `npm test` plus a plain-Node script, never an
+    actual `npm run web` boot.
+
+  Neither bug was reachable by the test suite or the production build step;
+  both only surfaced by actually starting the dev server and making a real
+  request against a route that exercises the changed code path.
 
 ## Security
 
