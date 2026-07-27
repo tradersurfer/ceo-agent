@@ -148,6 +148,22 @@ Most AI assistants answer one question at a time. CEO Agent runs the organizatio
 
 ---
 
+## Supported Models
+
+CEO Agent is model-agnostic. It resolves the **current best available** models live from the OpenRouter catalog into two cost tiers per role (`flagship` / `efficient`). No model IDs are hardcoded — they update automatically as providers release new versions.
+
+| Role | Provider | Icon |
+|------|----------|------|
+| **Claude** | Anthropic | ![Claude](https://img.shields.io/badge/Claude-Anthropic-191919?style=flat-square&logo=anthropic&logoColor=white) |
+| **GPT** | OpenAI | ![GPT](https://img.shields.io/badge/GPT-OpenAI-412991?style=flat-square&logo=openai&logoColor=white) |
+| **Gemini** | Google | ![Gemini](https://img.shields.io/badge/Gemini-Google-4285F4?style=flat-square&logo=google&logoColor=white) |
+| **Grok** | xAI | ![Grok](https://img.shields.io/badge/Grok-xAI-000000?style=flat-square&logo=x&logoColor=white) |
+| **Codex** | OpenAI (coding) | ![Codex](https://img.shields.io/badge/Codex-OpenAI-412991?style=flat-square&logo=openai&logoColor=white) |
+
+Use `/models` in chat to see the live resolved assignments for your current cost mode.
+
+---
+
 ## Architecture
 
 ```text
@@ -165,7 +181,27 @@ Most AI assistants answer one question at a time. CEO Agent runs the organizatio
                     VP of Sales      Onboarding Comms
 ```
 
-Seven departments, standard C-suite model. Hermes fills the COO seat directly, and Marketing includes a VP of Sales plus onboarding communications. The domain-specific Dispute Agent remains under `examples/` as an optional reference implementation and is not activated in the default roster. Activate only the departments your business needs. See [`ARCHITECTURE.md`](./ARCHITECTURE.md) for the full model.
+Seven departments, standard C-suite model. **Hermes** fills the COO seat directly (powered by [NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent)), and Marketing includes a VP of Sales plus onboarding communications. The domain-specific Dispute Agent remains under `examples/` as an optional reference implementation and is not activated in the default roster. Activate only the departments your business needs. See [`ARCHITECTURE.md`](./ARCHITECTURE.md) for the full model.
+
+---
+
+## Swarm Agents
+
+CEO Agent coordinates a growing multi-agent swarm under the C-suite.
+
+| Agent | Status | Role | Icon |
+|-------|--------|------|------|
+| **Hermes** | Active | Chief Operating Officer / Ops bridge & workflow executor | ![Hermes](https://img.shields.io/badge/Hermes-Ops-0A66C2?style=flat-square) |
+| **OpenClaw** | Coming soon | Swarm agent | ![OpenClaw](https://img.shields.io/badge/OpenClaw-Coming%20Soon-FF6B35?style=flat-square) |
+| **T3Agent** | Coming soon | Swarm agent | ![T3Agent](https://img.shields.io/badge/T3Agent-Coming%20Soon-7B68EE?style=flat-square) |
+
+---
+
+## WORKSPACES™️
+
+**Coming soon** — WORKSPACES™️ with **Buzz by Block** (relay Workspace connect).
+
+This will enable secure, relay-based workspace connectivity so CEO Agent and the swarm can operate across distributed environments while keeping tenant isolation and auditability intact.
 
 ---
 
@@ -225,7 +261,10 @@ Available through both the CLI and the local-only web dashboard.
 - [x] Multi-instance/shared rate limiting for hosted deployments (Supabase-backed)
 - [x] Health checks and observability
 - [x] Curated department skills: scope-creep detection, schema markup generation, content-quality analysis
+- [x] Hermes (COO / Ops) active in the default roster
 - [ ] Direct-provider adapter evaluation beyond OpenRouter
+- [ ] Swarm agents: OpenClaw & T3Agent
+- [ ] WORKSPACES™️ — relay Workspace connect with Buzz by Block
 - [ ] Marketplace listing
 
 Some install-specific pieces remain configurable by design: production runtime URLs for bridges, persistent storage, scheduling, model credentials, and deployment infrastructure.
