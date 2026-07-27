@@ -56,6 +56,7 @@ const {
   buildConfiguredAgentList,
 } = require('../core/runtimeFactory');
 const { friendlyMessageFor } = require('../lib/userMessages');
+const { saveUpload, MAX_UPLOAD_BYTES } = require('../lib/uploadStore');
 
 function loadConfig() {
   if (!fs.existsSync(CONFIG_PATH)) {
@@ -128,6 +129,8 @@ async function main() {
   const rl = readline.createInterface({ input: process.stdin, output: process.stdout, prompt: '> ' });
   rl.prompt();
 
+  let pendingAttachments = [];
+
   rl.on('line', async line => {
     const input = line.trim();
     if (!input) { rl.prompt(); return; }
@@ -144,10 +147,30 @@ async function main() {
       console.log('  /status            Show runtime + agent status');
       console.log('  /models            Show resolved model assignments (both tiers)');
       console.log('  /cost              Show or change cost mode (flagship/efficient)');
+      console.log('  /attach <path>     Attach a local file to your next message');
       console.log('  @department <msg>  Address a department head directly');
       console.log('  <anything else>    Talk to the CEO Agent directly');
       console.log('  /exit              Quit');
       console.log('');
+      rl.prompt();
+      return;
+    }
+
+    const attachMatch = input.match(/^\/attach\s+(.+)$/);
+    if (attachMatch) {
+      const filePath = attachMatch[1].trim().replace(/^"(.*)"$/, '$1');
+      try {
+        const resolved = path.resolve(filePath);
+        const stat = fs.statSync(resolved);
+        if (!stat.isFile()) throw new Error('Not a regular file.');
+        if (stat.size > MAX_UPLOAD_BYTES) throw new Error(`File exceeds the ${MAX_UPLOAD_BYTES}-byte limit.`);
+        const buffer = fs.readFileSync(resolved);
+        const metadata = saveUpload({ filename: path.basename(resolved), buffer });
+        pendingAttachments.push(metadata);
+        console.log(`\n  Attached: ${metadata.filename} (${metadata.size} bytes) — will be sent with your next message.\n`);
+      } catch (err) {
+        console.log(`\n  Could not attach "${filePath}": ${err.message}\n`);
+      }
       rl.prompt();
       return;
     }
@@ -217,6 +240,10 @@ async function main() {
       message = atMatch[2];
     }
 
+    const attachmentIds = pendingAttachments.map(a => a.fileId);
+    const attachedThisTurn = pendingAttachments;
+    pendingAttachments = [];
+
     let decision;
     if (!target) {
       decision = runtime.routeTask({
@@ -225,6 +252,7 @@ async function main() {
           task: message,
           project: 'cli-session',
           approved_by: 'ceo_agent',
+          attachmentIds,
         });
     } else {
       decision = runtime.routeTask({
@@ -233,6 +261,7 @@ async function main() {
           task: message,
           project: 'cli-session',
           approved_by: 'ceo_agent',
+          attachmentIds,
         });
       if (decision.status !== 'routed') {
         decision = runtime.routeTask({
@@ -241,6 +270,7 @@ async function main() {
           task: message,
           project: 'cli-session',
           approved_by: 'ceo_agent',
+          attachmentIds,
         });
       }
     }
@@ -256,6 +286,9 @@ async function main() {
     const agent = decision.agent;
     console.log('');
     console.log(`(routed to ${agent.name})`);
+    if (attachedThisTurn.length > 0) {
+      console.log(`(with ${attachedThisTurn.length} attachment${attachedThisTurn.length === 1 ? '' : 's'}: ${attachedThisTurn.map(a => a.filename).join(', ')})`);
+    }
 
     if (!liveModelsResolved) {
       console.log(`  ${friendlyMessageFor('no_api_key')}`);

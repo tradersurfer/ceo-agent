@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { checkRateLimit } from '../dispatch/handler';
 const { getRuntime, ensureModelsResolved, openRouterClient, buildSystemPrompt } = require('../../../lib/ceoAgentServer');
 const { friendlyMessageFor } = require('../../../lib/userMessages');
+const { getUploadMetadata } = require('../../../lib/uploadStore');
 
 export async function POST(request: Request) {
   const clientKey = request.headers.get('x-forwarded-for') || 'unknown';
@@ -19,7 +20,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ status: 'not_configured', reason, userMessage: friendlyMessageFor('not_configured', reason) });
   }
 
-  let body: { message?: string };
+  let body: { message?: string; attachmentIds?: unknown };
   try {
     body = await request.json();
   } catch {
@@ -29,6 +30,15 @@ export async function POST(request: Request) {
   const rawMessage = (body.message || '').trim();
   if (!rawMessage) {
     return NextResponse.json({ error: 'message is required' }, { status: 400 });
+  }
+
+  const requestedAttachmentIds = Array.isArray(body.attachmentIds)
+    ? body.attachmentIds.filter((id): id is string => typeof id === 'string')
+    : [];
+  const attachments = requestedAttachmentIds.map(fileId => ({ fileId, metadata: getUploadMetadata(fileId) }));
+  const unknownAttachment = attachments.find(a => !a.metadata);
+  if (unknownAttachment) {
+    return NextResponse.json({ error: `Unknown attachment: ${unknownAttachment.fileId}` }, { status: 400 });
   }
 
   let target: string | null = null;
@@ -41,11 +51,11 @@ export async function POST(request: Request) {
 
   let decision;
   if (!target) {
-    decision = runtime.routeTask({ assignedAgent: 'ceo_agent', goal: message, task: message, project: 'web-session', approved_by: 'ceo_agent' });
+    decision = runtime.routeTask({ assignedAgent: 'ceo_agent', goal: message, task: message, project: 'web-session', approved_by: 'ceo_agent', attachmentIds: requestedAttachmentIds });
   } else {
-    decision = runtime.routeTask({ assignedAgent: target, goal: message, task: message, project: 'web-session', approved_by: 'ceo_agent' });
+    decision = runtime.routeTask({ assignedAgent: target, goal: message, task: message, project: 'web-session', approved_by: 'ceo_agent', attachmentIds: requestedAttachmentIds });
     if (decision.status !== 'routed') {
-      decision = runtime.routeTask({ department: target, goal: message, task: message, project: 'web-session', approved_by: 'ceo_agent' });
+      decision = runtime.routeTask({ department: target, goal: message, task: message, project: 'web-session', approved_by: 'ceo_agent', attachmentIds: requestedAttachmentIds });
     }
   }
 
@@ -85,7 +95,14 @@ export async function POST(request: Request) {
         { role: 'user', content: message },
       ],
     });
-    return NextResponse.json({ status: 'ok', agentId: agent.id, agentName: agent.name, text, usage });
+    return NextResponse.json({
+      status: 'ok',
+      agentId: agent.id,
+      agentName: agent.name,
+      text,
+      usage,
+      attachments: attachments.map(a => ({ fileId: a.fileId, filename: a.metadata!.filename, size: a.metadata!.size })),
+    });
   } catch (err) {
     const reason = err instanceof Error ? err.message : String(err);
     return NextResponse.json({ status: 'model_call_failed', agent: agent.name, reason, userMessage: friendlyMessageFor('model_call_failed', reason) });
