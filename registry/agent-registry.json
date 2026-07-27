@@ -107,7 +107,9 @@
         "status_synthesis",
         "escalation_assessment",
         "quality_review",
-        "budget_token_allocation"
+        "budget_token_allocation",
+        "compute_financial_model",
+        "import_revenue_csv"
       ],
       "authorized_projects": "Configured per install via CEO_AGENT_PROJECTS env var.",
       "off_limits": [
