@@ -3,6 +3,7 @@ import { checkRateLimit } from '../dispatch/handler';
 const { getRuntime, ensureModelsResolved, openRouterClient, buildSystemPrompt } = require('../../../lib/ceoAgentServer');
 const { friendlyMessageFor } = require('../../../lib/userMessages');
 const { getUploadMetadata } = require('../../../lib/uploadStore');
+const { recordUsage } = require('../../../core/UsageTracker');
 
 export async function POST(request: Request) {
   const clientKey = request.headers.get('x-forwarded-for') || 'unknown';
@@ -95,6 +96,14 @@ export async function POST(request: Request) {
         { role: 'user', content: message },
       ],
     });
+    recordUsage(runtime.usageAudit, {
+      model: apiModelId,
+      role: roleForAgent,
+      costTier: config.costMode,
+      agentId: agent.id,
+      usage,
+      pricing: runtime.modelBroker.getPricing(roleForAgent, config.costMode),
+    }).catch(() => {}); // best-effort — never let audit persistence disrupt the chat response
     return NextResponse.json({
       status: 'ok',
       agentId: agent.id,

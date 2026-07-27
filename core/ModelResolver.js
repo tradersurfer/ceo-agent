@@ -117,6 +117,27 @@ function pickEfficient(models, prefix, role = null) {
 }
 
 /**
+ * Extracts per-token USD pricing from an OpenRouter model record, per its
+ * documented `pricing.prompt`/`pricing.completion` decimal-string contract
+ * (cost per single token, e.g. "0.000003" == $3 / million tokens) — this
+ * project could not independently verify a live response against that
+ * documented contract (openrouter.ai is unreachable from this environment),
+ * so treat downstream cost figures as an estimate against the documented
+ * shape, not an independently confirmed one.
+ * @param {object} model OpenRouter model record.
+ * @returns {{prompt: number|null, completion: number|null}|null}
+ */
+function extractPricing(model) {
+  if (!model?.pricing) return null;
+  const prompt = parseFloat(model.pricing.prompt);
+  const completion = parseFloat(model.pricing.completion);
+  return {
+    prompt: Number.isFinite(prompt) ? prompt : null,
+    completion: Number.isFinite(completion) ? completion : null,
+  };
+}
+
+/**
  * Resolves all known role labels to live OpenRouter model ids, both tiers.
  * @param {object[]} models Full OpenRouter model list.
  * @returns {object} Map of role -> { flagship: {...}|null, efficient: {...}|null }
@@ -128,10 +149,20 @@ function resolveRoleModels(models) {
     const efficient = pickEfficient(models, prefix, role);
     resolved[role] = {
       flagship: flagship
-        ? { apiModelId: flagship.id, contextLength: flagship.context_length || null, name: flagship.name || flagship.id }
+        ? {
+          apiModelId: flagship.id,
+          contextLength: flagship.context_length || null,
+          name: flagship.name || flagship.id,
+          pricing: extractPricing(flagship),
+        }
         : null,
       efficient: efficient
-        ? { apiModelId: efficient.id, contextLength: efficient.context_length || null, name: efficient.name || efficient.id }
+        ? {
+          apiModelId: efficient.id,
+          contextLength: efficient.context_length || null,
+          name: efficient.name || efficient.id,
+          pricing: extractPricing(efficient),
+        }
         : null,
     };
   }
@@ -143,6 +174,7 @@ module.exports = {
   pickFlagship,
   pickEfficient,
   isTextCapable,
+  extractPricing,
   PROVIDER_PREFIXES,
   ROLE_FAMILIES,
   SMALL_TIER_KEYWORDS,

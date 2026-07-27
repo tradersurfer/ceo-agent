@@ -1,6 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { resolveRoleModels } = require('../core/ModelResolver');
+const { resolveRoleModels, extractPricing } = require('../core/ModelResolver');
 
 function model(id, created, prompt = '0.000001') {
   return {
@@ -46,4 +46,16 @@ test('flagship prefers stable premium family while efficient prefers newest smal
 
   assert.equal(resolved.claude.flagship.apiModelId, 'anthropic/claude-opus-4.8');
   assert.equal(resolved.claude.efficient.apiModelId, 'anthropic/claude-haiku-4.5');
+});
+
+test('resolved models retain per-token pricing for downstream cost tracking', () => {
+  const resolved = resolveRoleModels([model('anthropic/claude-opus-4.8', 400, '0.000015')]);
+  assert.deepEqual(resolved.claude.flagship.pricing, { prompt: 0.000015, completion: null });
+});
+
+test('extractPricing parses both prompt and completion, and handles missing/malformed pricing', () => {
+  assert.deepEqual(extractPricing({ pricing: { prompt: '0.000003', completion: '0.000015' } }), { prompt: 0.000003, completion: 0.000015 });
+  assert.equal(extractPricing({}), null);
+  assert.equal(extractPricing(null), null);
+  assert.deepEqual(extractPricing({ pricing: { prompt: 'not-a-number' } }), { prompt: null, completion: null });
 });

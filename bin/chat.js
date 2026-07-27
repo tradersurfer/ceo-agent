@@ -57,6 +57,7 @@ const {
 } = require('../core/runtimeFactory');
 const { friendlyMessageFor } = require('../lib/userMessages');
 const { saveUpload, MAX_UPLOAD_BYTES } = require('../lib/uploadStore');
+const { recordUsage } = require('../core/UsageTracker');
 
 function loadConfig() {
   if (!fs.existsSync(CONFIG_PATH)) {
@@ -320,6 +321,14 @@ async function main() {
       const usageLine = formatUsageLine(usage);
       if (usageLine) console.log(`\n  ${usageLine}`);
       console.log('');
+      recordUsage(runtime.usageAudit, {
+        model: apiModelId,
+        role: roleForAgent,
+        costTier: config.costMode,
+        agentId: agent.id,
+        usage,
+        pricing: runtime.modelBroker.getPricing(roleForAgent, config.costMode),
+      }).catch(() => {}); // best-effort — never let audit persistence disrupt the chat response
     } catch (err) {
       console.log(`  ${friendlyMessageFor('model_call_failed', err.message)}`);
       console.log('');

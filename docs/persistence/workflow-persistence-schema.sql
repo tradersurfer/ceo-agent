@@ -67,3 +67,35 @@ create index if not exists skill_audit_skill_name_idx on skill_audit (skill_name
 create index if not exists skill_audit_tenant_id_idx  on skill_audit (tenant_id);
 create index if not exists skill_audit_agent_id_idx   on skill_audit (agent_id);
 create index if not exists skill_audit_event_time_idx on skill_audit (event_time);
+
+-- Model-usage audit log (issue #51). Chat completions bypass both
+-- workflow_audit and skill_audit entirely (bin/chat.js and
+-- app/api/chat/route.ts call OpenRouterClient#chatCompletion directly, not
+-- through WorkflowRuntime or SkillExecutor), so this is its own table for
+-- the same reason skill_audit is separate from workflow_audit: no
+-- cross-table correlation to preserve, own natural columns instead.
+-- Token counts, the pricing snapshot used to estimate cost, and the
+-- estimated cost itself live in `data` (jsonb) rather than as first-class
+-- columns — they're aggregated on read (see core/UsageTracker.js
+-- `summarizeUsage`), not filtered on individually. `estimated_cost_usd` is
+-- an estimate against OpenRouter's documented (not independently verified
+-- from this environment) per-token pricing contract — see
+-- core/ModelResolver.js `extractPricing`.
+-- Append-only; queryable by tenant / agent / model / date range (see
+-- core/persistence/SupabaseAuditLog.js `query`).
+create table if not exists model_usage (
+  id          bigint generated always as identity primary key,
+  event       text not null,
+  model       text,
+  role        text,
+  cost_tier   text,
+  tenant_id   text,
+  agent_id    text,
+  event_time  timestamptz not null default now(),
+  data        jsonb not null default '{}'::jsonb
+);
+
+create index if not exists model_usage_model_idx      on model_usage (model);
+create index if not exists model_usage_tenant_id_idx  on model_usage (tenant_id);
+create index if not exists model_usage_agent_id_idx   on model_usage (agent_id);
+create index if not exists model_usage_event_time_idx on model_usage (event_time);

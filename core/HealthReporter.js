@@ -5,16 +5,18 @@
  * configured — its absence is a supported first-class mode, not a
  * failure) and OpenRouter reachability for model resolution; routing
  * reads the model broker's already-resolved role→model table; counters
- * tally the real workflow and skill audit logs (`core/WorkflowRuntime.js`,
- * `core/SkillExecutor.js`) — whichever backend (in-memory or Supabase,
- * per Priority 5a) each is actually configured with.
+ * tally the real workflow, skill, and model-usage audit logs
+ * (`core/WorkflowRuntime.js`, `core/SkillExecutor.js`,
+ * `core/UsageTracker.js`) — whichever backend (in-memory or Supabase, per
+ * Priority 5a / issue #52) each is actually configured with.
  *
- * Cost counters are intentionally not included: nothing in this codebase
- * persists or aggregates the per-call `usage` OpenRouter returns
- * (`sdk/OpenRouterClient.js#chatCompletion`) anywhere today, so there is
- * no real cost data to read. Adding one here would be exactly the
- * invented-parallel-mechanism this design explicitly avoids.
+ * The usage counter (issue #51) reports real persisted OpenRouter usage
+ * once it exists, rather than assuming zero — before #51, this comment
+ * said cost counters were intentionally excluded because nothing
+ * persisted usage anywhere; now something does.
  */
+
+const { summarizeUsage } = require('./UsageTracker');
 
 const FAILURE_EVENT_PATTERN = /fail/i;
 
@@ -134,9 +136,10 @@ async function getHealthReport({ runtime, openRouterClient = null, env = process
   const routing = buildRouting(runtime.modelBroker);
   modelResolution.resolved = routing.resolved;
 
-  const [workflow, skill] = await Promise.all([
+  const [workflow, skill, usage] = await Promise.all([
     summarizeAudit(runtime.workflowRuntime.audit, auditLimit),
     summarizeAudit(runtime.skillExecutor.audit, auditLimit),
+    summarizeUsage(runtime.usageAudit, auditLimit),
   ]);
 
   // Absence of an optional backend is a supported mode, not a failure — the
@@ -158,7 +161,7 @@ async function getHealthReport({ runtime, openRouterClient = null, env = process
       modelResolution,
     },
     routing,
-    counters: { workflow, skill },
+    counters: { workflow, skill, usage },
   };
 }
 

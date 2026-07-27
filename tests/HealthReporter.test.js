@@ -8,14 +8,15 @@ const ModelBroker = require('../core/ModelBroker');
 const { SupabaseAuditLog } = require('../core/persistence/SupabaseAuditLog');
 const { makeFakeSupabase } = require('./helpers/fakeSupabase');
 const { getHealthReport, summarizeAudit, buildRouting } = require('../core/HealthReporter');
+const { recordUsage } = require('../core/UsageTracker');
 
-function makeRuntime({ store = null, audit = null, skillAudit = null, models = [] } = {}) {
+function makeRuntime({ store = null, audit = null, skillAudit = null, usageAudit = null, models = [] } = {}) {
   const workflowRuntime = new WorkflowRuntime({ store: store || undefined, audit: audit || undefined });
   const registry = new SkillRegistry();
   registerExampleSkills(registry);
   const skillExecutor = new SkillExecutor(registry, { audit: skillAudit || undefined });
   const modelBroker = new ModelBroker(models);
-  return { workflowRuntime, skillExecutor, modelBroker };
+  return { workflowRuntime, skillExecutor, modelBroker, usageAudit: usageAudit || new InMemoryAuditLog() };
 }
 
 const UNRESOLVED_MODELS = [
@@ -186,17 +187,32 @@ test('summarizeAudit handles a missing audit log without crashing', async () => 
   assert.equal(summary.failures, 0);
 });
 
-test('full report is healthy end-to-end with real workflow and skill activity, both backends in-memory', async () => {
+test('full report is healthy end-to-end with real workflow, skill, and usage activity, all backends in-memory', async () => {
   const runtime = makeRuntime({ models: RESOLVED_MODELS });
   runtime.workflowRuntime.registerExecutor('ok', async () => ({ status: 'ok' }));
   await runtime.workflowRuntime.execute({ workflow: { id: 'wf-a', steps: [{ id: 's1', type: 'ok' }] } });
   const registry = runtime.skillExecutor.registry;
   await runtime.skillExecutor.run('summarize_text', { text: 'hello world, this is fine.' });
+  await recordUsage(runtime.usageAudit, {
+    model: 'anthropic/claude-opus-5', role: 'claude', costTier: 'flagship', agentId: 'ceo_agent',
+    usage: { promptTokens: 1000, completionTokens: 500 }, pricing: { prompt: 0.000003, completion: 0.000015 },
+  });
 
   const report = await getHealthReport({ runtime, env: {} });
   assert.equal(report.status, 'healthy');
   assert.equal(report.routing.resolved, true);
   assert.equal(report.counters.workflow.byEvent['workflow.completed'], 1);
   assert.equal(report.counters.skill.byEvent['skill.execution.succeeded'], 1);
+  assert.equal(report.counters.usage.sampleSize, 1);
+  assert.equal(report.counters.usage.totalPromptTokens, 1000);
+  assert.equal(report.counters.usage.totalCostUsd, 0.0105);
   assert.ok(registry.get('summarize_text'), 'sanity check the real registry backs this executor');
+});
+
+test('counters.usage reports unavailable when the runtime has no usageAudit (older/injected runtime shape)', async () => {
+  const runtime = makeRuntime({ models: UNRESOLVED_MODELS });
+  delete runtime.usageAudit;
+  const report = await getHealthReport({ runtime, env: {} });
+  assert.equal(report.counters.usage.source, 'unavailable');
+  assert.equal(report.status, 'healthy', 'a missing usage log degrades the counter, not overall health');
 });
