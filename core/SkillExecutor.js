@@ -101,6 +101,11 @@ class SkillExecutor {
       event: status === 'ok' ? 'skill.execution.succeeded' : 'skill.execution.failed',
       skillName,
       agentId: context.agentId || null,
+      // Carried through when the caller supplies it (e.g. a future
+      // workflow-triggered or multi-tenant invocation), same conditional
+      // pattern WorkflowRuntime uses — omitted when absent so existing
+      // in-memory audit entries and consumers are unaffected.
+      ...(context.tenantId != null ? { tenantId: context.tenantId } : {}),
       status,
       reason: details.reason || null,
     });

@@ -73,7 +73,7 @@ test('createWorkflowPersistence returns null without Supabase credentials', () =
   assert.equal(createWorkflowPersistence({ SUPABASE_URL: 'http://x' }), null);
 });
 
-test('createWorkflowPersistence builds a store + audit when credentials are present', () => {
+test('createWorkflowPersistence builds a store + audit + skillAudit when credentials are present', () => {
   const persistence = createWorkflowPersistence({
     SUPABASE_URL: 'http://localhost:54321',
     SUPABASE_SERVICE_ROLE_KEY: 'test-service-role-key',
@@ -81,4 +81,13 @@ test('createWorkflowPersistence builds a store + audit when credentials are pres
   assert.ok(persistence);
   assert.ok(persistence.store instanceof SupabaseWorkflowStore);
   assert.ok(persistence.audit instanceof SupabaseAuditLog);
+  assert.ok(persistence.skillAudit instanceof SupabaseAuditLog);
+
+  // audit and skillAudit are logically separate (different tables, per
+  // issue #52 — no cross-table correlation exists to unify them around),
+  // but share the same underlying Supabase client/connection.
+  assert.equal(persistence.audit.table, 'workflow_audit');
+  assert.equal(persistence.skillAudit.table, 'skill_audit');
+  assert.equal(persistence.audit.supabase, persistence.store.supabase);
+  assert.equal(persistence.audit.supabase, persistence.skillAudit.supabase);
 });

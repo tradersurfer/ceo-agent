@@ -53,18 +53,27 @@ function createRuntime(config, options = {}) {
     reportsTo: agent.reportsTo || agent.reports_to || null,
   });
 
-  // Persistent workflow store + audit log when Supabase is configured; falls
-  // back to WorkflowRuntime's in-memory defaults otherwise (createWorkflowPersistence
-  // returns null when SUPABASE_URL/SUPABASE_SERVICE_ROLE_KEY are absent).
-  // An explicitly injected workflowRuntimeOptions (tests/advanced installs) wins.
-  const workflowRuntimeOptions = options.workflowRuntimeOptions || createWorkflowPersistence() || undefined;
+  // Persistent workflow store + audit log, and a Supabase-backed skill-
+  // execution audit log, when Supabase is configured; falls back to
+  // WorkflowRuntime's and SkillExecutor's own in-memory defaults otherwise
+  // (createWorkflowPersistence returns null when SUPABASE_URL/
+  // SUPABASE_SERVICE_ROLE_KEY are absent). Called at most once, so both
+  // conformers share one underlying Supabase client (see
+  // core/persistence/index.js) rather than opening two connections.
+  // An explicitly injected workflowRuntimeOptions (tests/advanced installs)
+  // wins and is NOT combined with the auto-derived skillAudit — pass
+  // options.skillAudit explicitly alongside it if that path needs one too.
+  const persistence = options.workflowRuntimeOptions ? null : createWorkflowPersistence();
+  const workflowRuntimeOptions = options.workflowRuntimeOptions
+    || (persistence ? { store: persistence.store, audit: persistence.audit } : undefined);
+  const skillAudit = options.skillAudit || (persistence ? persistence.skillAudit : undefined);
 
   const connectedRegistries = loadRuntimeRegistries({
     root,
     organization,
     bridgeOptions: options.bridgeOptions,
     workflowRuntimeOptions,
-    skillAudit: options.skillAudit,
+    skillAudit,
   });
 
   const runtime = new JECIRuntime({
