@@ -1,10 +1,11 @@
 import { NextResponse } from 'next/server';
 import { checkRateLimit } from '../dispatch/handler';
-const { getRuntime, ensureModelsResolved, openRouterClient, buildSystemPrompt } = require('../../../lib/ceoAgentServer');
+const { getRuntime, ensureModelsResolved, openRouterClient, anthropicClient, buildSystemPrompt } = require('../../../lib/ceoAgentServer');
 const { friendlyMessageFor } = require('../../../lib/userMessages');
 const { getUploadMetadata } = require('../../../lib/uploadStore');
 const { recordUsage } = require('../../../core/UsageTracker');
 const { resolveRoleForAgent } = require('../../../core/resolveDepartmentRole');
+const { resolveClientForModel } = require('../../../core/resolveClientForModel');
 const { CHAT_ROLES, COST_TIERS } = require('../../../lib/providers');
 
 export async function POST(request: Request) {
@@ -99,8 +100,16 @@ export async function POST(request: Request) {
   }
 
   try {
-    const { text, usage } = await openRouterClient.chatCompletion({
-      model: apiModelId,
+    // Dispatch seam (ADR-006): route through a direct provider client when
+    // one is connected for apiModelId's provider, else OpenRouter unchanged
+    // — this does not change role->model resolution (roleForAgent/apiModelId
+    // above), only which client places the already-resolved call.
+    const { client, providerModelId } = resolveClientForModel(apiModelId, {
+      openrouter: openRouterClient,
+      anthropic: process.env.ANTHROPIC_API_KEY ? anthropicClient : null,
+    });
+    const { text, usage } = await client.chatCompletion({
+      model: providerModelId,
       messages: [
         { role: 'system', content: buildSystemPrompt(config, agent) },
         { role: 'user', content: message },

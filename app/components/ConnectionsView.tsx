@@ -58,7 +58,18 @@ export default function ConnectionsView({ config, onSaved }: { config: any; onSa
             <div className="connection-card-header">
               <span className="connection-card-name">{provider.label}</span>
               <span className={`connection-status ${info.hasKey ? 'connection-status-connected' : 'connection-status-disconnected'}`}>
-                {info.hasKey ? (info.active ? 'Connected' : 'Connected — not active') : 'Not connected'}
+                {info.hasKey
+                  ? info.active
+                    ? provider.id === 'openrouter'
+                      ? 'Connected'
+                      // Dispatch-active without a resolved catalog (e.g.
+                      // Anthropic, BYNGE Phase 2) — mirrors ModelSelector's
+                      // own "direct calls enabled" copy below so this header
+                      // line never overstates what's active (see
+                      // ModelSelector.tsx's active-vs-catalog distinction).
+                      : 'Connected — direct calls enabled'
+                    : 'Connected — not active'
+                  : 'Not connected'}
               </span>
             </div>
             <label>
@@ -80,7 +91,15 @@ export default function ConnectionsView({ config, onSaved }: { config: any; onSa
                 mode="expanded"
                 active={info.active}
                 connected={info.hasKey}
-                catalog={info.active ? catalog : null}
+                // Only OpenRouter has a resolved role/tier catalog — that's
+                // ModelBroker/ModelResolver's only data source (ADR-006's
+                // catalog-merging across direct providers is out of scope).
+                // A provider can be `active` (dispatch-wired, e.g. Anthropic
+                // as of BYNGE Phase 2) without having one; gate on the
+                // provider id itself, not on `info.active`, so a future
+                // dispatch-active provider never silently inherits
+                // OpenRouter's catalog under its own label.
+                catalog={provider.id === 'openrouter' ? catalog : null}
                 value={selectionFor(provider.id)}
                 onChange={next => setSelections(prev => ({ ...prev, [provider.id]: next }))}
               />
