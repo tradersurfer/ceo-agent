@@ -12,9 +12,13 @@
 
 ---
 
+> The AI that runs your AI workforce. It learns your business, knows who's responsible for what, decides who handles a task, and answers for the outcome. The way a real CEO runs a company, not the way a chatbot answers a question.
+
 CEO Agent is an orchestration layer that sits above your other AI agents and models. It learns your business, knows who's responsible for what, decides who handles a task, and answers for the outcome — the way a real CEO runs a company, not the way a chatbot answers a question.
 
 **You can rename her on install. The role doesn't change.**
+
+CEO Agent is built cloud-first, with mobile and (partial) desktop reach, for entrepreneurs and small-business owners who are tired of paying for a stack of mundane tools, tasks, and workflows one at a time — not as an enterprise platform play. It doesn't replace the AI tools already in someone's stack; it aggregates whatever they've already connected — Claude, ChatGPT, Grok, Gemini, their CRM, their email — under one executive layer that knows who owns what. CEO Agent is not competing with Hermes, OpenClaw, T3Agent, or any model provider — they're department heads and model options it coordinates, not rivals.
 
 > **Status: working v1.** The white-label identity layer, SDK, organizational model, setup wizard, CLI and local web chat interfaces, dispatch API, workflow execution engine, and safe skill-invocation proof of concept are built and tested. See [Roadmap](#roadmap) for what comes next.
 
