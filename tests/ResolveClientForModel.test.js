@@ -34,19 +34,76 @@ test('an anthropic/-prefixed model with the anthropic key simply absent from the
   assert.equal(result.providerModelId, 'anthropic/claude-opus-5');
 });
 
-test('a non-Anthropic prefix always routes through OpenRouter, unchanged, regardless of Anthropic connection state', () => {
+test('a non-Anthropic, non-OpenAI prefix always routes through OpenRouter, unchanged, regardless of Anthropic/OpenAI connection state', () => {
+  const openrouter = fakeClient('openrouter');
+  const anthropic = fakeClient('anthropic');
+  const openai = fakeClient('openai');
+
+  for (const modelId of ['google/gemini-3-pro', 'x-ai/grok-5']) {
+    const withBothConnected = resolveClientForModel(modelId, { openrouter, anthropic, openai });
+    assert.equal(withBothConnected.client, openrouter, `${modelId} must route through OpenRouter even with Anthropic/OpenAI connected`);
+    assert.equal(withBothConnected.providerModelId, modelId);
+
+    const withNeitherConnected = resolveClientForModel(modelId, { openrouter, anthropic: null, openai: null });
+    assert.equal(withNeitherConnected.client, openrouter);
+    assert.equal(withNeitherConnected.providerModelId, modelId);
+  }
+});
+
+// --- OpenAI ('openai/' prefix, BYNGE Phase 2's second provider PR) --------
+// core/ModelResolver.js's PROVIDER_PREFIXES maps BOTH the 'gpt' and 'codex'
+// roles to OpenRouter's 'openai/' prefix (OpenRouter has no distinct
+// "Codex" listing) — resolveClientForModel() matches on the model-id prefix
+// only, so it must dispatch identically regardless of which role produced
+// the id. These cases use model ids that plausibly came from either role.
+
+test('a connected OpenAI model resolves to the OpenAI client with the "openai/" prefix stripped', () => {
+  const openrouter = fakeClient('openrouter');
+  const openai = fakeClient('openai');
+
+  const result = resolveClientForModel('openai/gpt-6-pro', { openrouter, openai });
+
+  assert.equal(result.client, openai);
+  assert.equal(result.providerModelId, 'gpt-6-pro');
+});
+
+test('an openai/-prefixed model with no OpenAI connection falls back to OpenRouter, id unchanged', () => {
+  const openrouter = fakeClient('openrouter');
+
+  const result = resolveClientForModel('openai/gpt-6-pro', { openrouter, openai: null });
+
+  assert.equal(result.client, openrouter);
+  assert.equal(result.providerModelId, 'openai/gpt-6-pro', 'id must not be stripped when routing through OpenRouter');
+});
+
+test('an openai/-prefixed model with the openai key simply absent from the registry also falls back to OpenRouter', () => {
+  const openrouter = fakeClient('openrouter');
+
+  const result = resolveClientForModel('openai/gpt-6-pro', { openrouter });
+
+  assert.equal(result.client, openrouter);
+  assert.equal(result.providerModelId, 'openai/gpt-6-pro');
+});
+
+test('an openai/-prefixed codex-role model id (OpenRouter has no distinct Codex listing) dispatches through OpenAIClient identically to a gpt-role id', () => {
+  const openrouter = fakeClient('openrouter');
+  const openai = fakeClient('openai');
+
+  const result = resolveClientForModel('openai/gpt-6-codex', { openrouter, openai });
+
+  assert.equal(result.client, openai);
+  assert.equal(result.providerModelId, 'gpt-6-codex');
+});
+
+test('Anthropic and OpenAI connections are resolved independently — connecting one does not affect the other\'s prefix', () => {
   const openrouter = fakeClient('openrouter');
   const anthropic = fakeClient('anthropic');
 
-  for (const modelId of ['openai/gpt-6-pro', 'google/gemini-3-pro', 'x-ai/grok-5']) {
-    const withAnthropicConnected = resolveClientForModel(modelId, { openrouter, anthropic });
-    assert.equal(withAnthropicConnected.client, openrouter, `${modelId} must route through OpenRouter even with Anthropic connected`);
-    assert.equal(withAnthropicConnected.providerModelId, modelId);
-
-    const withoutAnthropicConnected = resolveClientForModel(modelId, { openrouter, anthropic: null });
-    assert.equal(withoutAnthropicConnected.client, openrouter);
-    assert.equal(withoutAnthropicConnected.providerModelId, modelId);
-  }
+  // OpenAI not connected, Anthropic is — an openai/ id must still fall back
+  // to OpenRouter, not accidentally pick up the Anthropic client.
+  const result = resolveClientForModel('openai/gpt-6-pro', { openrouter, anthropic, openai: null });
+  assert.equal(result.client, openrouter);
+  assert.equal(result.providerModelId, 'openai/gpt-6-pro');
 });
 
 test('a null/undefined apiModelId falls back to OpenRouter unchanged rather than throwing', () => {

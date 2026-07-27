@@ -50,6 +50,7 @@ loadEnv();
 
 const OpenRouterClient = require('../sdk/OpenRouterClient');
 const AnthropicClient = require('../sdk/AnthropicClient');
+const OpenAIClient = require('../sdk/OpenAIClient');
 const { loadAgentPrompt } = require('../sdk/PromptLoader');
 const {
   createRuntime,
@@ -97,6 +98,7 @@ async function main() {
 
   const openRouterClient = new OpenRouterClient();
   const anthropicClient = new AnthropicClient();
+  const openAIClient = new OpenAIClient();
   let liveModelsResolved = false;
 
   console.log('');
@@ -320,6 +322,7 @@ async function main() {
       const { client, providerModelId } = resolveClientForModel(apiModelId, {
         openrouter: openRouterClient,
         anthropic: process.env.ANTHROPIC_API_KEY ? anthropicClient : null,
+        openai: process.env.OPENAI_API_KEY ? openAIClient : null,
       });
       const { text, usage } = await client.chatCompletion({
         model: providerModelId,

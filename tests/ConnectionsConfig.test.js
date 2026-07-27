@@ -26,7 +26,7 @@ test('buildConnections reports hasKey/active per provider and never leaks the ra
   assert.equal(connections.anthropic.keyMasked, null);
 });
 
-test('buildConnections marks providers with no ProviderClient yet as not active (openai/google/xai — Phase 2 not built for them)', () => {
+test('buildConnections marks providers with no ProviderClient yet as not active (google/xai — Phase 2 not built for them)', () => {
   const env = {
     OPENROUTER_API_KEY: 'sk-or-1234567890abcd',
     ANTHROPIC_API_KEY: 'sk-ant-1234567890abcd',
@@ -36,11 +36,13 @@ test('buildConnections marks providers with no ProviderClient yet as not active 
   };
   const connections = buildConnections(env, maskKey);
 
-  // openrouter and anthropic have real ProviderClients (sdk/OpenRouterClient.js,
-  // sdk/AnthropicClient.js) wired into dispatch via core/resolveClientForModel.js.
+  // openrouter, anthropic, and openai have real ProviderClients
+  // (sdk/OpenRouterClient.js, sdk/AnthropicClient.js, sdk/OpenAIClient.js)
+  // wired into dispatch via core/resolveClientForModel.js.
   assert.equal(connections.openrouter.active, true);
   assert.equal(connections.anthropic.active, true, 'anthropic has a real ProviderClient as of BYNGE Phase 2 (sdk/AnthropicClient.js)');
-  for (const providerId of ['openai', 'google', 'xai']) {
+  assert.equal(connections.openai.active, true, 'openai has a real ProviderClient as of BYNGE Phase 2 (sdk/OpenAIClient.js)');
+  for (const providerId of ['google', 'xai']) {
     assert.equal(connections[providerId].active, false, `${providerId} must not be marked active (no ProviderClient yet)`);
     assert.equal(connections[providerId].hasKey, true, `${providerId} should still report a stored key`);
   }
