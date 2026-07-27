@@ -6,7 +6,7 @@ const Logger = require('../sdk/Logger');
 
 class JECIRuntime {
   /**
-   * Creates the reusable JECI organization runtime without connecting providers.
+   * Creates the reusable CEO Agent organization runtime without connecting providers.
    * @param {object} options Runtime configuration and SDK dependencies.
    */
   constructor(options = {}) {
@@ -34,7 +34,7 @@ class JECIRuntime {
   initialize() {
     this.status = 'ready';
     this.startedAt = new Date().toISOString();
-    this.logger.info('JECI Runtime initialized.', { runtimeId: this.config.get('runtimeId') });
+    this.logger.info('CEO Agent runtime initialized.', { runtimeId: this.config.get('runtimeId') });
     return {
       status: this.status,
       identity: this.getIdentity(),
@@ -128,7 +128,7 @@ class JECIRuntime {
   /** Sets the runtime offline without stopping external services. @returns {object} Runtime status. */
   shutdown() {
     this.status = 'offline';
-    this.logger.info('JECI Runtime shut down.', { runtimeId: this.config.get('runtimeId') });
+    this.logger.info('CEO Agent runtime shut down.', { runtimeId: this.config.get('runtimeId') });
     return this.getStatus();
   }
 }
