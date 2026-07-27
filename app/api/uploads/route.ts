@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { checkRateLimit } from '../dispatch/handler';
-const { saveUpload, getUploadMetadata, MAX_UPLOAD_BYTES } = require('../../../lib/uploadStore');
+const { saveUpload, getUploadMetadata, readUpload, MAX_UPLOAD_BYTES } = require('../../../lib/uploadStore');
 
 /**
  * POST /api/uploads
@@ -45,15 +45,39 @@ export async function POST(request: Request) {
 
 /**
  * GET /api/uploads?fileId=<id>
+ * GET /api/uploads?fileId=<id>&download=1
  *
- * Looks up metadata for a previously uploaded file, so the web dashboard can
- * confirm an attachment resolved before sending it along with a chat message.
+ * Without `download`, looks up metadata for a previously uploaded (or
+ * skill-generated) file, so the web dashboard can confirm an attachment
+ * resolved before sending it along with a chat message. With `download=1`,
+ * streams the actual bytes back with a Content-Disposition attachment
+ * header, so a file — uploaded or produced by a document-creation skill —
+ * can actually be downloaded or attached to a chat message, not just
+ * referenced by id.
  */
 export async function GET(request: Request) {
-  const fileId = new URL(request.url).searchParams.get('fileId');
+  const url = new URL(request.url);
+  const fileId = url.searchParams.get('fileId');
   const metadata = fileId ? getUploadMetadata(fileId) : null;
   if (!metadata) {
     return NextResponse.json({ error: 'Unknown fileId.' }, { status: 404 });
   }
-  return NextResponse.json({ status: 'ok', ...metadata });
+
+  if (url.searchParams.get('download') !== '1') {
+    return NextResponse.json({ status: 'ok', ...metadata });
+  }
+
+  const buffer = readUpload(fileId as string);
+  if (!buffer) {
+    return NextResponse.json({ error: 'File content is missing.' }, { status: 404 });
+  }
+
+  return new NextResponse(new Uint8Array(buffer), {
+    status: 200,
+    headers: {
+      'Content-Type': metadata.mimeType || 'application/octet-stream',
+      'Content-Disposition': `attachment; filename="${metadata.filename.replace(/"/g, '')}"`,
+      'Content-Length': String(metadata.size),
+    },
+  });
 }
