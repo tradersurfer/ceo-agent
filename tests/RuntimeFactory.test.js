@@ -20,44 +20,53 @@ function withEnv(vars, fn) {
   }
 }
 
-test('without Supabase configured, workflow and skill audit stay independent in-memory logs (unchanged default)', () => {
+test('without Supabase configured, workflow, skill, and usage audit stay independent in-memory logs (unchanged default)', () => {
   const runtime = createRuntime(MINIMAL_CONFIG);
   assert.ok(runtime.workflowRuntime.audit instanceof InMemoryAuditLog);
   assert.ok(runtime.skillExecutor.audit instanceof InMemoryAuditLog);
+  assert.ok(runtime.usageAudit instanceof InMemoryAuditLog);
   assert.notEqual(runtime.workflowRuntime.audit, runtime.skillExecutor.audit);
+  assert.notEqual(runtime.workflowRuntime.audit, runtime.usageAudit);
+  assert.notEqual(runtime.skillExecutor.audit, runtime.usageAudit);
 });
 
-test('with Supabase configured, workflow and skill audit are separate SupabaseAuditLog tables sharing one client', () => {
+test('with Supabase configured, workflow/skill/usage audit are three separate SupabaseAuditLog tables sharing one client', () => {
   withEnv({ SUPABASE_URL: 'http://localhost:54321', SUPABASE_SERVICE_ROLE_KEY: 'test-service-role-key' }, () => {
     const runtime = createRuntime(MINIMAL_CONFIG);
 
     assert.ok(runtime.workflowRuntime.audit instanceof SupabaseAuditLog);
     assert.ok(runtime.skillExecutor.audit instanceof SupabaseAuditLog);
+    assert.ok(runtime.usageAudit instanceof SupabaseAuditLog);
     assert.equal(runtime.workflowRuntime.audit.table, 'workflow_audit');
     assert.equal(runtime.skillExecutor.audit.table, 'skill_audit');
+    assert.equal(runtime.usageAudit.table, 'model_usage');
 
     // Same backend/connection, not the same log — issue #52's "no
     // correlation to preserve" reasoning, fixed to actually reach Supabase.
     assert.equal(runtime.workflowRuntime.audit.supabase, runtime.skillExecutor.audit.supabase);
-    assert.notEqual(runtime.workflowRuntime.audit, runtime.skillExecutor.audit);
+    assert.equal(runtime.workflowRuntime.audit.supabase, runtime.usageAudit.supabase);
+    assert.notEqual(runtime.skillExecutor.audit, runtime.usageAudit);
   });
 });
 
-test('an explicitly injected workflowRuntimeOptions is honored as-is, and skillAudit must be passed alongside it explicitly', () => {
+test('an explicitly injected workflowRuntimeOptions is honored as-is, and skillAudit/usageAudit must be passed alongside it explicitly', () => {
   const audit = new InMemoryAuditLog();
   const store = { save: async () => {}, get: async () => null };
   const skillAudit = new InMemoryAuditLog();
+  const usageAudit = new InMemoryAuditLog();
 
   const runtime = createRuntime(MINIMAL_CONFIG, {
     workflowRuntimeOptions: { store, audit },
     skillAudit,
+    usageAudit,
   });
 
   assert.equal(runtime.workflowRuntime.audit, audit);
   assert.equal(runtime.skillExecutor.audit, skillAudit);
+  assert.equal(runtime.usageAudit, usageAudit);
 });
 
-test('an explicitly injected workflowRuntimeOptions without an explicit skillAudit falls back to a fresh in-memory log, not a silently derived Supabase one', () => {
+test('an explicitly injected workflowRuntimeOptions without explicit skillAudit/usageAudit falls back to fresh in-memory logs, not silently derived Supabase ones', () => {
   withEnv({ SUPABASE_URL: 'http://localhost:54321', SUPABASE_SERVICE_ROLE_KEY: 'test-service-role-key' }, () => {
     const audit = new InMemoryAuditLog();
     const store = { save: async () => {}, get: async () => null };
@@ -66,6 +75,8 @@ test('an explicitly injected workflowRuntimeOptions without an explicit skillAud
 
     assert.equal(runtime.workflowRuntime.audit, audit);
     assert.ok(runtime.skillExecutor.audit instanceof InMemoryAuditLog);
+    assert.ok(runtime.usageAudit instanceof InMemoryAuditLog);
     assert.notEqual(runtime.skillExecutor.audit, audit);
+    assert.notEqual(runtime.usageAudit, audit);
   });
 });

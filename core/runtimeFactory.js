@@ -6,6 +6,7 @@ const { loadRuntimeRegistries } = require('./RegistryLoader');
 const frameworkCatalog = require('./frameworks/catalog');
 const { createWorkflowPersistence } = require('./persistence');
 const { WorkflowScheduler } = require('./WorkflowScheduler');
+const { InMemoryAuditLog } = require('./WorkflowRuntime');
 
 const SESSION_PROJECTS = Object.freeze(['cli-session', 'web-session']);
 
@@ -53,20 +54,24 @@ function createRuntime(config, options = {}) {
     reportsTo: agent.reportsTo || agent.reports_to || null,
   });
 
-  // Persistent workflow store + audit log, and a Supabase-backed skill-
-  // execution audit log, when Supabase is configured; falls back to
-  // WorkflowRuntime's and SkillExecutor's own in-memory defaults otherwise
-  // (createWorkflowPersistence returns null when SUPABASE_URL/
-  // SUPABASE_SERVICE_ROLE_KEY are absent). Called at most once, so both
-  // conformers share one underlying Supabase client (see
-  // core/persistence/index.js) rather than opening two connections.
-  // An explicitly injected workflowRuntimeOptions (tests/advanced installs)
-  // wins and is NOT combined with the auto-derived skillAudit — pass
-  // options.skillAudit explicitly alongside it if that path needs one too.
+  // Persistent workflow store + audit log, a Supabase-backed skill-execution
+  // audit log, and a Supabase-backed model-usage audit log, when Supabase is
+  // configured; falls back to WorkflowRuntime's, SkillExecutor's, and
+  // UsageTracker's own in-memory defaults otherwise (createWorkflowPersistence
+  // returns null when SUPABASE_URL/SUPABASE_SERVICE_ROLE_KEY are absent).
+  // Called at most once, so all three conformers share one underlying
+  // Supabase client (see core/persistence/index.js) rather than opening
+  // three connections. An explicitly injected workflowRuntimeOptions (tests/
+  // advanced installs) wins and is NOT combined with the auto-derived
+  // skillAudit/usageAudit — pass those explicitly alongside it if that path
+  // needs them too.
   const persistence = options.workflowRuntimeOptions ? null : createWorkflowPersistence();
   const workflowRuntimeOptions = options.workflowRuntimeOptions
     || (persistence ? { store: persistence.store, audit: persistence.audit } : undefined);
   const skillAudit = options.skillAudit || (persistence ? persistence.skillAudit : undefined);
+  // UsageTracker has no owning class with its own in-memory default (unlike
+  // WorkflowRuntime/SkillExecutor), so runtimeFactory always constructs one.
+  const usageAudit = options.usageAudit || (persistence ? persistence.usageAudit : new InMemoryAuditLog());
 
   const connectedRegistries = loadRuntimeRegistries({
     root,
@@ -97,6 +102,7 @@ function createRuntime(config, options = {}) {
   runtime.skillRegistry = connectedRegistries.skillRegistry;
   runtime.skillExecutor = connectedRegistries.skillExecutor;
   runtime.workflowRuntime = connectedRegistries.workflowRuntime;
+  runtime.usageAudit = usageAudit;
   // Constructed (never auto-started) only when a caller supplies a
   // workflowResolver — this scaffold ships no pre-built workflow
   // definitions, so there is nothing to poll by default. Installs that

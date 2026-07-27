@@ -64,6 +64,20 @@ class ModelBroker {
     return model.apiModelId || null;
   }
 
+  /**
+   * Gets the resolved per-token USD pricing for a role at a given cost tier
+   * (see core/ModelResolver.js#extractPricing for the documented-but-not-
+   * independently-verified OpenRouter pricing contract this reads).
+   * @param {string} id Model role id (e.g. "claude").
+   * @param {'flagship'|'efficient'} tier Cost tier.
+   * @returns {{prompt: number|null, completion: number|null}|null} Pricing, or null if unresolved.
+   */
+  getPricing(id, tier = 'flagship') {
+    const model = this.models.get(id);
+    if (!model || !model.tiers || !model.tiers[tier]) return null;
+    return model.tiers[tier].pricing || null;
+  }
+
   /** Disables a model. @param {string} id Model id. @returns {object|null} Model or null. */
   disableModel(id) {
     const model = this.models.get(id);
