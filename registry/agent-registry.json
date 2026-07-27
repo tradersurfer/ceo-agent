@@ -178,7 +178,10 @@
         "schema_order_markup",
         "schema_discussion_markup",
         "schema_profile_markup",
-        "content_quality_analysis"
+        "content_quality_analysis",
+        "generate_docx",
+        "generate_pdf",
+        "generate_spreadsheet"
       ],
       "authorized_projects": "Configured per install via CEO_AGENT_PROJECTS env var.",
       "off_limits": [
