@@ -26,3 +26,17 @@ test('getPricing returns null for an unresolved model, unknown id, or unknown ti
   }]);
   assert.equal(brokerWithFlagshipOnly.getPricing('claude', 'efficient'), null);
 });
+
+test('getApiModelId and getPricing work generically for the "cheapest" tier, same as flagship/efficient (BYNGE §5 decision (b))', () => {
+  const broker = new ModelBroker([{
+    id: 'claude', role: 'claude',
+    tiers: {
+      flagship: { apiModelId: 'anthropic/claude-opus-5', pricing: { prompt: 0.000015, completion: 0.000075 } },
+      efficient: { apiModelId: 'anthropic/claude-haiku-4.5', pricing: { prompt: 0.000001, completion: 0.000005 } },
+      cheapest: { apiModelId: 'anthropic/claude-value-tier', pricing: { prompt: 0.0000003, completion: 0.0000015 } },
+    },
+  }]);
+
+  assert.equal(broker.getApiModelId('claude', 'cheapest'), 'anthropic/claude-value-tier');
+  assert.deepEqual(broker.getPricing('claude', 'cheapest'), { prompt: 0.0000003, completion: 0.0000015 });
+});

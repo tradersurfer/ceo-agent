@@ -43,7 +43,7 @@ test('buildConnections marks every non-OpenRouter provider as not active (Phase 
   }
 });
 
-test('buildCatalog reads resolved tiers per role from ModelBroker, defaulting to nulls when unresolved', () => {
+test('buildCatalog reads resolved tiers (including "cheapest") per role from ModelBroker, defaulting to nulls when unresolved', () => {
   const fakeBroker = {
     getModel(role) {
       if (role === 'claude') {
@@ -52,6 +52,7 @@ test('buildCatalog reads resolved tiers per role from ModelBroker, defaulting to
           tiers: {
             flagship: { apiModelId: 'anthropic/claude-opus-5' },
             efficient: { apiModelId: 'anthropic/claude-haiku-4.5' },
+            cheapest: { apiModelId: 'anthropic/claude-value-tier' },
           },
         };
       }
@@ -63,8 +64,9 @@ test('buildCatalog reads resolved tiers per role from ModelBroker, defaulting to
 
   assert.equal(catalog.claude.flagship.apiModelId, 'anthropic/claude-opus-5');
   assert.equal(catalog.claude.efficient.apiModelId, 'anthropic/claude-haiku-4.5');
-  assert.deepEqual(catalog.codex, { flagship: null, efficient: null });
-  assert.deepEqual(catalog.gpt, { flagship: null, efficient: null });
+  assert.equal(catalog.claude.cheapest.apiModelId, 'anthropic/claude-value-tier');
+  assert.deepEqual(catalog.codex, { flagship: null, efficient: null, cheapest: null });
+  assert.deepEqual(catalog.gpt, { flagship: null, efficient: null, cheapest: null });
   assert.deepEqual(Object.keys(catalog).sort(), ['claude', 'codex', 'gemini', 'gpt', 'grok'].sort());
 });
 

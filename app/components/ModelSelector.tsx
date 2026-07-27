@@ -7,9 +7,13 @@
 //
 // Two independent axes, per §5's table — NOT one flat toggle-chip list:
 //   - role:  claude / codex (dev-work) / gpt / gemini / grok
-//   - tier:  flagship / efficient
-// "Affordable" is deliberately NOT built here — see the PR description /
-// final report for the pending (a)-vs-(b) decision this needs first.
+//   - tier:  flagship / efficient / cheapest ("Affordable")
+// Adrian's call on §5's (a)-vs-(b) "Affordable" question: (b) — a real
+// pickCheapest() resolver (core/ModelResolver.js), not a rename of
+// "efficient". The 'cheapest' tier here is backed by that resolved data
+// end to end (ModelBroker -> /api/config's catalog -> here), same as
+// flagship/efficient — see core/ModelResolver.js's module comment for the
+// documented Phase-2 gap (no live pricing yet for direct-provider models).
 //
 // Hard requirement (scoping doc §3, "not a suggestion"): a provider with no
 // real ProviderClient yet (everything except OpenRouter, today) must render
@@ -19,7 +23,7 @@
 // `active` is true, regardless of what's passed as `catalog`.
 
 export type ChatRole = 'claude' | 'codex' | 'gpt' | 'gemini' | 'grok';
-export type CostTier = 'flagship' | 'efficient';
+export type CostTier = 'flagship' | 'efficient' | 'cheapest';
 
 export type CatalogEntry = {
   apiModelId: string;
@@ -28,7 +32,7 @@ export type CatalogEntry = {
   pricing?: { prompt: number | null; completion: number | null } | null;
 } | null;
 
-export type RoleCatalog = Partial<Record<ChatRole, { flagship: CatalogEntry; efficient: CatalogEntry }>>;
+export type RoleCatalog = Partial<Record<ChatRole, { flagship: CatalogEntry; efficient: CatalogEntry; cheapest: CatalogEntry }>>;
 
 const ROLES: { id: ChatRole; label: string; hint: string }[] = [
   { id: 'claude', label: 'Claude', hint: 'General reasoning, writing' },
@@ -38,9 +42,14 @@ const ROLES: { id: ChatRole; label: string; hint: string }[] = [
   { id: 'grok', label: 'Grok', hint: 'Rapid research' },
 ];
 
+// tier id 'cheapest' matches ModelResolver#pickCheapest / ModelBroker's
+// tiers.cheapest key (same naming pattern as flagship/efficient) — the
+// label "Affordable" is the only user-facing rename; the underlying tier
+// key stays consistent across resolver/broker/config/UI.
 const TIERS: { id: CostTier; label: string }[] = [
   { id: 'flagship', label: 'Flagship' },
   { id: 'efficient', label: 'Efficient' },
+  { id: 'cheapest', label: 'Affordable' },
 ];
 
 export default function ModelSelector({
@@ -89,7 +98,7 @@ export default function ModelSelector({
       <div className="model-selector-axis model-selector-roles" role="group" aria-label="Model role">
         {ROLES.map(role => {
           const roleData = catalog ? catalog[role.id] : null;
-          const roleResolved = Boolean(roleData && (roleData.flagship || roleData.efficient));
+          const roleResolved = Boolean(roleData && (roleData.flagship || roleData.efficient || roleData.cheapest));
           return (
             <button
               key={role.id}
