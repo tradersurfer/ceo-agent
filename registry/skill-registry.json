@@ -278,6 +278,61 @@
       "permissions": { "requiresAgentAssignment": true },
       "handler": "core/skills/contentQualitySkill.js#registerContentQualitySkill",
       "risk": "safe"
+    },
+    {
+      "id": "generate_docx",
+      "capability": "document_generation_docx",
+      "inputSchema": {
+        "title": { "type": "string", "required": true },
+        "content": { "type": "string", "required": true },
+        "filename": { "type": "string", "required": false }
+      },
+      "outputSchema": {
+        "fileId": { "type": "string", "required": true },
+        "filename": { "type": "string", "required": true },
+        "size": { "type": "number", "required": true },
+        "mimeType": { "type": "string", "required": true }
+      },
+      "permissions": { "requiresAgentAssignment": true },
+      "handler": "core/skills/documentCreationSkills.js#registerDocumentCreationSkills",
+      "risk": "safe"
+    },
+    {
+      "id": "generate_pdf",
+      "capability": "document_generation_pdf",
+      "inputSchema": {
+        "title": { "type": "string", "required": true },
+        "content": { "type": "string", "required": true },
+        "filename": { "type": "string", "required": false }
+      },
+      "outputSchema": {
+        "fileId": { "type": "string", "required": true },
+        "filename": { "type": "string", "required": true },
+        "size": { "type": "number", "required": true },
+        "mimeType": { "type": "string", "required": true }
+      },
+      "permissions": { "requiresAgentAssignment": true },
+      "handler": "core/skills/documentCreationSkills.js#registerDocumentCreationSkills",
+      "risk": "safe"
+    },
+    {
+      "id": "generate_spreadsheet",
+      "capability": "document_generation_spreadsheet",
+      "inputSchema": {
+        "title": { "type": "string", "required": true },
+        "rows": { "type": "array", "required": true },
+        "headers": { "type": "array", "required": false },
+        "filename": { "type": "string", "required": false }
+      },
+      "outputSchema": {
+        "fileId": { "type": "string", "required": true },
+        "filename": { "type": "string", "required": true },
+        "size": { "type": "number", "required": true },
+        "mimeType": { "type": "string", "required": true }
+      },
+      "permissions": { "requiresAgentAssignment": true },
+      "handler": "core/skills/documentCreationSkills.js#registerDocumentCreationSkills",
+      "risk": "safe"
     }
   ]
 }
