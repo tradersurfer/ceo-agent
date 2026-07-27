@@ -10,6 +10,7 @@ ceo-agent.config.json
 .clawhub/
 .next/
 .openclaw/
+.uploads/
 docs/
 tenants/
 memory/
