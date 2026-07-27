@@ -333,6 +333,39 @@
       "permissions": { "requiresAgentAssignment": true },
       "handler": "core/skills/documentCreationSkills.js#registerDocumentCreationSkills",
       "risk": "safe"
+    },
+    {
+      "id": "compute_financial_model",
+      "capability": "financial_projection",
+      "inputSchema": {
+        "model": { "type": "object", "required": true },
+        "scenario": { "type": "string", "required": false },
+        "horizon": { "type": "number", "required": false }
+      },
+      "outputSchema": {
+        "months": { "type": "array", "required": true },
+        "fy": { "type": "object", "required": true },
+        "kpis": { "type": "object", "required": true },
+        "lowCash": { "type": "object", "required": true }
+      },
+      "permissions": { "requiresAgentAssignment": true },
+      "handler": "core/skills/financialModelSkill.js#registerFinancialModelSkills",
+      "risk": "safe"
+    },
+    {
+      "id": "import_revenue_csv",
+      "capability": "financial_csv_import",
+      "inputSchema": {
+        "fileId": { "type": "string", "required": true }
+      },
+      "outputSchema": {
+        "monthsFound": { "type": "number", "required": true },
+        "last3Values": { "type": "array", "required": true },
+        "average": { "type": "number", "required": true }
+      },
+      "permissions": { "requiresAgentAssignment": true },
+      "handler": "core/skills/financialModelSkill.js#registerFinancialModelSkills",
+      "risk": "safe"
     }
   ]
 }
