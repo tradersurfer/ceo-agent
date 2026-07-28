@@ -22,6 +22,13 @@ itself to.
 
 ### YOLO / full-auto mode
 
+> **Resolved by [`ADR-008`](./adr/ADR-008-yolo-full-auto-mode.md)** (2026-07-28):
+> rejected for the current roadmap — "not now" — after directly verifying
+> `SECURITY.md`'s stated human-in-the-loop gap, `CONTRACT.md`'s Type 1/Type 2
+> escalation contract, every department's `off_limits` list (declarative in
+> `registry/agent-registry.json`, not code-enforced), and the AionUi
+> security-scan finding below. Read that ADR before reopening this item.
+
 Auto-approve all agent actions without confirmation — an idea from AionUi,
 which ships a comparable feature.
 
