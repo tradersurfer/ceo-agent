@@ -28,6 +28,52 @@ time if the direction doesn't fit.
 - Follow the existing code style (no new linter, just match what's there)
 - Update relevant docs (`README.md`, `docs/`) if the change affects setup,
   configuration, or behavior a user would notice
+- **If the change touches `app/`, `lib/`, or adds a new dependency reachable
+  from a web route, actually boot the dev server (`npm run web`) and verify
+  it in an actual browser before marking the PR ready.** `npm test` and
+  `next build` are necessary but not sufficient — three separate runtime
+  crashes have now shipped past both of those undetected on this project:
+  - PR #42 added a `require('path')` inside `loadRuntimeRegistries()` that
+    shadowed the module-level `path` import via temporal-dead-zone hoisting,
+    crashing the entire runtime-construction path (CLI, web, dispatch) with
+    `Cannot access 'path' before initialization`. `npm run web:build` passed
+    anyway, because Next's static build never calls
+    `loadRuntimeRegistries()` — a green build didn't mean the app worked.
+  - PR #59 added `docx` as a dependency. It contains a `require()` pattern
+    webpack can't statically analyze, breaking every web route that
+    transitively imports it through `core/RegistryLoader.js` — nearly the
+    whole dashboard (chat, health, status, org, dispatch). It shipped
+    because verification was `npm test` plus a plain-Node script, never an
+    actual `npm run web` boot.
+  - A `ConnectionsView.tsx` change imported `lib/providers.js` (a plain
+    CommonJS module with no import/export syntax) via ES `import` from a
+    `'use client'` component. This broke `next dev`'s client bundle with a
+    `Module parse failed: Cannot use 'import.meta' outside a module` error —
+    webpack's Fast-Refresh instrumentation injects `import.meta.webpackHot.
+    accept()` into every module reachable from a client boundary, which is
+    invalid syntax for a file webpack parses as Script (not Module) grammar.
+    **Booting the dev server and curling an API route — the boot-check as
+    originally scoped — did not catch this**, because API route handlers
+    compile separately from the client-side page bundle; the client bundle
+    only compiles when a browser actually requests and renders the page.
+    `next build`'s production bundle never injects Fast-Refresh code either,
+    so this was invisible to every build, test, and API-curl boot-check that
+    ran before it was caught.
+
+  **What "verify it in an actual browser" means, concretely**: booting
+  `npm run web` and curling an API route is not sufficient on its own — load
+  the actual page (or the specific page/component the change affects) in a
+  real browser context and confirm (a) the client bundle compiles without
+  error (no red `⨯` in the dev server's terminal output) and (b) the
+  browser's own console shows no errors after the page renders. A tool that
+  drives a real or headless browser (not curl, not a plain HTTP client)
+  satisfies this — the point is exercising the actual client-bundle compile
+  and render path, not just a server response.
+
+  None of these three bugs were reachable by the test suite or the
+  production build step; each only surfaced by actually starting the dev
+  server and exercising the specific path (server request, or client-bundle
+  render) the change touched.
 
 ## Security
 
