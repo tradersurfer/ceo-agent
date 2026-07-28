@@ -59,10 +59,22 @@
 // provider id ('google', matching lib/providers.js's PROVIDER_IDS) and the
 // OpenRouter prefix ('google/') happen to share a name here the same way
 // anthropic/openai's do, which was still worth checking, not inferring.
+//
+// 'x-ai/' (added in Phase 2's fourth and last PR, sdk/XaiClient.js) is the
+// OpenRouter prefix core/ModelResolver.js's PROVIDER_PREFIXES uses for the
+// 'grok' role — verified from that file, NOT assumed to be 'xai/' just
+// because the provider id ('xai', matching lib/providers.js's PROVIDER_IDS)
+// and every prior prefix so far happened to match their provider id.
+// anthropic/openai/google's OpenRouter prefixes all happen to equal their
+// provider id; xAI's does not (OpenRouter lists xAI's models under the
+// hyphenated 'x-ai/' prefix, not 'xai/') — this is exactly the kind of
+// per-provider fact ModelResolver.js's own PROVIDER_PREFIXES comment warns
+// not to assume, confirmed by reading that file rather than inferring it.
 const MODEL_PREFIX_TO_PROVIDER_ID = Object.freeze({
   'anthropic/': 'anthropic',
   'openai/': 'openai',
   'google/': 'google',
+  'x-ai/': 'xai',
 });
 
 /**

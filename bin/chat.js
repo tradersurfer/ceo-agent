@@ -52,6 +52,7 @@ const OpenRouterClient = require('../sdk/OpenRouterClient');
 const AnthropicClient = require('../sdk/AnthropicClient');
 const OpenAIClient = require('../sdk/OpenAIClient');
 const GoogleClient = require('../sdk/GoogleClient');
+const XaiClient = require('../sdk/XaiClient');
 const { loadAgentPrompt } = require('../sdk/PromptLoader');
 const {
   createRuntime,
@@ -101,6 +102,7 @@ async function main() {
   const anthropicClient = new AnthropicClient();
   const openAIClient = new OpenAIClient();
   const googleClient = new GoogleClient();
+  const xaiClient = new XaiClient();
   let liveModelsResolved = false;
 
   console.log('');
@@ -326,6 +328,7 @@ async function main() {
         anthropic: process.env.ANTHROPIC_API_KEY ? anthropicClient : null,
         openai: process.env.OPENAI_API_KEY ? openAIClient : null,
         google: process.env.GOOGLE_AI_STUDIO_API_KEY ? googleClient : null,
+        xai: process.env.XAI_API_KEY ? xaiClient : null,
       });
       const { text, usage } = await client.chatCompletion({
         model: providerModelId,
