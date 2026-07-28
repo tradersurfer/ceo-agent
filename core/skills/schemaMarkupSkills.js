@@ -172,6 +172,7 @@ const SCHEMA_MARKUP_PERMISSION = Object.freeze({ requiresAgentAssignment: true }
 function registerSchemaMarkupSkills(registry) {
   registry.register('schema_reservation_markup', {
     capability: 'marketing_schema_markup',
+    description: 'Generates schema.org Reservation JSON-LD markup.',
     inputSchema: {
       provider: { type: 'string', required: true },
       start: { type: 'string', required: true },
@@ -190,6 +191,7 @@ function registerSchemaMarkupSkills(registry) {
 
   registry.register('schema_order_markup', {
     capability: 'marketing_schema_markup',
+    description: 'Generates schema.org OrderAction JSON-LD markup.',
     inputSchema: {
       merchant: { type: 'string', required: true },
       orderUrl: { type: 'string', required: true },
@@ -204,6 +206,7 @@ function registerSchemaMarkupSkills(registry) {
 
   registry.register('schema_discussion_markup', {
     capability: 'marketing_schema_markup',
+    description: 'Generates schema.org DiscussionForumPosting JSON-LD markup.',
     inputSchema: {
       headline: { type: 'string', required: true },
       author: { type: 'string', required: true },
@@ -221,6 +224,7 @@ function registerSchemaMarkupSkills(registry) {
 
   registry.register('schema_profile_markup', {
     capability: 'marketing_schema_markup',
+    description: 'Generates schema.org ProfilePage JSON-LD markup.',
     inputSchema: {
       name: { type: 'string', required: true },
       url: { type: 'string', required: true },

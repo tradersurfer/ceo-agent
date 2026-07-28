@@ -59,6 +59,8 @@ button:disabled { opacity: 0.5; cursor: default; }
 .chat-agent .chat-text { background: #f0efe9; padding: 8px 12px; border-radius: 10px; }
 .chat-agent-label { font-size: 12px; color: #8a8983; margin-bottom: 4px; }
 .chat-system { align-self: center; font-size: 13px; color: #b0473f; }
+.chat-skill { align-self: flex-start; }
+.chat-skill-output { background: #f0efe9; padding: 8px 12px; border-radius: 10px; overflow-x: auto; font-size: 0.9em; margin: 0; }
 /* react-markdown renders block elements as direct children of .chat-text
    for agent messages — trim the bubble's own top/bottom margin doubling. */
 .chat-agent .chat-text > :first-child { margin-top: 0; }

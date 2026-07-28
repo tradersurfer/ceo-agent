@@ -46,6 +46,8 @@ test('project, skill, tool, and workflow registries match connected runtime stat
     skills.skills.map(skill => ({
       id: skill.id,
       capability: skill.capability,
+      description: skill.description || null,
+      disableModelInvocation: skill.disableModelInvocation || false,
       inputSchema: skill.inputSchema,
       outputSchema: skill.outputSchema || {},
       permissions: skill.permissions || { requiresAgentAssignment: false },
@@ -53,6 +55,8 @@ test('project, skill, tool, and workflow registries match connected runtime stat
     runtime.skillRegistry.list().map(skill => ({
       id: skill.name,
       capability: skill.capability,
+      description: skill.description,
+      disableModelInvocation: skill.disableModelInvocation,
       inputSchema: skill.inputSchema,
       outputSchema: skill.outputSchema,
       permissions: skill.permissions,

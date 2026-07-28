@@ -5,17 +5,44 @@ giving an agent a callable, validated, timeout-bound capability — replacing
 the old inert Hermes `skills/` folder (removed earlier) with something the
 code actually invokes.
 
-## Status: proof-of-concept
+## Status: dispatched from real chat turns (CLI + web)
 
-This ships with exactly 3 example skills (`core/skills/exampleSkills.js`),
-all deliberately safe and non-destructive:
+Registered skills are now invoked from a live chat turn, not just from unit
+tests. Both chat surfaces recognize the same explicit syntax, via the shared
+parser in `core/skillDispatch.js`:
+
+- `/skill_name {"field": "value"}` — slash-command form
+- `@skill_name {"field": "value"}` — @ addressing, alongside `@department`
+- `/skills` (CLI only today) lists every registered skill, its description,
+  and its input fields
+
+Arguments are a JSON object matching the skill's `inputSchema`; omit them
+entirely for a skill that takes none. Dispatch runs under `ceo_agent`'s
+context — the same default an unaddressed chat message already uses — so a
+skill gated to a specific department head (e.g. `scope_creep_detection` ->
+`cto_agent` only) correctly fails with `reason: 'permission_denied'` when
+invoked this way, exactly as `SkillExecutor.run()` already enforced before
+any chat wiring existed.
+
+**What's still not real:** every skill also carries a `description` and a
+`disableModelInvocation` flag (see `core/SkillRegistry.js#register`), but
+nothing in this codebase yet lets a model decide, on its own, to call a
+skill mid-conversation — both fields are metadata for a future
+model-invocation pass, not consumed by any matching logic today. The only
+way to run a skill is the explicit `/name` or `@name` syntax above, typed by
+a person.
+
+The 3 example skills (`core/skills/exampleSkills.js`) remain the safest
+reference implementations:
 
 - `summarize_text` — self-contained placeholder structure, no model call
 - `format_currency` — deterministic utility, no I/O
 - `lookup_department` — reads the existing org chart, read-only
 
 None of these write to the filesystem, make network calls, or execute
-arbitrary code.
+arbitrary code. Several other registered skills do write generated files
+(via `lib/uploadStore.js`) or read an uploaded file — see each skill's own
+module comment for its actual I/O boundary.
 
 ## Security boundary — read before adding a new skill
 
@@ -64,4 +91,24 @@ const executor = new SkillExecutor(registry);
 
 const result = await executor.run('format_currency', { amount: 42.5 });
 // { status: 'ok', output: { formatted: '$42.50', amount: 42.5, currency: 'USD' } }
+```
+
+## From a chat turn
+
+Both `bin/chat.js` (CLI) and `app/api/chat/route.ts` (web) call the same
+`dispatchSkillMessage()` helper in `core/skillDispatch.js` before falling
+through to normal `@department`/model-call handling:
+
+```js
+const { dispatchSkillMessage } = require('../core/skillDispatch');
+
+const dispatch = await dispatchSkillMessage('/format_currency {"amount": 42.5}', {
+  skillRegistry: runtime.skillRegistry,
+  skillExecutor: runtime.skillExecutor,
+  agentId: 'ceo_agent',
+});
+// dispatch === null if the input doesn't address a registered skill by name
+// (the caller should fall through to its existing routing in that case);
+// otherwise { skillName, result } with the same result shape as
+// executor.run() above.
 ```

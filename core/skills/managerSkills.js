@@ -8,8 +8,9 @@ function clampScore(value) {
 
 function registerManagerSkills(registry, options = {}) {
   const organization = options.organization || Organization.createDefault();
-  const register = (name, capability, inputSchema, outputSchema, handler) => registry.register(name, {
+  const register = (name, capability, description, inputSchema, outputSchema, handler) => registry.register(name, {
     capability,
+    description,
     inputSchema,
     outputSchema,
     permissions: MANAGER_PERMISSION,
@@ -19,6 +20,7 @@ function registerManagerSkills(registry, options = {}) {
   register(
     'task_decomposition',
     'management_planning',
+    'Breaks an objective into an ordered list of tasks with acceptance criteria.',
     {
       objective: { type: 'string', required: true },
       deliverables: { type: 'array', required: false },
@@ -45,6 +47,7 @@ function registerManagerSkills(registry, options = {}) {
   register(
     'delegation_brief',
     'management_delegation',
+    'Builds a structured delegation brief for a task assigned to someone else.',
     {
       task: { type: 'string', required: true },
       assignee: { type: 'string', required: true },
@@ -68,6 +71,7 @@ function registerManagerSkills(registry, options = {}) {
   register(
     'priority_scoring',
     'management_prioritization',
+    'Ranks a list of items by impact, urgency, and effort.',
     { items: { type: 'array', required: true } },
     { rankedItems: { type: 'array', required: true } },
     async ({ items }) => ({
@@ -82,6 +86,7 @@ function registerManagerSkills(registry, options = {}) {
   register(
     'decision_memo',
     'management_decision_support',
+    'Formats a decision, its options, and rationale into an approval-ready memo.',
     {
       decision: { type: 'string', required: true },
       options: { type: 'array', required: true },
@@ -98,6 +103,7 @@ function registerManagerSkills(registry, options = {}) {
   register(
     'status_synthesis',
     'management_reporting',
+    'Summarizes a list of status updates into counts, blockers, and next actions.',
     { updates: { type: 'array', required: true } },
     { summary: { type: 'object', required: true }, blockers: { type: 'array', required: true }, nextActions: { type: 'array', required: true } },
     async ({ updates }) => {
@@ -114,6 +120,7 @@ function registerManagerSkills(registry, options = {}) {
   register(
     'escalation_assessment',
     'management_escalation',
+    'Scores whether an issue should be escalated based on impact, urgency, reversibility, and authority.',
     {
       issue: { type: 'string', required: true },
       impact: { type: 'number', required: true },
@@ -137,6 +144,7 @@ function registerManagerSkills(registry, options = {}) {
   register(
     'department_capability_lookup',
     'management_org_lookup',
+    'Finds departments or agents whose name or capabilities match a query.',
     { query: { type: 'string', required: true } },
     { matches: { type: 'array', required: true } },
     async ({ query }) => {
@@ -160,6 +168,7 @@ function registerManagerSkills(registry, options = {}) {
   register(
     'workload_balancing',
     'management_capacity',
+    'Computes per-owner utilization and suggests reassignments away from overloaded owners.',
     { assignments: { type: 'array', required: true } },
     { workloads: { type: 'array', required: true }, recommendations: { type: 'array', required: true } },
     async ({ assignments }) => {
@@ -183,6 +192,7 @@ function registerManagerSkills(registry, options = {}) {
   register(
     'quality_review',
     'management_quality',
+    'Scores an artifact against a list of pass/fail criteria and reports gaps.',
     {
       artifact: { type: 'string', required: true },
       criteria: { type: 'array', required: true },
@@ -206,6 +216,7 @@ function registerManagerSkills(registry, options = {}) {
   register(
     'budget_token_allocation',
     'management_budgeting',
+    'Allocates a token budget across work items by minimum reservation, then priority x complexity weighting.',
     { totalTokens: { type: 'number', required: true }, workItems: { type: 'array', required: true } },
     { allocations: { type: 'array', required: true }, totalAllocated: { type: 'number', required: true }, unusedTokens: { type: 'number', required: true } },
     async ({ totalTokens, workItems }) => {

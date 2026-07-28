@@ -15,6 +15,14 @@ async function buildConfigResponse(config: any) {
     catalog = buildCatalog(runtime.modelBroker);
   }
 
+  const skills = runtime
+    ? runtime.skillRegistry.list().map((skill: any) => ({
+      name: skill.name,
+      description: skill.description,
+      inputSchema: skill.inputSchema,
+    }))
+    : [];
+
   return {
     configured: true,
     agentName: config.agentName,
@@ -27,6 +35,7 @@ async function buildConfigResponse(config: any) {
     activeProviderIds: ACTIVE_PROVIDER_IDS,
     catalog,
     allDepartments: ALL_DEPARTMENTS,
+    skills,
   };
 }
 

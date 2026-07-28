@@ -32,6 +32,12 @@ for (const key of Object.getOwnPropertyNames(dom.window)) {
 global.requestAnimationFrame = cb => setTimeout(cb, 0);
 global.cancelAnimationFrame = id => clearTimeout(id);
 
+// jsdom doesn't implement scrollIntoView — no-op polyfill so components that
+// autoscroll (e.g. ChatView's message list) don't throw under this harness.
+if (!dom.window.Element.prototype.scrollIntoView) {
+  dom.window.Element.prototype.scrollIntoView = () => {};
+}
+
 // Tells React 18 it's safe to batch/flush synchronously inside act()
 // without the "not wrapped in act" warning path meant for real browsers.
 global.IS_REACT_ACT_ENVIRONMENT = true;

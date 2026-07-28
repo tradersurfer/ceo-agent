@@ -6,11 +6,13 @@ import remarkGfm from 'remark-gfm';
 import ModelSelector, { ChatRole, CostTier } from './ModelSelector';
 
 type Message = {
-  role: 'user' | 'agent' | 'system';
+  role: 'user' | 'agent' | 'system' | 'skill';
   text: string;
   agentName?: string;
   usage?: { promptTokens: number | null; completionTokens: number | null };
   attachments?: { fileId: string; filename: string; size: number }[];
+  skillName?: string;
+  skillOutput?: unknown;
 };
 
 type Attachment = { fileId: string; filename: string; size: number };
@@ -88,7 +90,13 @@ export default function ChatView({ config }: { config: any }) {
       });
       const data = await res.json();
 
-      if (data.status === 'ok') {
+      if (data.kind === 'skill') {
+        if (data.status === 'ok') {
+          setMessages(prev => [...prev, { role: 'skill', text: '', skillName: data.skillName, skillOutput: data.output }]);
+        } else {
+          setMessages(prev => [...prev, { role: 'system', text: data.userMessage || `Skill "${data.skillName}" failed.` }]);
+        }
+      } else if (data.status === 'ok') {
         setMessages(prev => [...prev, { role: 'agent', text: data.text, agentName: data.agentName, usage: data.usage }]);
       } else {
         setMessages(prev => [...prev, { role: 'system', text: data.userMessage || 'Something went wrong. Please try again.' }]);
@@ -105,16 +113,20 @@ export default function ChatView({ config }: { config: any }) {
       <div className="chat-messages">
         {messages.length === 0 && (
           <div className="chat-empty">
-            Message {config.agentName} directly, or address a department with @department — e.g. &quot;@legal draft an NDA clause&quot;
+            Message {config.agentName} directly, or address a department with @department — e.g. &quot;@legal draft an NDA clause&quot;.
+            Run a skill directly with /name or @name — e.g. &quot;/format_currency {'{"amount": 42.5}'}&quot;.
           </div>
         )}
         {messages.map((m, i) => (
           <div key={i} className={`chat-bubble chat-${m.role}`}>
             {m.role === 'agent' && <div className="chat-agent-label">{m.agentName}</div>}
+            {m.role === 'skill' && <div className="chat-agent-label">skill: {m.skillName}</div>}
             <div className="chat-text">
               {m.role === 'agent'
                 ? <ReactMarkdown remarkPlugins={[remarkGfm]}>{m.text}</ReactMarkdown>
-                : m.text}
+                : m.role === 'skill'
+                  ? <pre className="chat-skill-output">{JSON.stringify(m.skillOutput, null, 2)}</pre>
+                  : m.text}
             </div>
             {m.attachments && m.attachments.length > 0 && (
               <div className="chat-attachments">

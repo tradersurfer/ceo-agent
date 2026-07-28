@@ -62,6 +62,7 @@ const { saveUpload, MAX_UPLOAD_BYTES } = require('../lib/uploadStore');
 const { recordUsage } = require('../core/UsageTracker');
 const { resolveRoleForAgent } = require('../core/resolveDepartmentRole');
 const { resolveClientForModel } = require('../core/resolveClientForModel');
+const { dispatchSkillMessage } = require('../core/skillDispatch');
 
 function loadConfig() {
   if (!fs.existsSync(CONFIG_PATH)) {
@@ -77,6 +78,18 @@ function saveConfig(config) {
 
 function buildSystemPrompt(config, agent) {
   return loadAgentPrompt({ root: ROOT, config, agent });
+}
+
+function printSkillResult(skillName, result) {
+  console.log('');
+  if (result.status === 'ok') {
+    console.log(`(skill: ${skillName})`);
+    console.log(JSON.stringify(result.output, null, 2));
+  } else {
+    console.log(`(skill: ${skillName} failed${result.reason ? ` — ${result.reason}` : ''})`);
+    console.log(`  ${result.error}`);
+  }
+  console.log('');
 }
 
 function formatUsageLine(usage) {
@@ -154,10 +167,25 @@ async function main() {
       console.log('  /status            Show runtime + agent status');
       console.log('  /models            Show resolved model assignments (both tiers)');
       console.log('  /cost              Show or change cost mode (flagship/efficient)');
+      console.log('  /skills            List registered skills and their arguments');
       console.log('  /attach <path>     Attach a local file to your next message');
       console.log('  @department <msg>  Address a department head directly');
+      console.log('  /<skill> {json}    Run a registered skill directly, e.g. /format_currency {"amount": 42.5}');
+      console.log('  @<skill> {json}    Same, via @ addressing');
       console.log('  <anything else>    Talk to the CEO Agent directly');
       console.log('  /exit              Quit');
+      console.log('');
+      rl.prompt();
+      return;
+    }
+
+    if (input === '/skills') {
+      console.log('');
+      for (const skill of runtime.skillRegistry.list()) {
+        console.log(`  ${skill.name}${skill.description ? ` — ${skill.description}` : ''}`);
+        const fields = Object.keys(skill.inputSchema || {});
+        if (fields.length) console.log(`    args: { ${fields.join(', ')} }`);
+      }
       console.log('');
       rl.prompt();
       return;
@@ -235,6 +263,17 @@ async function main() {
       console.log('');
       console.log(`  Cost mode set to: ${config.costMode}`);
       console.log('');
+      rl.prompt();
+      return;
+    }
+
+    const skillDispatch = await dispatchSkillMessage(input, {
+      skillRegistry: runtime.skillRegistry,
+      skillExecutor: runtime.skillExecutor,
+      agentId: 'ceo_agent',
+    });
+    if (skillDispatch) {
+      printSkillResult(skillDispatch.skillName, skillDispatch.result);
       rl.prompt();
       return;
     }
