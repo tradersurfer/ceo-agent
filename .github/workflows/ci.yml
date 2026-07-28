@@ -1,3 +1,9 @@
+# Node 22.x, not package.json's stated >=18.0.0 floor: jsdom's bundled
+# undici throws (`webidl.util.markAsUncloneable is not a function`) under
+# Node 20 on this project's actual dependency versions — confirmed on this
+# workflow's first real run. Node 22 is also what local development has
+# actually been happening on, so this pins CI to a version already known to
+# work rather than the unverified floor in package.json.
 name: CI
 
 on:
@@ -12,7 +18,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '20.x'
+          node-version: '22.x'
           cache: 'npm'
       - run: npm ci
       - run: node scripts/run-tests.js
@@ -24,7 +30,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '20.x'
+          node-version: '22.x'
           cache: 'npm'
       - run: npm ci
       - run: npm run web:build

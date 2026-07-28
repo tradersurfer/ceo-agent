@@ -15,6 +15,7 @@
  */
 
 const { spawnSync } = require('child_process');
+const fs = require('fs');
 const path = require('path');
 
 const ROOT = path.resolve(__dirname, '..');
@@ -27,7 +28,21 @@ function run(label, args) {
   return ok;
 }
 
-const coreOk = run('core suite (tests/*.test.js)', ['--test', 'tests/*.test.js']);
+// Resolved here via fs.readdirSync rather than handed to `--test` as a
+// shell-glob-style string: spawnSync has no shell involved (see module
+// comment), so a literal "tests/*.test.js" argument depends entirely on
+// Node's own CLI glob support for test-file arguments — present in the
+// Node version this was developed against, but not in Node 20 (confirmed
+// on CI: "Could not find '.../tests/*.test.js'", taken as a literal
+// filename). Enumerating files ourselves works identically on every
+// Node version >=18, matching package.json's stated engines range.
+function testFiles(dir, extension) {
+  return fs.readdirSync(dir)
+    .filter(name => name.endsWith(extension))
+    .map(name => path.join(dir, name));
+}
+
+const coreOk = run('core suite (tests/*.test.js)', ['--test', ...testFiles(path.join(ROOT, 'tests'), '.test.js')]);
 
 // Absolute paths for --require: a bare relative path here (e.g.
 // "tests/components/registerTsx.js" with no "./" prefix) is resolved by
@@ -36,7 +51,7 @@ const coreOk = run('core suite (tests/*.test.js)', ['--test', 'tests/*.test.js']
 const componentsOk = run('component suite (tests/components/*.test.jsx)', [
   '--require', path.join(ROOT, 'tests', 'components', 'registerTsx.js'),
   '--require', path.join(ROOT, 'tests', 'components', 'setupJsdom.js'),
-  '--test', path.join('tests', 'components', '*.test.jsx'),
+  '--test', ...testFiles(path.join(ROOT, 'tests', 'components'), '.test.jsx'),
 ]);
 
 if (!coreOk || !componentsOk) {
