@@ -26,7 +26,7 @@ test('buildConnections reports hasKey/active per provider and never leaks the ra
   assert.equal(connections.anthropic.keyMasked, null);
 });
 
-test('buildConnections marks providers with no ProviderClient yet as not active (google/xai — Phase 2 not built for them)', () => {
+test('buildConnections marks providers with no ProviderClient yet as not active (xai — Phase 2 not built for it)', () => {
   const env = {
     OPENROUTER_API_KEY: 'sk-or-1234567890abcd',
     ANTHROPIC_API_KEY: 'sk-ant-1234567890abcd',
@@ -36,16 +36,15 @@ test('buildConnections marks providers with no ProviderClient yet as not active 
   };
   const connections = buildConnections(env, maskKey);
 
-  // openrouter, anthropic, and openai have real ProviderClients
-  // (sdk/OpenRouterClient.js, sdk/AnthropicClient.js, sdk/OpenAIClient.js)
-  // wired into dispatch via core/resolveClientForModel.js.
+  // openrouter, anthropic, openai, and google have real ProviderClients
+  // (sdk/OpenRouterClient.js, sdk/AnthropicClient.js, sdk/OpenAIClient.js,
+  // sdk/GoogleClient.js) wired into dispatch via core/resolveClientForModel.js.
   assert.equal(connections.openrouter.active, true);
   assert.equal(connections.anthropic.active, true, 'anthropic has a real ProviderClient as of BYNGE Phase 2 (sdk/AnthropicClient.js)');
   assert.equal(connections.openai.active, true, 'openai has a real ProviderClient as of BYNGE Phase 2 (sdk/OpenAIClient.js)');
-  for (const providerId of ['google', 'xai']) {
-    assert.equal(connections[providerId].active, false, `${providerId} must not be marked active (no ProviderClient yet)`);
-    assert.equal(connections[providerId].hasKey, true, `${providerId} should still report a stored key`);
-  }
+  assert.equal(connections.google.active, true, 'google has a real ProviderClient as of BYNGE Phase 2 (sdk/GoogleClient.js)');
+  assert.equal(connections.xai.active, false, 'xai must not be marked active (no ProviderClient yet)');
+  assert.equal(connections.xai.hasKey, true, 'xai should still report a stored key');
 });
 
 test('buildConnections marks anthropic as not active when no key is stored, even though it has a ProviderClient', () => {
