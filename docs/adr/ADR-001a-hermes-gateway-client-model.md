@@ -6,6 +6,17 @@
 - **Amends:** [`ADR-001`](./ADR-001-hermes-sandboxed-execution.md) — supersedes its process-layer/subprocess-supervisor decision. ADR-001's kernel-layer conclusion (isolation is the operator's deployment responsibility, not something Node's application code can enforce) is carried forward unchanged, just relocated to a different boundary — see *Decision* below.
 - **Related:** `SECURITY.md`
 
+> **Corrected by [`ADR-001b`](./ADR-001b-hermes-gateway-api-surface-correction.md)**
+> (2026-07-27): issue #56's investigation into this ADR's *Open items* found
+> that "the gateway's task-submission API" described below is actually a
+> separate, opt-in adapter (`gateway/platforms/api_server.py`, `POST
+> /v1/runs`, Bearer auth, default port 8642) — distinct from the dashboard/
+> WebSocket server (port 9119) this ADR's language could be misread as
+> describing. ADR-001b corrects the API-surface description only; this ADR's
+> *Decision* — HTTP client of a gateway API, not subprocess supervisor —
+> remains correct and unamended. Read ADR-001b before implementing
+> `HermesGatewayClient`.
+
 ---
 
 ## Context
