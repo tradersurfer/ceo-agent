@@ -2,11 +2,28 @@
 
 import { useState } from 'react';
 import ModelSelector, { ChatRole, CostTier, RoleCatalog } from './ModelSelector';
-import { PROVIDERS } from '../../lib/providers';
 
 type ConnectionInfo = { hasKey: boolean; keyMasked: string | null; active: boolean };
+type ProviderMeta = { id: string; label: string };
 
 export default function ConnectionsView({ config, onSaved }: { config: any; onSaved: () => void }) {
+  // The provider display list (id/label only) is relayed through
+  // /api/config's response rather than required directly from lib/
+  // providers.js. lib/providers.js is a plain CommonJS module with no
+  // import/export syntax of its own — pulling it into the client bundle
+  // (however it's imported, `import` or `require()`) trips Next dev's
+  // Fast-Refresh instrumentation: webpack injects `import.meta.webpackHot.
+  // accept()` into every module reachable from a 'use client' boundary, and
+  // that injection is only valid syntax for a file webpack parses as ESM
+  // ("Module" grammar). A file with zero import/export statements parses as
+  // "Script" grammar instead, so the injected line is a hard parse error —
+  // `next build` (production, no Fast-Refresh injection) never catches this,
+  // only `next dev` does. Reading it from `config` — server-computed data
+  // this component already receives as a prop — avoids bundling the CJS
+  // module into the client at all, which is the actual fix, not a
+  // require()-vs-import syntax swap (verified that alone does not resolve
+  // it: same error, same cache-cleared repro, before this restructuring).
+  const providers: ProviderMeta[] = config.providers || [];
   const connections: Record<string, ConnectionInfo> = config.connections || {};
   const catalog: RoleCatalog | null = config.catalog || null;
 
@@ -51,7 +68,7 @@ export default function ConnectionsView({ config, onSaved }: { config: any; onSa
 
   return (
     <div className="connections-view">
-      {PROVIDERS.map((provider: { id: string; label: string }) => {
+      {providers.map((provider: ProviderMeta) => {
         const info: ConnectionInfo = connections[provider.id] || { hasKey: false, keyMasked: null, active: false };
         return (
           <div key={provider.id} className="connection-card">

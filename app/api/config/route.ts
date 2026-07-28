@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 const { loadConfig, saveConfig, maskKey, setProviderKey, resetRuntimeCache, getRuntime, ensureModelsResolved } = require('../../../lib/ceoAgentServer');
-const { PROVIDER_IDS, ACTIVE_PROVIDER_IDS } = require('../../../lib/providers');
+const { PROVIDERS, PROVIDER_IDS, ACTIVE_PROVIDER_IDS } = require('../../../lib/providers');
 const { ALL_DEPARTMENTS, buildConnections, buildCatalog, sanitizeDepartmentModelDefaults } = require('../../../lib/connectionsConfig');
 
 async function buildConfigResponse(config: any) {
@@ -25,6 +25,13 @@ async function buildConfigResponse(config: any) {
     departmentModelDefaults: config.departmentModelDefaults || {},
     connections: buildConnections(process.env, maskKey),
     activeProviderIds: ACTIVE_PROVIDER_IDS,
+    // id+label only (no envVar) — relayed through this already-fetched
+    // response so ConnectionsView.tsx never needs to require() lib/
+    // providers.js directly into the client bundle. See ConnectionsView.tsx
+    // for why that broke the dev-mode client bundle (import.meta parse
+    // error from webpack's Fast-Refresh instrumentation on a pure-CommonJS
+    // module with no import/export syntax of its own).
+    providers: PROVIDERS.map((p: { id: string; label: string }) => ({ id: p.id, label: p.label })),
     catalog,
     allDepartments: ALL_DEPARTMENTS,
   };
