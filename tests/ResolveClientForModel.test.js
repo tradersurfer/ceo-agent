@@ -34,20 +34,20 @@ test('an anthropic/-prefixed model with the anthropic key simply absent from the
   assert.equal(result.providerModelId, 'anthropic/claude-opus-5');
 });
 
-test('a non-Anthropic, non-OpenAI prefix always routes through OpenRouter, unchanged, regardless of Anthropic/OpenAI connection state', () => {
+test('a non-Anthropic/OpenAI/Google prefix (xAI) always routes through OpenRouter, unchanged, regardless of other providers\' connection state', () => {
   const openrouter = fakeClient('openrouter');
   const anthropic = fakeClient('anthropic');
   const openai = fakeClient('openai');
+  const google = fakeClient('google');
 
-  for (const modelId of ['google/gemini-3-pro', 'x-ai/grok-5']) {
-    const withBothConnected = resolveClientForModel(modelId, { openrouter, anthropic, openai });
-    assert.equal(withBothConnected.client, openrouter, `${modelId} must route through OpenRouter even with Anthropic/OpenAI connected`);
-    assert.equal(withBothConnected.providerModelId, modelId);
+  const modelId = 'x-ai/grok-5';
+  const withAllConnected = resolveClientForModel(modelId, { openrouter, anthropic, openai, google });
+  assert.equal(withAllConnected.client, openrouter, `${modelId} must route through OpenRouter even with Anthropic/OpenAI/Google connected`);
+  assert.equal(withAllConnected.providerModelId, modelId);
 
-    const withNeitherConnected = resolveClientForModel(modelId, { openrouter, anthropic: null, openai: null });
-    assert.equal(withNeitherConnected.client, openrouter);
-    assert.equal(withNeitherConnected.providerModelId, modelId);
-  }
+  const withNoneConnected = resolveClientForModel(modelId, { openrouter, anthropic: null, openai: null, google: null });
+  assert.equal(withNoneConnected.client, openrouter);
+  assert.equal(withNoneConnected.providerModelId, modelId);
 });
 
 // --- OpenAI ('openai/' prefix, BYNGE Phase 2's second provider PR) --------
@@ -104,6 +104,50 @@ test('Anthropic and OpenAI connections are resolved independently — connecting
   const result = resolveClientForModel('openai/gpt-6-pro', { openrouter, anthropic, openai: null });
   assert.equal(result.client, openrouter);
   assert.equal(result.providerModelId, 'openai/gpt-6-pro');
+});
+
+// --- Google ('google/' prefix, BYNGE Phase 2's third provider PR) ---------
+// core/ModelResolver.js's PROVIDER_PREFIXES maps the 'gemini' role to
+// OpenRouter's 'google/' prefix.
+
+test('a connected Google model resolves to the Google client with the "google/" prefix stripped', () => {
+  const openrouter = fakeClient('openrouter');
+  const google = fakeClient('google');
+
+  const result = resolveClientForModel('google/gemini-3-pro', { openrouter, google });
+
+  assert.equal(result.client, google);
+  assert.equal(result.providerModelId, 'gemini-3-pro');
+});
+
+test('a google/-prefixed model with no Google connection falls back to OpenRouter, id unchanged', () => {
+  const openrouter = fakeClient('openrouter');
+
+  const result = resolveClientForModel('google/gemini-3-pro', { openrouter, google: null });
+
+  assert.equal(result.client, openrouter);
+  assert.equal(result.providerModelId, 'google/gemini-3-pro', 'id must not be stripped when routing through OpenRouter');
+});
+
+test('a google/-prefixed model with the google key simply absent from the registry also falls back to OpenRouter', () => {
+  const openrouter = fakeClient('openrouter');
+
+  const result = resolveClientForModel('google/gemini-3-pro', { openrouter });
+
+  assert.equal(result.client, openrouter);
+  assert.equal(result.providerModelId, 'google/gemini-3-pro');
+});
+
+test('Anthropic, OpenAI, and Google connections are resolved independently — connecting one does not affect the others\' prefixes', () => {
+  const openrouter = fakeClient('openrouter');
+  const anthropic = fakeClient('anthropic');
+  const openai = fakeClient('openai');
+
+  // Google not connected, Anthropic/OpenAI are — a google/ id must still
+  // fall back to OpenRouter, not accidentally pick up another provider's client.
+  const result = resolveClientForModel('google/gemini-3-pro', { openrouter, anthropic, openai, google: null });
+  assert.equal(result.client, openrouter);
+  assert.equal(result.providerModelId, 'google/gemini-3-pro');
 });
 
 test('a null/undefined apiModelId falls back to OpenRouter unchanged rather than throwing', () => {

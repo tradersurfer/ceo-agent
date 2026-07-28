@@ -52,9 +52,17 @@
 // loop matches on the model-id prefix only, not on which role produced it,
 // so an 'openai/'-prefixed id resolved from either role dispatches through
 // OpenAIClient identically — no role-awareness needed or added here.
+//
+// 'google/' (added in Phase 2's third PR, sdk/GoogleClient.js) is the
+// OpenRouter prefix core/ModelResolver.js's PROVIDER_PREFIXES uses for the
+// 'gemini' role — confirmed from that file rather than assumed; the
+// provider id ('google', matching lib/providers.js's PROVIDER_IDS) and the
+// OpenRouter prefix ('google/') happen to share a name here the same way
+// anthropic/openai's do, which was still worth checking, not inferring.
 const MODEL_PREFIX_TO_PROVIDER_ID = Object.freeze({
   'anthropic/': 'anthropic',
   'openai/': 'openai',
+  'google/': 'google',
 });
 
 /**
