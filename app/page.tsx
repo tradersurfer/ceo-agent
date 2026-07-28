@@ -5,11 +5,12 @@ import Sidebar from './components/Sidebar';
 import ChatView from './components/ChatView';
 import OrgView from './components/OrgView';
 import StatusView from './components/StatusView';
+import ActivityView from './components/ActivityView';
 import SettingsView from './components/SettingsView';
 import AddAgentView from './components/AddAgentView';
 import ConnectionsView from './components/ConnectionsView';
 
-type Tab = 'chat' | 'org' | 'status' | 'add' | 'connections' | 'settings';
+type Tab = 'chat' | 'org' | 'status' | 'activity' | 'add' | 'connections' | 'settings';
 
 export default function Home() {
   const [tab, setTab] = useState<Tab>('chat');
@@ -49,6 +50,7 @@ export default function Home() {
         {tab === 'chat' && <ChatView config={config} />}
         {tab === 'org' && <OrgView />}
         {tab === 'status' && <StatusView />}
+        {tab === 'activity' && <ActivityView />}
         {tab === 'add' && <AddAgentView onCreated={refreshConfig} />}
         {tab === 'connections' && <ConnectionsView config={config} onSaved={refreshConfig} />}
         {tab === 'settings' && <SettingsView config={config} onSaved={refreshConfig} />}

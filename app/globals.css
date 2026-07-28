@@ -83,10 +83,30 @@ button:disabled { opacity: 0.5; cursor: default; }
 
 .org-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
 .org-card { background: #fff; border: 1px solid #e5e3dc; border-radius: 12px; padding: 14px; }
-.org-card-header { font-weight: 600; font-size: 13px; text-transform: capitalize; margin-bottom: 8px; color: #4a4944; }
+.org-card-header { display: flex; align-items: center; justify-content: space-between; font-weight: 600; font-size: 13px; text-transform: capitalize; margin-bottom: 8px; color: #4a4944; }
 .org-agent { padding: 4px 0; }
 .org-agent-name { font-weight: 500; font-size: 14px; display: block; }
 .org-agent-title { font-size: 12px; color: #8a8983; }
+.org-working-indicator { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 500; text-transform: none; color: #2f7d4f; }
+.org-working-dot { width: 7px; height: 7px; border-radius: 50%; background: #2f7d4f; display: inline-block; animation: org-working-pulse 1.4s ease-in-out infinite; }
+@keyframes org-working-pulse {
+  0% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.75); }
+  100% { opacity: 1; transform: scale(1); }
+}
+.org-highlight { margin-top: 10px; padding-top: 8px; border-top: 1px solid #e5e3dc; font-size: 12px; color: #6a6963; }
+.org-highlight-time { color: #a5a49d; }
+
+.activity-view { display: flex; flex-direction: column; gap: 24px; max-width: 900px; }
+.activity-section h3 { font-size: 14px; font-weight: 600; margin: 0 0 10px; color: #1a1a18; }
+.activity-subsection { margin-top: 12px; }
+.activity-table { border: 1px solid #e5e3dc; border-radius: 10px; overflow: hidden; }
+.activity-row { display: grid; grid-template-columns: 1.2fr 1.4fr 1fr 1fr; gap: 8px; padding: 8px 12px; font-size: 13px; border-top: 1px solid #e5e3dc; align-items: center; }
+.activity-row:first-child { border-top: none; }
+.activity-row-header { background: #f0efe9; font-weight: 500; color: #4a4944; font-size: 12px; }
+.activity-status-ok { color: #2f7d4f; }
+.activity-status-failed { color: #b0473f; }
+.activity-notes { display: flex; flex-direction: column; gap: 4px; }
 
 .status-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-bottom: 20px; max-width: 640px; }
 .status-card { background: #fff; border: 1px solid #e5e3dc; border-radius: 10px; padding: 14px; }
