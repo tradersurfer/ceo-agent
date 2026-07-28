@@ -26,7 +26,7 @@ test('buildConnections reports hasKey/active per provider and never leaks the ra
   assert.equal(connections.anthropic.keyMasked, null);
 });
 
-test('buildConnections marks providers with no ProviderClient yet as not active (xai — Phase 2 not built for it)', () => {
+test('buildConnections marks every provider active now that all four direct ProviderClients exist (BYNGE Phase 2 complete)', () => {
   const env = {
     OPENROUTER_API_KEY: 'sk-or-1234567890abcd',
     ANTHROPIC_API_KEY: 'sk-ant-1234567890abcd',
@@ -36,14 +36,16 @@ test('buildConnections marks providers with no ProviderClient yet as not active 
   };
   const connections = buildConnections(env, maskKey);
 
-  // openrouter, anthropic, openai, and google have real ProviderClients
-  // (sdk/OpenRouterClient.js, sdk/AnthropicClient.js, sdk/OpenAIClient.js,
-  // sdk/GoogleClient.js) wired into dispatch via core/resolveClientForModel.js.
+  // openrouter, anthropic, openai, google, and (as of this PR) xai all have
+  // real ProviderClients (sdk/OpenRouterClient.js, sdk/AnthropicClient.js,
+  // sdk/OpenAIClient.js, sdk/GoogleClient.js, sdk/XaiClient.js) wired into
+  // dispatch via core/resolveClientForModel.js — BYNGE Phase 2's fourth and
+  // last provider client. No provider id is "connected, not active" anymore.
   assert.equal(connections.openrouter.active, true);
   assert.equal(connections.anthropic.active, true, 'anthropic has a real ProviderClient as of BYNGE Phase 2 (sdk/AnthropicClient.js)');
   assert.equal(connections.openai.active, true, 'openai has a real ProviderClient as of BYNGE Phase 2 (sdk/OpenAIClient.js)');
   assert.equal(connections.google.active, true, 'google has a real ProviderClient as of BYNGE Phase 2 (sdk/GoogleClient.js)');
-  assert.equal(connections.xai.active, false, 'xai must not be marked active (no ProviderClient yet)');
+  assert.equal(connections.xai.active, true, 'xai has a real ProviderClient as of BYNGE Phase 2 (sdk/XaiClient.js)');
   assert.equal(connections.xai.hasKey, true, 'xai should still report a stored key');
 });
 

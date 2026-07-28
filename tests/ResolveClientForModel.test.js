@@ -34,18 +34,19 @@ test('an anthropic/-prefixed model with the anthropic key simply absent from the
   assert.equal(result.providerModelId, 'anthropic/claude-opus-5');
 });
 
-test('a non-Anthropic/OpenAI/Google prefix (xAI) always routes through OpenRouter, unchanged, regardless of other providers\' connection state', () => {
+test('an unrecognized prefix (not anthropic/openai/google/x-ai) always routes through OpenRouter, unchanged, regardless of other providers\' connection state', () => {
   const openrouter = fakeClient('openrouter');
   const anthropic = fakeClient('anthropic');
   const openai = fakeClient('openai');
   const google = fakeClient('google');
+  const xai = fakeClient('xai');
 
-  const modelId = 'x-ai/grok-5';
-  const withAllConnected = resolveClientForModel(modelId, { openrouter, anthropic, openai, google });
-  assert.equal(withAllConnected.client, openrouter, `${modelId} must route through OpenRouter even with Anthropic/OpenAI/Google connected`);
+  const modelId = 'mistralai/mistral-large';
+  const withAllConnected = resolveClientForModel(modelId, { openrouter, anthropic, openai, google, xai });
+  assert.equal(withAllConnected.client, openrouter, `${modelId} must route through OpenRouter even with every direct provider connected`);
   assert.equal(withAllConnected.providerModelId, modelId);
 
-  const withNoneConnected = resolveClientForModel(modelId, { openrouter, anthropic: null, openai: null, google: null });
+  const withNoneConnected = resolveClientForModel(modelId, { openrouter, anthropic: null, openai: null, google: null, xai: null });
   assert.equal(withNoneConnected.client, openrouter);
   assert.equal(withNoneConnected.providerModelId, modelId);
 });
@@ -148,6 +149,68 @@ test('Anthropic, OpenAI, and Google connections are resolved independently — c
   const result = resolveClientForModel('google/gemini-3-pro', { openrouter, anthropic, openai, google: null });
   assert.equal(result.client, openrouter);
   assert.equal(result.providerModelId, 'google/gemini-3-pro');
+});
+
+// --- xAI ('x-ai/' prefix, BYNGE Phase 2's fourth and last provider PR) ----
+// core/ModelResolver.js's PROVIDER_PREFIXES maps the 'grok' role to
+// OpenRouter's 'x-ai/' prefix — NOT 'xai/' (the only one of the four
+// provider prefixes that doesn't equal its provider id verbatim).
+
+test('a connected xAI model resolves to the xAI client with the "x-ai/" prefix stripped', () => {
+  const openrouter = fakeClient('openrouter');
+  const xai = fakeClient('xai');
+
+  const result = resolveClientForModel('x-ai/grok-4.5', { openrouter, xai });
+
+  assert.equal(result.client, xai);
+  assert.equal(result.providerModelId, 'grok-4.5');
+});
+
+test('an x-ai/-prefixed model with no xAI connection falls back to OpenRouter, id unchanged', () => {
+  const openrouter = fakeClient('openrouter');
+
+  const result = resolveClientForModel('x-ai/grok-4.5', { openrouter, xai: null });
+
+  assert.equal(result.client, openrouter);
+  assert.equal(result.providerModelId, 'x-ai/grok-4.5', 'id must not be stripped when routing through OpenRouter');
+});
+
+test('an x-ai/-prefixed model with the xai key simply absent from the registry also falls back to OpenRouter', () => {
+  const openrouter = fakeClient('openrouter');
+
+  const result = resolveClientForModel('x-ai/grok-4.5', { openrouter });
+
+  assert.equal(result.client, openrouter);
+  assert.equal(result.providerModelId, 'x-ai/grok-4.5');
+});
+
+test('a bare "xai/"-prefixed id (the wrong, unhyphenated prefix) does NOT match — must fall back to OpenRouter unchanged', () => {
+  // Guards against the exact mistake ADR-006/resolveClientForModel.js's
+  // comments warn about: assuming the OpenRouter prefix equals the provider
+  // id. Only "x-ai/" (verified from core/ModelResolver.js's
+  // PROVIDER_PREFIXES) is a real OpenRouter prefix; "xai/" is not, so an id
+  // using it must be treated as unrecognized, not accidentally routed to
+  // the xAI client.
+  const openrouter = fakeClient('openrouter');
+  const xai = fakeClient('xai');
+
+  const result = resolveClientForModel('xai/grok-4.5', { openrouter, xai });
+
+  assert.equal(result.client, openrouter);
+  assert.equal(result.providerModelId, 'xai/grok-4.5');
+});
+
+test('Anthropic, OpenAI, Google, and xAI connections are resolved independently — connecting one does not affect the others\' prefixes', () => {
+  const openrouter = fakeClient('openrouter');
+  const anthropic = fakeClient('anthropic');
+  const openai = fakeClient('openai');
+  const google = fakeClient('google');
+
+  // xAI not connected, the other three are — an x-ai/ id must still fall
+  // back to OpenRouter, not accidentally pick up another provider's client.
+  const result = resolveClientForModel('x-ai/grok-4.5', { openrouter, anthropic, openai, google, xai: null });
+  assert.equal(result.client, openrouter);
+  assert.equal(result.providerModelId, 'x-ai/grok-4.5');
 });
 
 test('a null/undefined apiModelId falls back to OpenRouter unchanged rather than throwing', () => {
