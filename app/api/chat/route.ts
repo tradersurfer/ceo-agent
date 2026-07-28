@@ -7,6 +7,7 @@ const { recordUsage } = require('../../../core/UsageTracker');
 const { resolveRoleForAgent } = require('../../../core/resolveDepartmentRole');
 const { resolveClientForModel } = require('../../../core/resolveClientForModel');
 const { CHAT_ROLES, COST_TIERS } = require('../../../lib/providers');
+const { dispatchSkillMessage } = require('../../../core/skillDispatch');
 
 export async function POST(request: Request) {
   const clientKey = request.headers.get('x-forwarded-for') || 'unknown';
@@ -34,6 +35,32 @@ export async function POST(request: Request) {
   const rawMessage = (body.message || '').trim();
   if (!rawMessage) {
     return NextResponse.json({ error: 'message is required' }, { status: 400 });
+  }
+
+  // Explicit skill dispatch (/name or @name against a registered skill) —
+  // same parser bin/chat.js's CLI uses (core/skillDispatch.js), so both chat
+  // surfaces recognize this syntax identically. Returns null for anything
+  // that isn't an exact registered skill name, in which case this request
+  // falls through to the normal @department/model-call handling below,
+  // unchanged. Skill execution is deterministic and doesn't need
+  // attachments or a model call, so this returns before either.
+  const skillDispatch = await dispatchSkillMessage(rawMessage, {
+    skillRegistry: runtime.skillRegistry,
+    skillExecutor: runtime.skillExecutor,
+    agentId: 'ceo_agent',
+  });
+  if (skillDispatch) {
+    const { skillName, result } = skillDispatch;
+    if (result.status === 'ok') {
+      return NextResponse.json({ status: 'ok', kind: 'skill', skillName, output: result.output });
+    }
+    return NextResponse.json({
+      status: 'failed',
+      kind: 'skill',
+      skillName,
+      reason: result.reason,
+      userMessage: result.error,
+    });
   }
 
   const requestedAttachmentIds = Array.isArray(body.attachmentIds)

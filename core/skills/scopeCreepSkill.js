@@ -417,6 +417,7 @@ const SCOPE_CREEP_PERMISSION = Object.freeze({ requiresAgentAssignment: true });
 function registerScopeCreepSkill(registry) {
   registry.register('scope_creep_detection', {
     capability: 'code_review_scope_analysis',
+    description: 'Classifies a unified diff against a stated intent into in-scope changes and likely scope creep.',
     inputSchema: {
       diffText: { type: 'string', required: true },
       intent: { type: 'string', required: true },

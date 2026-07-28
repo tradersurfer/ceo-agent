@@ -249,6 +249,7 @@ const CONTENT_QUALITY_PERMISSION = Object.freeze({ requiresAgentAssignment: true
 function registerContentQualitySkill(registry) {
   registry.register('content_quality_analysis', {
     capability: 'marketing_content_quality',
+    description: 'Scores text for filler, AI-typical phrasing, information density, and repetition (QRG-aligned, advisory only).',
     inputSchema: {
       text: { type: 'string', required: true },
       threshold: { type: 'number', required: false },

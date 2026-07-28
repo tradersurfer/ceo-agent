@@ -66,6 +66,7 @@ function slugify(title) {
 function registerDocumentCreationSkills(registry) {
   registry.register('generate_docx', {
     capability: 'document_generation_docx',
+    description: 'Generates a downloadable .docx file from a title and body text.',
     inputSchema: {
       title: { type: 'string', required: true },
       content: { type: 'string', required: true },
@@ -100,6 +101,7 @@ function registerDocumentCreationSkills(registry) {
 
   registry.register('generate_pdf', {
     capability: 'document_generation_pdf',
+    description: 'Generates a downloadable .pdf file from a title and body text.',
     inputSchema: {
       title: { type: 'string', required: true },
       content: { type: 'string', required: true },
@@ -151,6 +153,7 @@ function registerDocumentCreationSkills(registry) {
 
   registry.register('generate_spreadsheet', {
     capability: 'document_generation_spreadsheet',
+    description: 'Generates a downloadable .xlsx spreadsheet from headers and rows.',
     inputSchema: {
       title: { type: 'string', required: true },
       rows: { type: 'array', required: true },

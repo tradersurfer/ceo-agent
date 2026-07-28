@@ -256,6 +256,7 @@ function validateModel(model) {
 function registerFinancialModelSkills(registry) {
   registry.register('compute_financial_model', {
     capability: 'financial_projection',
+    description: 'Projects a multi-stream revenue model into a month-by-month P&L and cash flow.',
     inputSchema: {
       model: { type: 'object', required: true },
       scenario: { type: 'string', required: false },
@@ -282,6 +283,7 @@ function registerFinancialModelSkills(registry) {
 
   registry.register('import_revenue_csv', {
     capability: 'financial_csv_import',
+    description: 'Reads an uploaded revenue CSV and averages the last 3 months of values.',
     inputSchema: {
       fileId: { type: 'string', required: true },
     },

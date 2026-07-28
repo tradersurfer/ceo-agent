@@ -6,6 +6,7 @@
     {
       "id": "summarize_text",
       "capability": "text_summarization",
+      "description": "Returns a word count and truncated preview of the given text (structural placeholder, no model call).",
       "inputSchema": {
         "text": { "type": "string", "required": true }
       },
@@ -15,6 +16,7 @@
     {
       "id": "format_currency",
       "capability": "currency_formatting",
+      "description": "Formats a numeric amount as a localized currency string.",
       "inputSchema": {
         "amount": { "type": "number", "required": true },
         "currency": { "type": "string", "required": false }
@@ -25,6 +27,7 @@
     {
       "id": "lookup_department",
       "capability": "org_lookup",
+      "description": "Looks up a department by id in the org chart.",
       "inputSchema": {
         "departmentId": { "type": "string", "required": true }
       },
@@ -34,6 +37,7 @@
     {
       "id": "task_decomposition",
       "capability": "management_planning",
+      "description": "Breaks an objective into an ordered list of tasks with acceptance criteria.",
       "inputSchema": {
         "objective": { "type": "string", "required": true },
         "deliverables": { "type": "array", "required": false },
@@ -51,6 +55,7 @@
     {
       "id": "delegation_brief",
       "capability": "management_delegation",
+      "description": "Builds a structured delegation brief for a task assigned to someone else.",
       "inputSchema": {
         "task": { "type": "string", "required": true },
         "assignee": { "type": "string", "required": true },
@@ -66,6 +71,7 @@
     {
       "id": "priority_scoring",
       "capability": "management_prioritization",
+      "description": "Ranks a list of items by impact, urgency, and effort.",
       "inputSchema": { "items": { "type": "array", "required": true } },
       "outputSchema": { "rankedItems": { "type": "array", "required": true } },
       "permissions": { "requiresAgentAssignment": true },
@@ -75,6 +81,7 @@
     {
       "id": "decision_memo",
       "capability": "management_decision_support",
+      "description": "Formats a decision, its options, and rationale into an approval-ready memo.",
       "inputSchema": {
         "decision": { "type": "string", "required": true },
         "options": { "type": "array", "required": true },
@@ -90,6 +97,7 @@
     {
       "id": "status_synthesis",
       "capability": "management_reporting",
+      "description": "Summarizes a list of status updates into counts, blockers, and next actions.",
       "inputSchema": { "updates": { "type": "array", "required": true } },
       "outputSchema": {
         "summary": { "type": "object", "required": true },
@@ -103,6 +111,7 @@
     {
       "id": "escalation_assessment",
       "capability": "management_escalation",
+      "description": "Scores whether an issue should be escalated based on impact, urgency, reversibility, and authority.",
       "inputSchema": {
         "issue": { "type": "string", "required": true },
         "impact": { "type": "number", "required": true },
@@ -118,6 +127,7 @@
     {
       "id": "department_capability_lookup",
       "capability": "management_org_lookup",
+      "description": "Finds departments or agents whose name or capabilities match a query.",
       "inputSchema": { "query": { "type": "string", "required": true } },
       "outputSchema": { "matches": { "type": "array", "required": true } },
       "permissions": { "requiresAgentAssignment": true },
@@ -127,6 +137,7 @@
     {
       "id": "workload_balancing",
       "capability": "management_capacity",
+      "description": "Computes per-owner utilization and suggests reassignments away from overloaded owners.",
       "inputSchema": { "assignments": { "type": "array", "required": true } },
       "outputSchema": {
         "workloads": { "type": "array", "required": true },
@@ -139,6 +150,7 @@
     {
       "id": "quality_review",
       "capability": "management_quality",
+      "description": "Scores an artifact against a list of pass/fail criteria and reports gaps.",
       "inputSchema": {
         "artifact": { "type": "string", "required": true },
         "criteria": { "type": "array", "required": true },
@@ -152,6 +164,7 @@
     {
       "id": "budget_token_allocation",
       "capability": "management_budgeting",
+      "description": "Allocates a token budget across work items by minimum reservation, then priority x complexity weighting.",
       "inputSchema": {
         "totalTokens": { "type": "number", "required": true },
         "workItems": { "type": "array", "required": true }
@@ -168,6 +181,7 @@
     {
       "id": "scope_creep_detection",
       "capability": "code_review_scope_analysis",
+      "description": "Classifies a unified diff against a stated intent into in-scope changes and likely scope creep.",
       "inputSchema": {
         "diffText": { "type": "string", "required": true },
         "intent": { "type": "string", "required": true },
@@ -189,6 +203,7 @@
     {
       "id": "schema_reservation_markup",
       "capability": "marketing_schema_markup",
+      "description": "Generates schema.org Reservation JSON-LD markup.",
       "inputSchema": {
         "provider": { "type": "string", "required": true },
         "start": { "type": "string", "required": true },
@@ -208,6 +223,7 @@
     {
       "id": "schema_order_markup",
       "capability": "marketing_schema_markup",
+      "description": "Generates schema.org OrderAction JSON-LD markup.",
       "inputSchema": {
         "merchant": { "type": "string", "required": true },
         "orderUrl": { "type": "string", "required": true },
@@ -223,6 +239,7 @@
     {
       "id": "schema_discussion_markup",
       "capability": "marketing_schema_markup",
+      "description": "Generates schema.org DiscussionForumPosting JSON-LD markup.",
       "inputSchema": {
         "headline": { "type": "string", "required": true },
         "author": { "type": "string", "required": true },
@@ -241,6 +258,7 @@
     {
       "id": "schema_profile_markup",
       "capability": "marketing_schema_markup",
+      "description": "Generates schema.org ProfilePage JSON-LD markup.",
       "inputSchema": {
         "name": { "type": "string", "required": true },
         "url": { "type": "string", "required": true },
@@ -259,6 +277,7 @@
     {
       "id": "content_quality_analysis",
       "capability": "marketing_content_quality",
+      "description": "Scores text for filler, AI-typical phrasing, information density, and repetition (QRG-aligned, advisory only).",
       "inputSchema": {
         "text": { "type": "string", "required": true },
         "threshold": { "type": "number", "required": false }
@@ -282,6 +301,7 @@
     {
       "id": "generate_docx",
       "capability": "document_generation_docx",
+      "description": "Generates a downloadable .docx file from a title and body text.",
       "inputSchema": {
         "title": { "type": "string", "required": true },
         "content": { "type": "string", "required": true },
@@ -300,6 +320,7 @@
     {
       "id": "generate_pdf",
       "capability": "document_generation_pdf",
+      "description": "Generates a downloadable .pdf file from a title and body text.",
       "inputSchema": {
         "title": { "type": "string", "required": true },
         "content": { "type": "string", "required": true },
@@ -318,6 +339,7 @@
     {
       "id": "generate_spreadsheet",
       "capability": "document_generation_spreadsheet",
+      "description": "Generates a downloadable .xlsx spreadsheet from headers and rows.",
       "inputSchema": {
         "title": { "type": "string", "required": true },
         "rows": { "type": "array", "required": true },
@@ -337,6 +359,7 @@
     {
       "id": "compute_financial_model",
       "capability": "financial_projection",
+      "description": "Projects a multi-stream revenue model into a month-by-month P&L and cash flow.",
       "inputSchema": {
         "model": { "type": "object", "required": true },
         "scenario": { "type": "string", "required": false },
@@ -355,6 +378,7 @@
     {
       "id": "import_revenue_csv",
       "capability": "financial_csv_import",
+      "description": "Reads an uploaded revenue CSV and averages the last 3 months of values.",
       "inputSchema": {
         "fileId": { "type": "string", "required": true }
       },

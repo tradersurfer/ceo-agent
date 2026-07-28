@@ -9,6 +9,7 @@ const Organization = require('../../organization/Organization');
 function registerExampleSkills(registry) {
   registry.register('summarize_text', {
     capability: 'text_summarization',
+    description: 'Returns a word count and truncated preview of the given text (structural placeholder, no model call).',
     inputSchema: { text: { type: 'string', required: true } },
     handler: async ({ text }) => {
       const trimmed = text.trim();
@@ -20,6 +21,7 @@ function registerExampleSkills(registry) {
 
   registry.register('format_currency', {
     capability: 'currency_formatting',
+    description: 'Formats a numeric amount as a localized currency string.',
     inputSchema: { amount: { type: 'number', required: true }, currency: { type: 'string', required: false } },
     handler: async ({ amount, currency = 'USD' }) => {
       const formatted = new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(amount);
@@ -29,6 +31,7 @@ function registerExampleSkills(registry) {
 
   registry.register('lookup_department', {
     capability: 'org_lookup',
+    description: 'Looks up a department by id in the org chart.',
     inputSchema: { departmentId: { type: 'string', required: true } },
     handler: async ({ departmentId }) => {
       const org = Organization.createDefault();

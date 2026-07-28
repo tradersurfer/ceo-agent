@@ -103,6 +103,8 @@
       "properties": {
         "id": { "$ref": "#/$defs/id" },
         "capability": { "$ref": "#/$defs/id" },
+        "description": { "type": "string" },
+        "disableModelInvocation": { "type": "boolean" },
         "inputSchema": { "type": "object" },
         "outputSchema": { "type": "object" },
         "permissions": {
