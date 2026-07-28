@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { checkRateLimit } from '../dispatch/handler';
-const { getRuntime, ensureModelsResolved, openRouterClient, anthropicClient, buildSystemPrompt } = require('../../../lib/ceoAgentServer');
+const { getRuntime, ensureModelsResolved, openRouterClient, anthropicClient, openAIClient, buildSystemPrompt } = require('../../../lib/ceoAgentServer');
 const { friendlyMessageFor } = require('../../../lib/userMessages');
 const { getUploadMetadata } = require('../../../lib/uploadStore');
 const { recordUsage } = require('../../../core/UsageTracker');
@@ -107,6 +107,7 @@ export async function POST(request: Request) {
     const { client, providerModelId } = resolveClientForModel(apiModelId, {
       openrouter: openRouterClient,
       anthropic: process.env.ANTHROPIC_API_KEY ? anthropicClient : null,
+      openai: process.env.OPENAI_API_KEY ? openAIClient : null,
     });
     const { text, usage } = await client.chatCompletion({
       model: providerModelId,

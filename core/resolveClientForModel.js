@@ -39,13 +39,22 @@
  * function anyway.
  */
 
-// Model-id prefix -> provider id. Phase 2's first PR only wires Anthropic;
+// Model-id prefix -> provider id. Phase 2's first PR only wired Anthropic;
 // this stays a plain object (not lib/providers.js's PROVIDER_PREFIXES,
 // which doesn't exist there — core/ModelResolver.js's PROVIDER_PREFIXES is
 // role -> prefix, a different mapping) so each future provider PR
 // (OpenAI/Google/xAI) adds one line here without touching resolution logic.
+//
+// 'openai/' (added in Phase 2's second PR, sdk/OpenAIClient.js) is the
+// OpenRouter prefix core/ModelResolver.js's PROVIDER_PREFIXES uses for BOTH
+// the 'gpt' and 'codex' roles (OpenRouter has no distinct "Codex" listing —
+// see ModelResolver.js's own PROVIDER_PREFIXES comment). This function's
+// loop matches on the model-id prefix only, not on which role produced it,
+// so an 'openai/'-prefixed id resolved from either role dispatches through
+// OpenAIClient identically — no role-awareness needed or added here.
 const MODEL_PREFIX_TO_PROVIDER_ID = Object.freeze({
   'anthropic/': 'anthropic',
+  'openai/': 'openai',
 });
 
 /**
