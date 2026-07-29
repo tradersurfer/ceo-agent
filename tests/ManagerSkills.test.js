@@ -30,7 +30,8 @@ test('manager skills register through SkillRegistry with schemas and permission 
 
 test('C-suite skill assignments are selective and subordinate agents receive none', () => {
   const { organization } = build();
-  assert.equal(organization.findAgent('ceo_agent').skills.length, 10);
+  // 10 manager skills + web_search (core/skills/webSearchSkill.js).
+  assert.equal(organization.findAgent('ceo_agent').skills.length, 11);
   assert.equal(organization.findAgent('cfo_agent').skills.includes('budget_token_allocation'), true);
   assert.equal(organization.findAgent('cfo_agent').skills.includes('workload_balancing'), false);
   assert.equal(organization.findAgent('hermes').skills.includes('workload_balancing'), true);

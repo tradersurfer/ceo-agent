@@ -44,6 +44,9 @@ arbitrary code. Several other registered skills do write generated files
 (via `lib/uploadStore.js`) or read an uploaded file — see each skill's own
 module comment for its actual I/O boundary.
 
+`web_search` (`core/skills/webSearchSkill.js`) is the first skill that makes
+a real outbound network call — see the next section.
+
 ## Security boundary — read before adding a new skill
 
 Any skill that would:
@@ -54,6 +57,19 @@ Any skill that would:
 
 ...requires explicit security review before being added. This pattern is
 intentionally narrow. It is not a general script-execution engine.
+
+**`web_search` passed this review** (Batch 4, backed by Perplexity's Search
+API via `sdk/PerplexityClient.js`): outbound HTTPS only to Perplexity's
+single documented API host, no arbitrary caller-supplied URL, no filesystem
+or shell access, bounded/typed input (`query` string, `maxResults` number),
+requires `PERPLEXITY_API_KEY` (never logged or echoed back). It's marked
+`"risk": "review_required"` in `registry/skill-registry.json` (rather than
+`"safe"` like the filesystem/CPU-only skills around it) to keep that
+distinction visible in the catalog itself, not just in prose here. See
+`core/skills/webSearchSkill.js`'s own header comment for the full review
+notes. A future skill making a *different* kind of network call (a new
+host, a different provider) still needs its own review — this entry
+doesn't blanket-approve network calls in general, only this one.
 
 ## Skills must honor their abort signal
 
