@@ -390,6 +390,22 @@
       "permissions": { "requiresAgentAssignment": true },
       "handler": "core/skills/financialModelSkill.js#registerFinancialModelSkills",
       "risk": "safe"
+    },
+    {
+      "id": "web_search",
+      "capability": "web_search",
+      "description": "Searches the web via Perplexity's Search API and returns ranked results (title, url, snippet).",
+      "inputSchema": {
+        "query": { "type": "string", "required": true },
+        "maxResults": { "type": "number", "required": false }
+      },
+      "outputSchema": {
+        "results": { "type": "array", "required": true },
+        "id": { "type": "string", "required": false }
+      },
+      "permissions": { "requiresAgentAssignment": true },
+      "handler": "core/skills/webSearchSkill.js#registerWebSearchSkill",
+      "risk": "review_required"
     }
   ]
 }

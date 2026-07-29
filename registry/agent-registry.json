@@ -76,7 +76,8 @@
         "department_capability_lookup",
         "workload_balancing",
         "quality_review",
-        "budget_token_allocation"
+        "budget_token_allocation",
+        "web_search"
       ],
       "authorized_projects": "Configured per install via CEO_AGENT_PROJECTS env var.",
       "off_limits": [
@@ -183,7 +184,8 @@
         "content_quality_analysis",
         "generate_docx",
         "generate_pdf",
-        "generate_spreadsheet"
+        "generate_spreadsheet",
+        "web_search"
       ],
       "authorized_projects": "Configured per install via CEO_AGENT_PROJECTS env var.",
       "off_limits": [

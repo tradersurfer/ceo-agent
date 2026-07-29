@@ -9,6 +9,7 @@ const { registerSchemaMarkupSkills } = require('./skills/schemaMarkupSkills');
 const { registerContentQualitySkill } = require('./skills/contentQualitySkill');
 const { registerDocumentCreationSkills } = require('./skills/documentCreationSkills');
 const { registerFinancialModelSkills } = require('./skills/financialModelSkill');
+const { registerWebSearchSkill } = require('./skills/webSearchSkill');
 const { WorkflowRuntime } = require('./WorkflowRuntime');
 const { registerBridgeExecutors } = require('./BridgeExecutors');
 
@@ -53,6 +54,7 @@ function loadRuntimeRegistries(options = {}) {
   registerContentQualitySkill(skillRegistry);
   registerDocumentCreationSkills(skillRegistry);
   registerFinancialModelSkills(skillRegistry);
+  registerWebSearchSkill(skillRegistry);
   const skillExecutor = new SkillExecutor(skillRegistry, {
     agentResolver: options.organization
       ? agentId => options.organization.findAgent(agentId)
