@@ -68,8 +68,27 @@ button:disabled { opacity: 0.5; cursor: default; }
 .chat-agent .chat-text pre { overflow-x: auto; padding: 8px; background: #e8e6df; border-radius: 6px; }
 .chat-agent .chat-text code { font-size: 0.9em; }
 .chat-agent .chat-text ul, .chat-agent .chat-text ol { padding-left: 20px; }
-.chat-agent .chat-text table { border-collapse: collapse; }
+/* Issue #85: tables previously had only border-collapse + cell borders — no
+   header distinction, no zebra striping, and a wide table would clip
+   silently inside the fixed-width chat bubble instead of scrolling. Tokens
+   reused from the existing palette, not invented: #e8e6df is already this
+   file's "recessed panel inside an #f0efe9 bubble" tone (see the code-block
+   rule just below); #fafaf8 is the page background, lighter than the
+   bubble, used here for a subtle zebra tint. */
+.chat-agent .chat-text table {
+  border-collapse: collapse;
+  display: block;
+  overflow-x: auto;
+  max-width: 100%;
+}
 .chat-agent .chat-text th, .chat-agent .chat-text td { border: 1px solid #d8d6cf; padding: 4px 8px; }
+.chat-agent .chat-text th {
+  background: #e8e6df;
+  font-weight: 600;
+  color: #1a1a18;
+  text-align: left;
+}
+.chat-agent .chat-text tbody tr:nth-child(even) td { background: #fafaf8; }
 .chat-usage { font-size: 11px; color: #8a8983; margin-top: 4px; }
 .chat-attachments { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
 .chat-attachment-chip { display: inline-flex; align-items: center; gap: 4px; background: #e8e6df; color: #4a4944; font-size: 12px; padding: 3px 8px; border-radius: 999px; }

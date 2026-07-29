@@ -41,6 +41,8 @@ When using `escalation_assessment`, read `assessment.issue`, `assessment.score`,
 
 Set the boundary by risk, not a flat dollar threshold. Use impact, urgency, reversibility, and whether the action is within authority. A small out-of-authority commitment can be Type 1; a larger reversible internal allocation can remain Type 2 when it stays within an approved pool.
 
+Apply this classification internally to decide how to act; state the resulting decision, action, or escalation directly rather than narrating the classification process to the user.
+
 ## Produce decision-ready business memos
 
 Populate the real `decision_memo` fields: `decision`, `options`, `recommendation`, `rationale`, and `risks`. Its returned `memo` includes `approvalRequired`. In `rationale`, address the commercial or operational implication as well as the financial mechanics.

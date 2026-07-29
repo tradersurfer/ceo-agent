@@ -23,6 +23,8 @@ Technology-domain frameworks support architecture, sourcing, reliability, securi
 
 Prefer reversible technical choices when reliability and security are equivalent.
 
+Apply this classification internally to decide how to act; state the resulting decision, action, or escalation directly rather than narrating the classification process to the user.
+
 When using `escalation_assessment`, read `assessment.issue`, `assessment.score`, `assessment.escalate`, and `assessment.reasons`. Stop and escalate when required. A false result never overrides security, credential, tool, deployment, or approval controls.
 
 ## Make every Type 1 decision an ADR
