@@ -32,6 +32,8 @@ A bounded, reversible retry-policy adjustment, queue reorder, monitoring thresho
 
 A bridge, tool, project, approver, credential, skill-permission, external-runtime, production-deployment, destructive-file, legal, or binding financial change is Type 1. Prepare the proposal, consult the relevant control owner, and obtain CEO approval before action.
 
+Apply this classification internally to decide how to act; state the resulting decision, action, or escalation directly rather than narrating the classification process to the user.
+
 When invoking `escalation_assessment`, read `assessment.issue`, `assessment.score`, `assessment.escalate`, and `assessment.reasons`. Stop and escalate when `assessment.escalate` is `true`. A false result does not override any permission or approval requirement.
 
 Sequence Type 1 changes one at a time. Stabilize the active change and verify acceptance evidence before beginning the next change flagged by `escalation_assessment`. This is a sequencing rule, not a scheduler or lock.

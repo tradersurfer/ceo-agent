@@ -157,3 +157,36 @@ test('Enter with only the keyCode-229 signal (isComposing unset/unreliable) is s
     },
   );
 });
+
+// Issue #85: table CSS previously had only border-collapse + cell borders —
+// no header distinction, no zebra striping, and a wide table would clip
+// inside the fixed-width chat bubble instead of scrolling. This structural
+// check confirms remark-gfm's real output (<thead>/<th>, <tbody>/<tr>) is
+// what actually renders, so the CSS selectors (.chat-agent .chat-text th,
+// tbody tr:nth-child(even) td) have real elements to target. jsdom doesn't
+// paint CSS, so the actual visual result (header background/weight, zebra
+// tint, horizontal scroll on a wide table) was verified manually in a real
+// browser — see the PR description, not this test file, for that evidence.
+test('an agent message with a markdown table renders real thead/th and tbody/tr elements for the header/zebra-stripe CSS to target', async () => {
+  await withFetch(
+    async () => ({
+      json: async () => ({
+        status: 'ok',
+        agentName: 'CEO Agent',
+        usage: {},
+        text: '| Metric | Q1 | Q2 |\n|---|---|---|\n| Revenue | 100 | 120 |\n| Cost | 40 | 45 |\n',
+      }),
+    }),
+    async () => {
+      render(React.createElement(ChatView, { config: MINIMAL_CONFIG }));
+      await sendMessage('show the quarterly table');
+
+      await waitFor(() => assert.ok(screen.getByText('Revenue')));
+      const table = document.querySelector('.chat-agent .chat-text table');
+      assert.ok(table, 'a real <table> must render inside the agent message bubble');
+      assert.ok(table.querySelector('thead th'), 'header cells must be real <th> elements inside <thead>, for the header CSS rule to target');
+      const bodyRows = table.querySelectorAll('tbody tr');
+      assert.equal(bodyRows.length, 2, 'both data rows must render inside <tbody>, for the :nth-child zebra-stripe CSS rule to target');
+    },
+  );
+});
