@@ -169,7 +169,20 @@ export default function ChatView({ config }: { config: any }) {
           value={input}
           placeholder="Message your CEO Agent..."
           onChange={e => setInput(e.target.value)}
-          onKeyDown={e => e.key === 'Enter' && send()}
+          onKeyDown={e => {
+            // Issue #87: an Enter keystroke that confirms an IME composition
+            // (e.g. selecting a candidate while typing CJK/predictive text)
+            // also fires a native/synthetic 'Enter' keydown. Treating that as
+            // a send trigger races the composition-confirming update against
+            // the controlled input's value, which can send a garbled or
+            // partial in-progress value instead of the finished text.
+            // `isComposing` is the standard signal; `keyCode === 229` is the
+            // long-standing fallback for browsers/IMEs that don't set
+            // `isComposing` reliably on the keydown event.
+            if (e.key !== 'Enter') return;
+            if (e.nativeEvent.isComposing || e.keyCode === 229) return;
+            send();
+          }}
           disabled={sending}
         />
         <button onClick={send} disabled={sending}>{sending ? 'Sending...' : 'Send'}</button>

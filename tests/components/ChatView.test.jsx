@@ -60,3 +60,100 @@ test('a failed skill-dispatch response renders as a system message, not a skill 
     },
   );
 });
+
+// Issue #87: an Enter keystroke that confirms an IME composition also fires
+// a native/synthetic 'Enter' keydown. Treating that as a send trigger races
+// the composition-confirming update against the controlled input's value,
+// which can send a garbled/partial value instead of the finished text (the
+// real-world symptom: a corrupted "drafdra"-style bubble). These tests
+// confirm the fix: Enter during an active composition must not send.
+test('Enter during an active IME composition (isComposing: true) does not send', async () => {
+  let fetchCalled = false;
+  await withFetch(
+    async () => { fetchCalled = true; return { json: async () => ({ status: 'ok', text: 'unexpected', agentName: 'CEO Agent', usage: {} }) }; },
+    async () => {
+      render(React.createElement(ChatView, { config: MINIMAL_CONFIG }));
+      const input = screen.getByPlaceholderText('Message your CEO Agent...');
+
+      // Simulate a real composition sequence: compositionstart -> the input
+      // changes mid-composition (the browser's in-progress candidate text,
+      // not the user's finished intent) -> Enter fires WHILE still
+      // composing (isComposing: true) to confirm the candidate, not to send.
+      fireEvent.compositionStart(input);
+      fireEvent.change(input, { target: { value: 'draf' } });
+      fireEvent.keyDown(input, { key: 'Enter', isComposing: true, keyCode: 229 });
+
+      // Give any (incorrect) async send a tick to fire, then assert it didn't.
+      await new Promise(resolve => setTimeout(resolve, 0));
+      assert.equal(fetchCalled, false, 'Enter during active composition must not trigger send()');
+      assert.equal(input.value, 'draf', 'input value must be unchanged by the composition-confirming Enter');
+    },
+  );
+});
+
+test('after composition ends, Enter sends the real finished value, not the mid-composition draft', async () => {
+  let sentBody = null;
+  await withFetch(
+    async (url, options) => {
+      sentBody = JSON.parse(options.body);
+      return { json: async () => ({ status: 'ok', text: 'ok', agentName: 'CEO Agent', usage: {} }) };
+    },
+    async () => {
+      render(React.createElement(ChatView, { config: MINIMAL_CONFIG }));
+      const input = screen.getByPlaceholderText('Message your CEO Agent...');
+
+      // Full sequence: compositionstart -> in-progress candidate text ->
+      // Enter confirms the composition (isComposing still true at this
+      // point per the spec) -> compositionend -> the input settles to its
+      // real final value -> a genuine, non-composing Enter actually sends.
+      fireEvent.compositionStart(input);
+      fireEvent.change(input, { target: { value: 'draf' } });
+      fireEvent.keyDown(input, { key: 'Enter', isComposing: true, keyCode: 229 });
+      fireEvent.compositionEnd(input);
+      fireEvent.change(input, { target: { value: 'draft complete' } });
+      fireEvent.keyDown(input, { key: 'Enter', isComposing: false });
+
+      await waitFor(() => assert.ok(sentBody));
+      assert.equal(sentBody.message, 'draft complete', 'the send must use the real finished value, not the mid-composition draft');
+    },
+  );
+});
+
+test('a plain Enter with no composition in play still sends normally (no regression)', async () => {
+  let sentBody = null;
+  await withFetch(
+    async (url, options) => {
+      sentBody = JSON.parse(options.body);
+      return { json: async () => ({ status: 'ok', text: 'ok', agentName: 'CEO Agent', usage: {} }) };
+    },
+    async () => {
+      render(React.createElement(ChatView, { config: MINIMAL_CONFIG }));
+      const input = screen.getByPlaceholderText('Message your CEO Agent...');
+      fireEvent.change(input, { target: { value: 'hello' } });
+      fireEvent.keyDown(input, { key: 'Enter' });
+
+      await waitFor(() => assert.ok(sentBody));
+      assert.equal(sentBody.message, 'hello');
+    },
+  );
+});
+
+test('Enter with only the keyCode-229 signal (isComposing unset/unreliable) is still treated as composition and does not send', async () => {
+  // Some browsers/IMEs don't set isComposing reliably on the keydown event —
+  // keyCode 229 is the long-standing fallback signal. This test isolates
+  // that path specifically (isComposing NOT set), proving the fallback
+  // alone is sufficient to suppress the send, not just isComposing.
+  let fetchCalled = false;
+  await withFetch(
+    async () => { fetchCalled = true; return { json: async () => ({ status: 'ok', text: 'unexpected', agentName: 'CEO Agent', usage: {} }) }; },
+    async () => {
+      render(React.createElement(ChatView, { config: MINIMAL_CONFIG }));
+      const input = screen.getByPlaceholderText('Message your CEO Agent...');
+      fireEvent.change(input, { target: { value: 'draf' } });
+      fireEvent.keyDown(input, { key: 'Enter', keyCode: 229 });
+
+      await new Promise(resolve => setTimeout(resolve, 0));
+      assert.equal(fetchCalled, false, 'Enter with keyCode 229 must not trigger send(), even without isComposing set');
+    },
+  );
+});
