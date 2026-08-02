@@ -41,16 +41,20 @@ These names define validation eligibility only. They are not proof that correspo
 
 ## Current integration truth
 
-- `HermesBridge.runTask()` delegates validation to `BaseBridge.execute()`.
+- `HermesBridge.runTask()` validates the task, then checks it against Hermes's seven `off_limits` items (see Prohibited actions) before any network call.
 - Invalid input returns `status: blocked`, populated `blockers`, no actions, and no runtime execution.
-- Valid input returns `status: queued`, validation actions, and the normalized task.
-- `executionConnected` is always `false`.
-- `HERMES_RUNTIME_PATH` and `HERMES_APPLICATION_PATH` are metadata only.
+- A task matching an `off_limits` item returns `status: blocked` with the matched phrase in `blockers`; the gateway is never contacted.
+- Valid, non-off-limits input with no `HERMES_GATEWAY_URL`/`HERMES_GATEWAY_API_KEY` configured returns `status: queued` — validated but not executed.
+- Valid, non-off-limits input with a configured gateway is submitted to **`POST /v1/runs`** on the gateway's `api_server` adapter (Bearer auth, default `127.0.0.1:8642`, per ADR-001b):
+  - a real `202` hand-off (`{run_id, status:"started"}`) returns `status: triggered`, with the real `run_id` attached;
+  - a network/timeout error, an auth failure (`gateway_auth_failed`), or an exhausted `429` retry returns `status: failed`, with the actual reason in `blockers` — never a guessed success.
+- `executionConnected` reflects whether a gateway URL and a valid (≥16-char) API key are both configured — no longer always `false`.
+- `HERMES_RUNTIME_PATH` and `HERMES_APPLICATION_PATH` remain metadata only; they are unrelated to the gateway connection above.
 - The optional `hermes-agent` submodule does not connect itself to CEO Agent.
 - `core/BridgeExecutors.js` registers Hermes as a WorkflowRuntime executor for its allowed task types.
 - The dispatch handler calls `HermesBridge.runTask()` for real; there is no hardcoded `queued` placeholder.
 
-Therefore, `queued` never means executed: the bridge validates and queues without running the external runtime, so a Hermes workflow step resolves to failure (validated but not executed) rather than succeeding.
+Therefore: `queued` means validated but no gateway is connected; `triggered` means a real task was handed to the gateway via a genuine `202` response. Only `triggered` resolves a Hermes workflow step as success.
 
 ## Outputs
 
@@ -123,3 +127,5 @@ Accepted only when counts reconcile, blockers and next actions preserve their ID
 ## Prohibited actions
 
 You may not change credentials, move money, make legal claims, change pricing, approve production deployments, delete source files, alter permission allowlists, connect an external runtime, or override {{CEO_AGENT_NAME}} without explicit authorization.
+
+The first seven of these (all but "alter permission allowlists" and "connect an external runtime") are Hermes's registered `off_limits` items and are now checked by `HermesBridge.checkOffLimits()` before any gateway call, per ADR-009 §4 — a heuristic match on a task's declared intent, not a guarantee of perfect coverage (the general mechanism for all nine agents is ADR-010, not yet built).
