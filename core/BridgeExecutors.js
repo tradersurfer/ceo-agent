@@ -11,10 +11,12 @@ const HermesBridge = require('../departments/operations/hermes/src/HermesBridge'
  * will actually call SalesIntakeBridge.trigger() when the workflow runs.
  *
  * Hermes exposes runTask() rather than trigger(); the executor calls whichever
- * the bridge implements. Hermes validates and queues but does not execute an
- * external runtime, so a Hermes workflow step honestly resolves to failure
- * (validated-but-not-executed) rather than a false success — actual Hermes
- * runtime execution is tracked as a separate follow-up.
+ * the bridge implements. Hermes now returns 'triggered' when a real gateway
+ * is configured and the POST /v1/runs submission succeeds (issue #36,
+ * ADR-001b/ADR-009); it returns 'blocked' on validation or off_limits
+ * rejection, 'queued' only when no gateway is configured, and 'failed' on a
+ * real network/auth/429 error — so a Hermes workflow step now honestly
+ * completes when a gateway is actually connected, instead of always failing.
  *
  * Bridge trigger() results are translated into WorkflowRuntime's pass/fail
  * contract. Only a bridge status of 'triggered' counts as workflow success.
@@ -92,10 +94,10 @@ function buildExecutor(bridge, taskType, defaultProject, defaultApprovedBy) {
       return { status: 'ok', bridgeResult: result };
     }
 
-    // Hermes never returns 'triggered' — it validates and queues without
-    // executing an external runtime, so its steps honestly resolve to failure
-    // (queued did not execute) until real execution wiring exists. blocked
-    // uses errors on trigger()-style bridges and blockers on Hermes runTask().
+    // Only a configured Hermes with a real gateway hand-off returns
+    // 'triggered' (issue #36); 'blocked'/'queued'/'failed' all fall through
+    // to workflow failure below, honestly. blocked uses errors on
+    // trigger()-style bridges and blockers on Hermes runTask().
     const reason = result.status === 'blocked'
       ? (result.errors || result.blockers || []).join('; ')
       : result.summary || result.error || `Bridge returned status: ${result.status}`;

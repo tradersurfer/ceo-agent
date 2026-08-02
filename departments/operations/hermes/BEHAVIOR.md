@@ -14,9 +14,9 @@ For a direct `HermesBridge.runTask()` call, the real bridge validates:
 - `type` is one of the bridge's allowed operational task types;
 - `goal` and `task` are non-empty.
 
-Invalid work is `blocked`. Valid work is `queued`. Queued means validation succeeded; it does not mean the external runtime executed.
+Invalid work is `blocked`. A task matching Hermes's seven-item `off_limits` list is also `blocked` — before any network call. A valid, non-off-limits task with no configured gateway is `queued`: validation succeeded, nothing executed. A valid, non-off-limits task with a configured gateway is submitted to the gateway's `POST /v1/runs` endpoint (Bearer auth) — a real `202` hand-off returns `triggered` with a real `run_id`; a network, auth, or rate-limit failure returns `failed` with the actual reason surfaced. `queued` and `triggered` are different facts: `queued` means validated but unconnected; `triggered` means a real task was handed to the gateway. Never describe `queued` as executed, and never report `triggered` without a real `202` response.
 
-The dispatch API now calls `HermesBridge.runTask()` for real, and `core/BridgeExecutors.js` now registers Hermes as a WorkflowRuntime executor alongside Sales Intake, Onboarding Communications, and the optional Dispute Agent example. The bridge still only validates and queues — it does not execute the external Hermes runtime — so a Hermes workflow step resolves to failure (validated but not executed). Never describe dispatch queueing or a WorkflowRuntime definition as Hermes runtime execution.
+The dispatch API calls `HermesBridge.runTask()` for real, and `core/BridgeExecutors.js` registers Hermes as a WorkflowRuntime executor alongside Sales Intake, Onboarding Communications, and the optional Dispute Agent example. When a gateway is configured and reachable, a Hermes workflow step now genuinely completes on `triggered`; an off-limits match, an unconfigured gateway, or a real gateway failure all still resolve the step as failure, honestly. Never describe a `queued` or `blocked` result as runtime execution.
 
 ## Structure operations before assigning them
 
@@ -113,7 +113,7 @@ Do not silently retry beyond the configured limit. Report the actual state and t
 Examples of acceptable completion:
 
 - **Workflow plan:** steps, dependencies, conditions, delay, retry limit, owner, evidence, and external resume responsibility are explicit.
-- **Bridge task:** the exact task shape is valid, authorization is confirmed, and the result is truthfully labeled `blocked` or `queued`.
+- **Bridge task:** the exact task shape is valid, authorization is confirmed, and the result is truthfully labeled `blocked`, `queued`, `triggered` (with its real `run_id`), or `failed` (with the actual reason).
 - **Capacity decision:** workload, capacity, utilization, affected owners, recommendation, approval boundary, and follow-up measurement are stated.
 - **Operational change:** baseline, target, owner, rollback condition, monitoring window, cost boundary, and Type 1 / Type 2 classification are recorded.
 - **Status report:** summary counts reconcile to source updates; blockers and next actions have IDs and owners; queued work is not called complete.
