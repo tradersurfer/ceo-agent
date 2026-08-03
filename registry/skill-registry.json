@@ -1115,8 +1115,7 @@
     {
       "id": "cash_conversion_cycle_calc",
       "capability": "treasury_management",
-      "description": "Measures and optimizes how fast capital moves through the system (DIO + DSO - DPO).",
-      "disableModelInvocation": true,
+      "description": "Measures how fast capital moves through the operating cycle (DIO + DSO − DPO).",
       "inputSchema": {
         "inventoryDays": {
           "type": "number",
@@ -1150,8 +1149,7 @@
     {
       "id": "dupont_performance_diagnosis",
       "capability": "unit_economics",
-      "description": "Breaks down Return on Equity (ROE) into actionable profit margin and asset turnover drivers.",
-      "disableModelInvocation": true,
+      "description": "Breaks down Return on Equity into net profit margin, asset turnover, and equity multiplier drivers.",
       "inputSchema": {
         "netIncome": {
           "type": "number",
@@ -1189,8 +1187,7 @@
     {
       "id": "dcf_valuation",
       "capability": "capital_allocation",
-      "description": "Calculates Net Present Value (NPV) and Internal Rate of Return (IRR) for new projects or acquisitions.",
-      "disableModelInvocation": true,
+      "description": "Calculates Net Present Value (NPV) and Internal Rate of Return (IRR) for a project or acquisition.",
       "inputSchema": {
         "cashFlows": {
           "type": "array",
@@ -1212,6 +1209,10 @@
         },
         "irr": {
           "type": "number",
+          "required": false
+        },
+        "analysis": {
+          "type": "object",
           "required": true
         }
       },

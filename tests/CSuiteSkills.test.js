@@ -25,6 +25,14 @@ const ALL_NEW_SKILLS = registrars.flatMap(({ fn }) => {
   return reg.list();
 });
 
+// Promoted from scaffold stub to real pure-computation implementations
+// (see core/skills/cfoSkills.js's module comment and tests/CfoSkills.test.js).
+// Excluded from the two "still a scaffold stub" assertions below; every
+// other generic assertion in this file (schema presence, permission
+// metadata, capability coverage, unique IDs) still applies to them.
+const PROMOTED_TO_REAL = new Set(['cash_conversion_cycle_calc', 'dupont_performance_diagnosis', 'dcf_valuation']);
+const SCAFFOLD_SKILLS = ALL_NEW_SKILLS.filter(skill => !PROMOTED_TO_REAL.has(skill.name));
+
 test('each C-suite skill registrar registers the expected number of skills', () => {
   for (const { name, fn, count } of registrars) {
     const reg = new SkillRegistry();
@@ -33,9 +41,17 @@ test('each C-suite skill registrar registers the expected number of skills', () 
   }
 });
 
-test('all C-suite scaffold skills have disableModelInvocation=true', () => {
-  for (const skill of ALL_NEW_SKILLS) {
+test('all still-scaffold C-suite skills have disableModelInvocation=true', () => {
+  for (const skill of SCAFFOLD_SKILLS) {
     assert.equal(skill.disableModelInvocation, true, `${skill.name} must have disableModelInvocation=true`);
+  }
+});
+
+test('the 3 promoted CFO skills are real: disableModelInvocation=false', () => {
+  const promoted = ALL_NEW_SKILLS.filter(skill => PROMOTED_TO_REAL.has(skill.name));
+  assert.equal(promoted.length, 3);
+  for (const skill of promoted) {
+    assert.equal(skill.disableModelInvocation, false, `${skill.name} is real — must not be disableModelInvocation=true`);
   }
 });
 
@@ -52,8 +68,8 @@ test('all C-suite scaffold skills have non-empty input and output schemas', () =
   }
 });
 
-test('all C-suite scaffold handlers return scaffolded:true', async () => {
-  for (const skill of ALL_NEW_SKILLS) {
+test('all still-scaffold C-suite handlers return scaffolded:true', async () => {
+  for (const skill of SCAFFOLD_SKILLS) {
     const reg = new SkillRegistry();
     // Re-register to get the full skill object including handler
     for (const { fn } of registrars) fn(reg);
