@@ -64,7 +64,11 @@
         "brand_enforcement",
         "revenue_prioritization",
         "escalation_management",
-        "agent_registry_management"
+        "agent_registry_management",
+        "cross_subsidiary_coordination",
+        "joint_venture_oversight",
+        "portfolio_resource_allocation",
+        "autonomous_framework_governance"
       ],
       "skills": [
         "task_decomposition",
@@ -77,7 +81,12 @@
         "workload_balancing",
         "quality_review",
         "budget_token_allocation",
-        "web_search"
+        "web_search",
+        "subsidiary_health_check",
+        "partnership_transition_planning",
+        "multi_agent_consensus_evaluation",
+        "resource_reallocation_directive",
+        "launch_roadmap_orchestration"
       ],
       "authorized_projects": "Configured per install via CEO_AGENT_PROJECTS env var.",
       "off_limits": [
@@ -100,7 +109,12 @@
       "supervises": [],
       "capabilities": [
         "financial_strategy",
-        "financial_forecasting"
+        "financial_forecasting",
+        "capital_allocation",
+        "treasury_management",
+        "risk_and_controls",
+        "unit_economics",
+        "macro_market_analysis"
       ],
       "skills": [
         "priority_scoring",
@@ -110,7 +124,15 @@
         "quality_review",
         "budget_token_allocation",
         "compute_financial_model",
-        "import_revenue_csv"
+        "import_revenue_csv",
+        "three_statement_modeling",
+        "cash_conversion_cycle_calc",
+        "dupont_performance_diagnosis",
+        "dcf_valuation",
+        "scenario_planning_matrix",
+        "digital_asset_treasury_tracking",
+        "options_chain_analysis",
+        "real_estate_cap_rate_modeling"
       ],
       "authorized_projects": "Configured per install via CEO_AGENT_PROJECTS env var.",
       "off_limits": [
@@ -130,7 +152,12 @@
       "supervises": [],
       "capabilities": [
         "technology_strategy",
-        "software_development"
+        "software_development",
+        "full_stack_architecture",
+        "cloud_deployment_orchestration",
+        "ai_agent_containerization",
+        "open_source_risk_assessment",
+        "technical_debt_management"
       ],
       "skills": [
         "task_decomposition",
@@ -142,7 +169,12 @@
         "workload_balancing",
         "quality_review",
         "budget_token_allocation",
-        "scope_creep_detection"
+        "scope_creep_detection",
+        "react_tailwind_ui_generation",
+        "node_flask_backend_integration",
+        "firebase_vercel_deployment_config",
+        "docker_environment_blueprinting",
+        "open_source_dependency_audit"
       ],
       "authorized_projects": "Configured per install via CEO_AGENT_PROJECTS env var.",
       "off_limits": [
@@ -165,7 +197,12 @@
       ],
       "capabilities": [
         "marketing_strategy",
-        "content_creation"
+        "content_creation",
+        "social_media_automation",
+        "seo_and_local_directory_optimization",
+        "brand_identity_architecture",
+        "community_engagement_strategy",
+        "campaign_performance_analytics"
       ],
       "skills": [
         "task_decomposition",
@@ -185,7 +222,13 @@
         "generate_docx",
         "generate_pdf",
         "generate_spreadsheet",
-        "web_search"
+        "web_search",
+        "social_post_architect_prompting",
+        "local_keyword_campaign_builder",
+        "brand_guideline_generation",
+        "ai_brand_training_manual_creation",
+        "visual_layout_review",
+        "public_vs_internal_copy_separation"
       ],
       "authorized_projects": "Configured per install via CEO_AGENT_PROJECTS env var.",
       "off_limits": [
@@ -203,7 +246,13 @@
       "reports_to": "ceo_agent",
       "supervises": [],
       "capabilities": [
-        "people_strategy"
+        "people_strategy",
+        "organizational_design",
+        "talent_density_management",
+        "performance_and_rewards_strategy",
+        "change_management_orchestration",
+        "people_analytics_synthesis",
+        "culture_and_employee_experience"
       ],
       "skills": [
         "delegation_brief",
@@ -213,7 +262,14 @@
         "escalation_assessment",
         "department_capability_lookup",
         "workload_balancing",
-        "quality_review"
+        "quality_review",
+        "spans_and_layers_analysis",
+        "nine_box_talent_mapping",
+        "compensation_equity_audit",
+        "adkar_readiness_assessment",
+        "okr_alignment_review",
+        "interview_rubric_generation",
+        "scarf_threat_assessment"
       ],
       "authorized_projects": "Configured per install via CEO_AGENT_PROJECTS env var.",
       "off_limits": [
@@ -232,14 +288,26 @@
       "supervises": [],
       "capabilities": [
         "legal_strategy",
-        "regulatory_compliance"
+        "regulatory_compliance",
+        "corporate_governance_and_structuring",
+        "enterprise_risk_management",
+        "contract_lifecycle_management",
+        "digital_asset_and_open_source_compliance",
+        "consumer_credit_compliance"
       ],
       "skills": [
         "priority_scoring",
         "decision_memo",
         "status_synthesis",
         "escalation_assessment",
-        "quality_review"
+        "quality_review",
+        "irac_legal_analysis_memo",
+        "regulatory_horizon_scanning",
+        "contract_risk_allocation_audit",
+        "legislative_language_review",
+        "corporate_entity_structuring",
+        "credit_infrastructure_compliance_check",
+        "incident_response_orchestration"
       ],
       "authorized_projects": "Configured per install via CEO_AGENT_PROJECTS env var.",
       "off_limits": [
@@ -276,7 +344,11 @@
         "scheduled_job",
         "file_processing",
         "memory_lookup",
-        "automation_run"
+        "automation_run",
+        "containerized_environment_orchestration",
+        "api_webhook_orchestration",
+        "node_synchronization_monitoring",
+        "cross_platform_backend_sync"
       ],
       "skills": [
         "task_decomposition",
@@ -287,7 +359,9 @@
         "department_capability_lookup",
         "workload_balancing",
         "quality_review",
-        "budget_token_allocation"
+        "budget_token_allocation",
+        "payment_gateway_sync",
+        "webhook_payload_parsing"
       ],
       "authorized_projects": "Configured per install via CEO_AGENT_PROJECTS env var.",
       "off_limits": [

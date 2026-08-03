@@ -1,4 +1,5 @@
 const RECOGNIZED_CAPABILITIES = Object.freeze([
+  // Original capabilities
   'workflow_execution',
   'cron_create',
   'webhook_subscribe',
@@ -14,6 +15,47 @@ const RECOGNIZED_CAPABILITIES = Object.freeze([
   'research',
   'design_generation',
   'image_generation',
+  // CEO Agent capabilities
+  'cross_subsidiary_coordination',
+  'joint_venture_oversight',
+  'portfolio_resource_allocation',
+  'autonomous_framework_governance',
+  // CFO Agent capabilities
+  'capital_allocation',
+  'treasury_management',
+  'risk_and_controls',
+  'unit_economics',
+  'macro_market_analysis',
+  // COO/Hermes capabilities
+  'containerized_environment_orchestration',
+  'api_webhook_orchestration',
+  'node_synchronization_monitoring',
+  'cross_platform_backend_sync',
+  // CTO Agent capabilities
+  'full_stack_architecture',
+  'cloud_deployment_orchestration',
+  'ai_agent_containerization',
+  'open_source_risk_assessment',
+  'technical_debt_management',
+  // CMO Agent capabilities
+  'social_media_automation',
+  'seo_and_local_directory_optimization',
+  'brand_identity_architecture',
+  'community_engagement_strategy',
+  'campaign_performance_analytics',
+  // CHRO Agent capabilities
+  'organizational_design',
+  'talent_density_management',
+  'performance_and_rewards_strategy',
+  'change_management_orchestration',
+  'people_analytics_synthesis',
+  'culture_and_employee_experience',
+  // CLO Agent capabilities
+  'corporate_governance_and_structuring',
+  'enterprise_risk_management',
+  'contract_lifecycle_management',
+  'digital_asset_and_open_source_compliance',
+  'consumer_credit_compliance',
 ]);
 
 class CapabilityResolver {

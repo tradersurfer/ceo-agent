@@ -8,7 +8,10 @@
       "capability": "text_summarization",
       "description": "Returns a word count and truncated preview of the given text (structural placeholder, no model call).",
       "inputSchema": {
-        "text": { "type": "string", "required": true }
+        "text": {
+          "type": "string",
+          "required": true
+        }
       },
       "handler": "core/skills/exampleSkills.js#registerExampleSkills",
       "risk": "safe"
@@ -18,8 +21,14 @@
       "capability": "currency_formatting",
       "description": "Formats a numeric amount as a localized currency string.",
       "inputSchema": {
-        "amount": { "type": "number", "required": true },
-        "currency": { "type": "string", "required": false }
+        "amount": {
+          "type": "number",
+          "required": true
+        },
+        "currency": {
+          "type": "string",
+          "required": false
+        }
       },
       "handler": "core/skills/exampleSkills.js#registerExampleSkills",
       "risk": "safe"
@@ -29,7 +38,10 @@
       "capability": "org_lookup",
       "description": "Looks up a department by id in the org chart.",
       "inputSchema": {
-        "departmentId": { "type": "string", "required": true }
+        "departmentId": {
+          "type": "string",
+          "required": true
+        }
       },
       "handler": "core/skills/exampleSkills.js#registerExampleSkills",
       "risk": "safe"
@@ -39,16 +51,36 @@
       "capability": "management_planning",
       "description": "Breaks an objective into an ordered list of tasks with acceptance criteria.",
       "inputSchema": {
-        "objective": { "type": "string", "required": true },
-        "deliverables": { "type": "array", "required": false },
-        "constraints": { "type": "array", "required": false }
+        "objective": {
+          "type": "string",
+          "required": true
+        },
+        "deliverables": {
+          "type": "array",
+          "required": false
+        },
+        "constraints": {
+          "type": "array",
+          "required": false
+        }
       },
       "outputSchema": {
-        "objective": { "type": "string", "required": true },
-        "tasks": { "type": "array", "required": true },
-        "assumptions": { "type": "array", "required": true }
+        "objective": {
+          "type": "string",
+          "required": true
+        },
+        "tasks": {
+          "type": "array",
+          "required": true
+        },
+        "assumptions": {
+          "type": "array",
+          "required": true
+        }
       },
-      "permissions": { "requiresAgentAssignment": true },
+      "permissions": {
+        "requiresAgentAssignment": true
+      },
       "handler": "core/skills/managerSkills.js#registerManagerSkills",
       "risk": "safe"
     },
@@ -57,14 +89,36 @@
       "capability": "management_delegation",
       "description": "Builds a structured delegation brief for a task assigned to someone else.",
       "inputSchema": {
-        "task": { "type": "string", "required": true },
-        "assignee": { "type": "string", "required": true },
-        "desiredOutcome": { "type": "string", "required": true },
-        "context": { "type": "string", "required": false },
-        "deadline": { "type": "string", "required": false }
+        "task": {
+          "type": "string",
+          "required": true
+        },
+        "assignee": {
+          "type": "string",
+          "required": true
+        },
+        "desiredOutcome": {
+          "type": "string",
+          "required": true
+        },
+        "context": {
+          "type": "string",
+          "required": false
+        },
+        "deadline": {
+          "type": "string",
+          "required": false
+        }
       },
-      "outputSchema": { "brief": { "type": "object", "required": true } },
-      "permissions": { "requiresAgentAssignment": true },
+      "outputSchema": {
+        "brief": {
+          "type": "object",
+          "required": true
+        }
+      },
+      "permissions": {
+        "requiresAgentAssignment": true
+      },
       "handler": "core/skills/managerSkills.js#registerManagerSkills",
       "risk": "safe"
     },
@@ -72,9 +126,21 @@
       "id": "priority_scoring",
       "capability": "management_prioritization",
       "description": "Ranks a list of items by impact, urgency, and effort.",
-      "inputSchema": { "items": { "type": "array", "required": true } },
-      "outputSchema": { "rankedItems": { "type": "array", "required": true } },
-      "permissions": { "requiresAgentAssignment": true },
+      "inputSchema": {
+        "items": {
+          "type": "array",
+          "required": true
+        }
+      },
+      "outputSchema": {
+        "rankedItems": {
+          "type": "array",
+          "required": true
+        }
+      },
+      "permissions": {
+        "requiresAgentAssignment": true
+      },
       "handler": "core/skills/managerSkills.js#registerManagerSkills",
       "risk": "safe"
     },
@@ -83,14 +149,36 @@
       "capability": "management_decision_support",
       "description": "Formats a decision, its options, and rationale into an approval-ready memo.",
       "inputSchema": {
-        "decision": { "type": "string", "required": true },
-        "options": { "type": "array", "required": true },
-        "recommendation": { "type": "string", "required": true },
-        "rationale": { "type": "string", "required": true },
-        "risks": { "type": "array", "required": false }
+        "decision": {
+          "type": "string",
+          "required": true
+        },
+        "options": {
+          "type": "array",
+          "required": true
+        },
+        "recommendation": {
+          "type": "string",
+          "required": true
+        },
+        "rationale": {
+          "type": "string",
+          "required": true
+        },
+        "risks": {
+          "type": "array",
+          "required": false
+        }
       },
-      "outputSchema": { "memo": { "type": "object", "required": true } },
-      "permissions": { "requiresAgentAssignment": true },
+      "outputSchema": {
+        "memo": {
+          "type": "object",
+          "required": true
+        }
+      },
+      "permissions": {
+        "requiresAgentAssignment": true
+      },
       "handler": "core/skills/managerSkills.js#registerManagerSkills",
       "risk": "safe"
     },
@@ -98,13 +186,29 @@
       "id": "status_synthesis",
       "capability": "management_reporting",
       "description": "Summarizes a list of status updates into counts, blockers, and next actions.",
-      "inputSchema": { "updates": { "type": "array", "required": true } },
-      "outputSchema": {
-        "summary": { "type": "object", "required": true },
-        "blockers": { "type": "array", "required": true },
-        "nextActions": { "type": "array", "required": true }
+      "inputSchema": {
+        "updates": {
+          "type": "array",
+          "required": true
+        }
       },
-      "permissions": { "requiresAgentAssignment": true },
+      "outputSchema": {
+        "summary": {
+          "type": "object",
+          "required": true
+        },
+        "blockers": {
+          "type": "array",
+          "required": true
+        },
+        "nextActions": {
+          "type": "array",
+          "required": true
+        }
+      },
+      "permissions": {
+        "requiresAgentAssignment": true
+      },
       "handler": "core/skills/managerSkills.js#registerManagerSkills",
       "risk": "safe"
     },
@@ -113,15 +217,40 @@
       "capability": "management_escalation",
       "description": "Scores whether an issue should be escalated based on impact, urgency, reversibility, and authority.",
       "inputSchema": {
-        "issue": { "type": "string", "required": true },
-        "impact": { "type": "number", "required": true },
-        "urgency": { "type": "number", "required": true },
-        "reversible": { "type": "boolean", "required": true },
-        "withinAuthority": { "type": "boolean", "required": true },
-        "threshold": { "type": "number", "required": false }
+        "issue": {
+          "type": "string",
+          "required": true
+        },
+        "impact": {
+          "type": "number",
+          "required": true
+        },
+        "urgency": {
+          "type": "number",
+          "required": true
+        },
+        "reversible": {
+          "type": "boolean",
+          "required": true
+        },
+        "withinAuthority": {
+          "type": "boolean",
+          "required": true
+        },
+        "threshold": {
+          "type": "number",
+          "required": false
+        }
       },
-      "outputSchema": { "assessment": { "type": "object", "required": true } },
-      "permissions": { "requiresAgentAssignment": true },
+      "outputSchema": {
+        "assessment": {
+          "type": "object",
+          "required": true
+        }
+      },
+      "permissions": {
+        "requiresAgentAssignment": true
+      },
       "handler": "core/skills/managerSkills.js#registerManagerSkills",
       "risk": "safe"
     },
@@ -129,9 +258,21 @@
       "id": "department_capability_lookup",
       "capability": "management_org_lookup",
       "description": "Finds departments or agents whose name or capabilities match a query.",
-      "inputSchema": { "query": { "type": "string", "required": true } },
-      "outputSchema": { "matches": { "type": "array", "required": true } },
-      "permissions": { "requiresAgentAssignment": true },
+      "inputSchema": {
+        "query": {
+          "type": "string",
+          "required": true
+        }
+      },
+      "outputSchema": {
+        "matches": {
+          "type": "array",
+          "required": true
+        }
+      },
+      "permissions": {
+        "requiresAgentAssignment": true
+      },
       "handler": "core/skills/managerSkills.js#registerManagerSkills",
       "risk": "safe"
     },
@@ -139,12 +280,25 @@
       "id": "workload_balancing",
       "capability": "management_capacity",
       "description": "Computes per-owner utilization and suggests reassignments away from overloaded owners.",
-      "inputSchema": { "assignments": { "type": "array", "required": true } },
-      "outputSchema": {
-        "workloads": { "type": "array", "required": true },
-        "recommendations": { "type": "array", "required": true }
+      "inputSchema": {
+        "assignments": {
+          "type": "array",
+          "required": true
+        }
       },
-      "permissions": { "requiresAgentAssignment": true },
+      "outputSchema": {
+        "workloads": {
+          "type": "array",
+          "required": true
+        },
+        "recommendations": {
+          "type": "array",
+          "required": true
+        }
+      },
+      "permissions": {
+        "requiresAgentAssignment": true
+      },
       "handler": "core/skills/managerSkills.js#registerManagerSkills",
       "risk": "safe"
     },
@@ -153,12 +307,28 @@
       "capability": "management_quality",
       "description": "Scores an artifact against a list of pass/fail criteria and reports gaps.",
       "inputSchema": {
-        "artifact": { "type": "string", "required": true },
-        "criteria": { "type": "array", "required": true },
-        "passThreshold": { "type": "number", "required": false }
+        "artifact": {
+          "type": "string",
+          "required": true
+        },
+        "criteria": {
+          "type": "array",
+          "required": true
+        },
+        "passThreshold": {
+          "type": "number",
+          "required": false
+        }
       },
-      "outputSchema": { "review": { "type": "object", "required": true } },
-      "permissions": { "requiresAgentAssignment": true },
+      "outputSchema": {
+        "review": {
+          "type": "object",
+          "required": true
+        }
+      },
+      "permissions": {
+        "requiresAgentAssignment": true
+      },
       "handler": "core/skills/managerSkills.js#registerManagerSkills",
       "risk": "safe"
     },
@@ -167,15 +337,32 @@
       "capability": "management_budgeting",
       "description": "Allocates a token budget across work items by minimum reservation, then priority x complexity weighting.",
       "inputSchema": {
-        "totalTokens": { "type": "number", "required": true },
-        "workItems": { "type": "array", "required": true }
+        "totalTokens": {
+          "type": "number",
+          "required": true
+        },
+        "workItems": {
+          "type": "array",
+          "required": true
+        }
       },
       "outputSchema": {
-        "allocations": { "type": "array", "required": true },
-        "totalAllocated": { "type": "number", "required": true },
-        "unusedTokens": { "type": "number", "required": true }
+        "allocations": {
+          "type": "array",
+          "required": true
+        },
+        "totalAllocated": {
+          "type": "number",
+          "required": true
+        },
+        "unusedTokens": {
+          "type": "number",
+          "required": true
+        }
       },
-      "permissions": { "requiresAgentAssignment": true },
+      "permissions": {
+        "requiresAgentAssignment": true
+      },
       "handler": "core/skills/managerSkills.js#registerManagerSkills",
       "risk": "safe"
     },
@@ -184,20 +371,52 @@
       "capability": "code_review_scope_analysis",
       "description": "Classifies a unified diff against a stated intent into in-scope changes and likely scope creep.",
       "inputSchema": {
-        "diffText": { "type": "string", "required": true },
-        "intent": { "type": "string", "required": true },
-        "hunkThreshold": { "type": "number", "required": false }
+        "diffText": {
+          "type": "string",
+          "required": true
+        },
+        "intent": {
+          "type": "string",
+          "required": true
+        },
+        "hunkThreshold": {
+          "type": "number",
+          "required": false
+        }
       },
       "outputSchema": {
-        "intent": { "type": "string", "required": true },
-        "inScope": { "type": "array", "required": true },
-        "likelyCreep": { "type": "array", "required": true },
-        "newDependencies": { "type": "array", "required": true },
-        "apiRenames": { "type": "array", "required": true },
-        "configEdits": { "type": "array", "required": true },
-        "stats": { "type": "object", "required": true }
+        "intent": {
+          "type": "string",
+          "required": true
+        },
+        "inScope": {
+          "type": "array",
+          "required": true
+        },
+        "likelyCreep": {
+          "type": "array",
+          "required": true
+        },
+        "newDependencies": {
+          "type": "array",
+          "required": true
+        },
+        "apiRenames": {
+          "type": "array",
+          "required": true
+        },
+        "configEdits": {
+          "type": "array",
+          "required": true
+        },
+        "stats": {
+          "type": "object",
+          "required": true
+        }
       },
-      "permissions": { "requiresAgentAssignment": true },
+      "permissions": {
+        "requiresAgentAssignment": true
+      },
       "handler": "core/skills/scopeCreepSkill.js#registerScopeCreepSkill",
       "risk": "safe"
     },
@@ -206,18 +425,52 @@
       "capability": "marketing_schema_markup",
       "description": "Generates schema.org Reservation JSON-LD markup.",
       "inputSchema": {
-        "provider": { "type": "string", "required": true },
-        "start": { "type": "string", "required": true },
-        "end": { "type": "string", "required": false },
-        "partySize": { "type": "number", "required": false },
-        "reservationId": { "type": "string", "required": false },
-        "reservationForName": { "type": "string", "required": false },
-        "customerName": { "type": "string", "required": false },
-        "customerEmail": { "type": "string", "required": false },
-        "kind": { "type": "string", "required": false }
+        "provider": {
+          "type": "string",
+          "required": true
+        },
+        "start": {
+          "type": "string",
+          "required": true
+        },
+        "end": {
+          "type": "string",
+          "required": false
+        },
+        "partySize": {
+          "type": "number",
+          "required": false
+        },
+        "reservationId": {
+          "type": "string",
+          "required": false
+        },
+        "reservationForName": {
+          "type": "string",
+          "required": false
+        },
+        "customerName": {
+          "type": "string",
+          "required": false
+        },
+        "customerEmail": {
+          "type": "string",
+          "required": false
+        },
+        "kind": {
+          "type": "string",
+          "required": false
+        }
       },
-      "outputSchema": { "jsonLd": { "type": "object", "required": true } },
-      "permissions": { "requiresAgentAssignment": true },
+      "outputSchema": {
+        "jsonLd": {
+          "type": "object",
+          "required": true
+        }
+      },
+      "permissions": {
+        "requiresAgentAssignment": true
+      },
       "handler": "core/skills/schemaMarkupSkills.js#registerSchemaMarkupSkills",
       "risk": "safe"
     },
@@ -226,14 +479,36 @@
       "capability": "marketing_schema_markup",
       "description": "Generates schema.org OrderAction JSON-LD markup.",
       "inputSchema": {
-        "merchant": { "type": "string", "required": true },
-        "orderUrl": { "type": "string", "required": true },
-        "name": { "type": "string", "required": false },
-        "acceptedPaymentMethod": { "type": "array", "required": false },
-        "deliveryMethod": { "type": "array", "required": false }
+        "merchant": {
+          "type": "string",
+          "required": true
+        },
+        "orderUrl": {
+          "type": "string",
+          "required": true
+        },
+        "name": {
+          "type": "string",
+          "required": false
+        },
+        "acceptedPaymentMethod": {
+          "type": "array",
+          "required": false
+        },
+        "deliveryMethod": {
+          "type": "array",
+          "required": false
+        }
       },
-      "outputSchema": { "jsonLd": { "type": "object", "required": true } },
-      "permissions": { "requiresAgentAssignment": true },
+      "outputSchema": {
+        "jsonLd": {
+          "type": "object",
+          "required": true
+        }
+      },
+      "permissions": {
+        "requiresAgentAssignment": true
+      },
       "handler": "core/skills/schemaMarkupSkills.js#registerSchemaMarkupSkills",
       "risk": "safe"
     },
@@ -242,17 +517,48 @@
       "capability": "marketing_schema_markup",
       "description": "Generates schema.org DiscussionForumPosting JSON-LD markup.",
       "inputSchema": {
-        "headline": { "type": "string", "required": true },
-        "author": { "type": "string", "required": true },
-        "url": { "type": "string", "required": true },
-        "datePublished": { "type": "string", "required": true },
-        "text": { "type": "string", "required": false },
-        "dateModified": { "type": "string", "required": false },
-        "commentCount": { "type": "number", "required": false },
-        "likes": { "type": "number", "required": false }
+        "headline": {
+          "type": "string",
+          "required": true
+        },
+        "author": {
+          "type": "string",
+          "required": true
+        },
+        "url": {
+          "type": "string",
+          "required": true
+        },
+        "datePublished": {
+          "type": "string",
+          "required": true
+        },
+        "text": {
+          "type": "string",
+          "required": false
+        },
+        "dateModified": {
+          "type": "string",
+          "required": false
+        },
+        "commentCount": {
+          "type": "number",
+          "required": false
+        },
+        "likes": {
+          "type": "number",
+          "required": false
+        }
       },
-      "outputSchema": { "jsonLd": { "type": "object", "required": true } },
-      "permissions": { "requiresAgentAssignment": true },
+      "outputSchema": {
+        "jsonLd": {
+          "type": "object",
+          "required": true
+        }
+      },
+      "permissions": {
+        "requiresAgentAssignment": true
+      },
       "handler": "core/skills/schemaMarkupSkills.js#registerSchemaMarkupSkills",
       "risk": "safe"
     },
@@ -261,17 +567,48 @@
       "capability": "marketing_schema_markup",
       "description": "Generates schema.org ProfilePage JSON-LD markup.",
       "inputSchema": {
-        "name": { "type": "string", "required": true },
-        "url": { "type": "string", "required": true },
-        "description": { "type": "string", "required": false },
-        "sameAs": { "type": "array", "required": false },
-        "knowsAbout": { "type": "array", "required": false },
-        "worksFor": { "type": "string", "required": false },
-        "image": { "type": "string", "required": false },
-        "jobTitle": { "type": "string", "required": false }
+        "name": {
+          "type": "string",
+          "required": true
+        },
+        "url": {
+          "type": "string",
+          "required": true
+        },
+        "description": {
+          "type": "string",
+          "required": false
+        },
+        "sameAs": {
+          "type": "array",
+          "required": false
+        },
+        "knowsAbout": {
+          "type": "array",
+          "required": false
+        },
+        "worksFor": {
+          "type": "string",
+          "required": false
+        },
+        "image": {
+          "type": "string",
+          "required": false
+        },
+        "jobTitle": {
+          "type": "string",
+          "required": false
+        }
       },
-      "outputSchema": { "jsonLd": { "type": "object", "required": true } },
-      "permissions": { "requiresAgentAssignment": true },
+      "outputSchema": {
+        "jsonLd": {
+          "type": "object",
+          "required": true
+        }
+      },
+      "permissions": {
+        "requiresAgentAssignment": true
+      },
       "handler": "core/skills/schemaMarkupSkills.js#registerSchemaMarkupSkills",
       "risk": "safe"
     },
@@ -280,22 +617,60 @@
       "capability": "marketing_content_quality",
       "description": "Scores text for filler, AI-typical phrasing, information density, and repetition (QRG-aligned, advisory only).",
       "inputSchema": {
-        "text": { "type": "string", "required": true },
-        "threshold": { "type": "number", "required": false }
+        "text": {
+          "type": "string",
+          "required": true
+        },
+        "threshold": {
+          "type": "number",
+          "required": false
+        }
       },
       "outputSchema": {
-        "fillerScore": { "type": "number", "required": true },
-        "aiPatternScore": { "type": "number", "required": true },
-        "informationDensity": { "type": "number", "required": true },
-        "repetitionScore": { "type": "number", "required": true },
-        "overallQuality": { "type": "number", "required": true },
-        "flags": { "type": "array", "required": true },
-        "matches": { "type": "object", "required": true },
-        "tokens": { "type": "number", "required": true },
-        "uniqueTokens": { "type": "number", "required": true },
-        "passesThreshold": { "type": "boolean", "required": true }
+        "fillerScore": {
+          "type": "number",
+          "required": true
+        },
+        "aiPatternScore": {
+          "type": "number",
+          "required": true
+        },
+        "informationDensity": {
+          "type": "number",
+          "required": true
+        },
+        "repetitionScore": {
+          "type": "number",
+          "required": true
+        },
+        "overallQuality": {
+          "type": "number",
+          "required": true
+        },
+        "flags": {
+          "type": "array",
+          "required": true
+        },
+        "matches": {
+          "type": "object",
+          "required": true
+        },
+        "tokens": {
+          "type": "number",
+          "required": true
+        },
+        "uniqueTokens": {
+          "type": "number",
+          "required": true
+        },
+        "passesThreshold": {
+          "type": "boolean",
+          "required": true
+        }
       },
-      "permissions": { "requiresAgentAssignment": true },
+      "permissions": {
+        "requiresAgentAssignment": true
+      },
       "handler": "core/skills/contentQualitySkill.js#registerContentQualitySkill",
       "risk": "safe"
     },
@@ -304,17 +679,40 @@
       "capability": "document_generation_docx",
       "description": "Generates a downloadable .docx file from a title and body text.",
       "inputSchema": {
-        "title": { "type": "string", "required": true },
-        "content": { "type": "string", "required": true },
-        "filename": { "type": "string", "required": false }
+        "title": {
+          "type": "string",
+          "required": true
+        },
+        "content": {
+          "type": "string",
+          "required": true
+        },
+        "filename": {
+          "type": "string",
+          "required": false
+        }
       },
       "outputSchema": {
-        "fileId": { "type": "string", "required": true },
-        "filename": { "type": "string", "required": true },
-        "size": { "type": "number", "required": true },
-        "mimeType": { "type": "string", "required": true }
+        "fileId": {
+          "type": "string",
+          "required": true
+        },
+        "filename": {
+          "type": "string",
+          "required": true
+        },
+        "size": {
+          "type": "number",
+          "required": true
+        },
+        "mimeType": {
+          "type": "string",
+          "required": true
+        }
       },
-      "permissions": { "requiresAgentAssignment": true },
+      "permissions": {
+        "requiresAgentAssignment": true
+      },
       "handler": "core/skills/documentCreationSkills.js#registerDocumentCreationSkills",
       "risk": "safe"
     },
@@ -323,17 +721,40 @@
       "capability": "document_generation_pdf",
       "description": "Generates a downloadable .pdf file from a title and body text.",
       "inputSchema": {
-        "title": { "type": "string", "required": true },
-        "content": { "type": "string", "required": true },
-        "filename": { "type": "string", "required": false }
+        "title": {
+          "type": "string",
+          "required": true
+        },
+        "content": {
+          "type": "string",
+          "required": true
+        },
+        "filename": {
+          "type": "string",
+          "required": false
+        }
       },
       "outputSchema": {
-        "fileId": { "type": "string", "required": true },
-        "filename": { "type": "string", "required": true },
-        "size": { "type": "number", "required": true },
-        "mimeType": { "type": "string", "required": true }
+        "fileId": {
+          "type": "string",
+          "required": true
+        },
+        "filename": {
+          "type": "string",
+          "required": true
+        },
+        "size": {
+          "type": "number",
+          "required": true
+        },
+        "mimeType": {
+          "type": "string",
+          "required": true
+        }
       },
-      "permissions": { "requiresAgentAssignment": true },
+      "permissions": {
+        "requiresAgentAssignment": true
+      },
       "handler": "core/skills/documentCreationSkills.js#registerDocumentCreationSkills",
       "risk": "safe"
     },
@@ -342,18 +763,44 @@
       "capability": "document_generation_spreadsheet",
       "description": "Generates a downloadable .xlsx spreadsheet from headers and rows.",
       "inputSchema": {
-        "title": { "type": "string", "required": true },
-        "rows": { "type": "array", "required": true },
-        "headers": { "type": "array", "required": false },
-        "filename": { "type": "string", "required": false }
+        "title": {
+          "type": "string",
+          "required": true
+        },
+        "rows": {
+          "type": "array",
+          "required": true
+        },
+        "headers": {
+          "type": "array",
+          "required": false
+        },
+        "filename": {
+          "type": "string",
+          "required": false
+        }
       },
       "outputSchema": {
-        "fileId": { "type": "string", "required": true },
-        "filename": { "type": "string", "required": true },
-        "size": { "type": "number", "required": true },
-        "mimeType": { "type": "string", "required": true }
+        "fileId": {
+          "type": "string",
+          "required": true
+        },
+        "filename": {
+          "type": "string",
+          "required": true
+        },
+        "size": {
+          "type": "number",
+          "required": true
+        },
+        "mimeType": {
+          "type": "string",
+          "required": true
+        }
       },
-      "permissions": { "requiresAgentAssignment": true },
+      "permissions": {
+        "requiresAgentAssignment": true
+      },
       "handler": "core/skills/documentCreationSkills.js#registerDocumentCreationSkills",
       "risk": "safe"
     },
@@ -362,17 +809,40 @@
       "capability": "financial_projection",
       "description": "Projects a multi-stream revenue model into a month-by-month P&L and cash flow.",
       "inputSchema": {
-        "model": { "type": "object", "required": true },
-        "scenario": { "type": "string", "required": false },
-        "horizon": { "type": "number", "required": false }
+        "model": {
+          "type": "object",
+          "required": true
+        },
+        "scenario": {
+          "type": "string",
+          "required": false
+        },
+        "horizon": {
+          "type": "number",
+          "required": false
+        }
       },
       "outputSchema": {
-        "months": { "type": "array", "required": true },
-        "fy": { "type": "object", "required": true },
-        "kpis": { "type": "object", "required": true },
-        "lowCash": { "type": "object", "required": true }
+        "months": {
+          "type": "array",
+          "required": true
+        },
+        "fy": {
+          "type": "object",
+          "required": true
+        },
+        "kpis": {
+          "type": "object",
+          "required": true
+        },
+        "lowCash": {
+          "type": "object",
+          "required": true
+        }
       },
-      "permissions": { "requiresAgentAssignment": true },
+      "permissions": {
+        "requiresAgentAssignment": true
+      },
       "handler": "core/skills/financialModelSkill.js#registerFinancialModelSkills",
       "risk": "safe"
     },
@@ -381,14 +851,28 @@
       "capability": "financial_csv_import",
       "description": "Reads an uploaded revenue CSV and averages the last 3 months of values.",
       "inputSchema": {
-        "fileId": { "type": "string", "required": true }
+        "fileId": {
+          "type": "string",
+          "required": true
+        }
       },
       "outputSchema": {
-        "monthsFound": { "type": "number", "required": true },
-        "last3Values": { "type": "array", "required": true },
-        "average": { "type": "number", "required": true }
+        "monthsFound": {
+          "type": "number",
+          "required": true
+        },
+        "last3Values": {
+          "type": "array",
+          "required": true
+        },
+        "average": {
+          "type": "number",
+          "required": true
+        }
       },
-      "permissions": { "requiresAgentAssignment": true },
+      "permissions": {
+        "requiresAgentAssignment": true
+      },
       "handler": "core/skills/financialModelSkill.js#registerFinancialModelSkills",
       "risk": "safe"
     },
@@ -397,16 +881,1350 @@
       "capability": "web_search",
       "description": "Searches the web via Perplexity's Search API and returns ranked results (title, url, snippet).",
       "inputSchema": {
-        "query": { "type": "string", "required": true },
-        "maxResults": { "type": "number", "required": false }
+        "query": {
+          "type": "string",
+          "required": true
+        },
+        "maxResults": {
+          "type": "number",
+          "required": false
+        }
       },
       "outputSchema": {
-        "results": { "type": "array", "required": true },
-        "id": { "type": "string", "required": false }
+        "results": {
+          "type": "array",
+          "required": true
+        },
+        "id": {
+          "type": "string",
+          "required": false
+        }
       },
-      "permissions": { "requiresAgentAssignment": true },
+      "permissions": {
+        "requiresAgentAssignment": true
+      },
       "handler": "core/skills/webSearchSkill.js#registerWebSearchSkill",
       "risk": "review_required"
+    },
+    {
+      "id": "subsidiary_health_check",
+      "capability": "cross_subsidiary_coordination",
+      "description": "Pulls synthesized metrics from different corporate entities to diagnose subsidiary health.",
+      "disableModelInvocation": true,
+      "inputSchema": {
+        "subsidiaryIds": {
+          "type": "array",
+          "required": true
+        },
+        "metrics": {
+          "type": "array",
+          "required": false
+        }
+      },
+      "outputSchema": {
+        "healthReport": {
+          "type": "object",
+          "required": true
+        },
+        "flags": {
+          "type": "array",
+          "required": true
+        }
+      },
+      "permissions": {
+        "requiresAgentAssignment": true
+      },
+      "handler": "core/skills/ceoSkills.js#registerCeoSkills",
+      "risk": "safe"
+    },
+    {
+      "id": "partnership_transition_planning",
+      "capability": "joint_venture_oversight",
+      "description": "Structures and executes operational takeover proposals or transition plans for external enterprises.",
+      "disableModelInvocation": true,
+      "inputSchema": {
+        "partnerName": {
+          "type": "string",
+          "required": true
+        },
+        "transitionType": {
+          "type": "string",
+          "required": true
+        },
+        "timeline": {
+          "type": "string",
+          "required": false
+        },
+        "constraints": {
+          "type": "array",
+          "required": false
+        }
+      },
+      "outputSchema": {
+        "transitionPlan": {
+          "type": "object",
+          "required": true
+        },
+        "milestones": {
+          "type": "array",
+          "required": true
+        }
+      },
+      "permissions": {
+        "requiresAgentAssignment": true
+      },
+      "handler": "core/skills/ceoSkills.js#registerCeoSkills",
+      "risk": "safe"
+    },
+    {
+      "id": "multi_agent_consensus_evaluation",
+      "capability": "autonomous_framework_governance",
+      "description": "Reviews risk moats and consensus logic of lower-level AI trading systems or external models before approving outputs.",
+      "disableModelInvocation": true,
+      "inputSchema": {
+        "frameworkId": {
+          "type": "string",
+          "required": true
+        },
+        "consensusLogic": {
+          "type": "object",
+          "required": true
+        },
+        "riskThreshold": {
+          "type": "number",
+          "required": false
+        }
+      },
+      "outputSchema": {
+        "evaluation": {
+          "type": "object",
+          "required": true
+        },
+        "recommendation": {
+          "type": "string",
+          "required": true
+        }
+      },
+      "permissions": {
+        "requiresAgentAssignment": true
+      },
+      "handler": "core/skills/ceoSkills.js#registerCeoSkills",
+      "risk": "safe"
+    },
+    {
+      "id": "resource_reallocation_directive",
+      "capability": "portfolio_resource_allocation",
+      "description": "Generates formal, structured mandates for the CFO and CTO to shift assets or development bandwidth into new strategic sectors.",
+      "disableModelInvocation": true,
+      "inputSchema": {
+        "fromSector": {
+          "type": "string",
+          "required": true
+        },
+        "toSector": {
+          "type": "string",
+          "required": true
+        },
+        "rationale": {
+          "type": "string",
+          "required": true
+        },
+        "targetAgent": {
+          "type": "string",
+          "required": false
+        }
+      },
+      "outputSchema": {
+        "directive": {
+          "type": "object",
+          "required": true
+        }
+      },
+      "permissions": {
+        "requiresAgentAssignment": true
+      },
+      "handler": "core/skills/ceoSkills.js#registerCeoSkills",
+      "risk": "safe"
+    },
+    {
+      "id": "launch_roadmap_orchestration",
+      "capability": "portfolio_resource_allocation",
+      "description": "Constructs and governs detailed 90-to-180-day master launch schedules with timed task blocks and milestones.",
+      "disableModelInvocation": true,
+      "inputSchema": {
+        "projectName": {
+          "type": "string",
+          "required": true
+        },
+        "durationDays": {
+          "type": "number",
+          "required": false
+        },
+        "milestones": {
+          "type": "array",
+          "required": false
+        }
+      },
+      "outputSchema": {
+        "roadmap": {
+          "type": "object",
+          "required": true
+        },
+        "phases": {
+          "type": "array",
+          "required": true
+        }
+      },
+      "permissions": {
+        "requiresAgentAssignment": true
+      },
+      "handler": "core/skills/ceoSkills.js#registerCeoSkills",
+      "risk": "safe"
+    },
+    {
+      "id": "three_statement_modeling",
+      "capability": "capital_allocation",
+      "description": "Dynamically links income, balance sheet, and cash flow statements.",
+      "disableModelInvocation": true,
+      "inputSchema": {
+        "incomeStatement": {
+          "type": "object",
+          "required": true
+        },
+        "balanceSheet": {
+          "type": "object",
+          "required": true
+        },
+        "cashFlow": {
+          "type": "object",
+          "required": true
+        }
+      },
+      "outputSchema": {
+        "linkedModel": {
+          "type": "object",
+          "required": true
+        }
+      },
+      "permissions": {
+        "requiresAgentAssignment": true
+      },
+      "handler": "core/skills/cfoSkills.js#registerCfoSkills",
+      "risk": "safe"
+    },
+    {
+      "id": "cash_conversion_cycle_calc",
+      "capability": "treasury_management",
+      "description": "Measures and optimizes how fast capital moves through the system (DIO + DSO - DPO).",
+      "disableModelInvocation": true,
+      "inputSchema": {
+        "inventoryDays": {
+          "type": "number",
+          "required": true
+        },
+        "receivableDays": {
+          "type": "number",
+          "required": true
+        },
+        "payableDays": {
+          "type": "number",
+          "required": true
+        }
+      },
+      "outputSchema": {
+        "ccc": {
+          "type": "number",
+          "required": true
+        },
+        "analysis": {
+          "type": "object",
+          "required": true
+        }
+      },
+      "permissions": {
+        "requiresAgentAssignment": true
+      },
+      "handler": "core/skills/cfoSkills.js#registerCfoSkills",
+      "risk": "safe"
+    },
+    {
+      "id": "dupont_performance_diagnosis",
+      "capability": "unit_economics",
+      "description": "Breaks down Return on Equity (ROE) into actionable profit margin and asset turnover drivers.",
+      "disableModelInvocation": true,
+      "inputSchema": {
+        "netIncome": {
+          "type": "number",
+          "required": true
+        },
+        "revenue": {
+          "type": "number",
+          "required": true
+        },
+        "totalAssets": {
+          "type": "number",
+          "required": true
+        },
+        "equity": {
+          "type": "number",
+          "required": true
+        }
+      },
+      "outputSchema": {
+        "roe": {
+          "type": "number",
+          "required": true
+        },
+        "breakdown": {
+          "type": "object",
+          "required": true
+        }
+      },
+      "permissions": {
+        "requiresAgentAssignment": true
+      },
+      "handler": "core/skills/cfoSkills.js#registerCfoSkills",
+      "risk": "safe"
+    },
+    {
+      "id": "dcf_valuation",
+      "capability": "capital_allocation",
+      "description": "Calculates Net Present Value (NPV) and Internal Rate of Return (IRR) for new projects or acquisitions.",
+      "disableModelInvocation": true,
+      "inputSchema": {
+        "cashFlows": {
+          "type": "array",
+          "required": true
+        },
+        "discountRate": {
+          "type": "number",
+          "required": true
+        },
+        "initialInvestment": {
+          "type": "number",
+          "required": true
+        }
+      },
+      "outputSchema": {
+        "npv": {
+          "type": "number",
+          "required": true
+        },
+        "irr": {
+          "type": "number",
+          "required": true
+        }
+      },
+      "permissions": {
+        "requiresAgentAssignment": true
+      },
+      "handler": "core/skills/cfoSkills.js#registerCfoSkills",
+      "risk": "safe"
+    },
+    {
+      "id": "scenario_planning_matrix",
+      "capability": "risk_and_controls",
+      "description": "Runs base, upside, and downside models with explicit decision triggers before capital is deployed.",
+      "disableModelInvocation": true,
+      "inputSchema": {
+        "scenarios": {
+          "type": "array",
+          "required": true
+        },
+        "decisionTriggers": {
+          "type": "array",
+          "required": false
+        }
+      },
+      "outputSchema": {
+        "matrix": {
+          "type": "object",
+          "required": true
+        },
+        "recommendation": {
+          "type": "string",
+          "required": true
+        }
+      },
+      "permissions": {
+        "requiresAgentAssignment": true
+      },
+      "handler": "core/skills/cfoSkills.js#registerCfoSkills",
+      "risk": "safe"
+    },
+    {
+      "id": "digital_asset_treasury_tracking",
+      "capability": "treasury_management",
+      "description": "Monitors on-chain metrics, long-term holder data, and corporate treasury accumulation strategies. [Open product-scope question — see BACKLOG-skill-expansion.md]",
+      "disableModelInvocation": true,
+      "inputSchema": {
+        "assetSymbols": {
+          "type": "array",
+          "required": true
+        },
+        "metrics": {
+          "type": "array",
+          "required": false
+        }
+      },
+      "outputSchema": {
+        "treasuryReport": {
+          "type": "object",
+          "required": true
+        }
+      },
+      "permissions": {
+        "requiresAgentAssignment": true
+      },
+      "handler": "core/skills/cfoSkills.js#registerCfoSkills",
+      "risk": "safe"
+    },
+    {
+      "id": "options_chain_analysis",
+      "capability": "macro_market_analysis",
+      "description": "Tracks and evaluates short-term equity swing strategies and contract premiums. [Open product-scope question — see BACKLOG-skill-expansion.md]",
+      "disableModelInvocation": true,
+      "inputSchema": {
+        "ticker": {
+          "type": "string",
+          "required": true
+        },
+        "expiration": {
+          "type": "string",
+          "required": false
+        },
+        "strategy": {
+          "type": "string",
+          "required": false
+        }
+      },
+      "outputSchema": {
+        "chainAnalysis": {
+          "type": "object",
+          "required": true
+        }
+      },
+      "permissions": {
+        "requiresAgentAssignment": true
+      },
+      "handler": "core/skills/cfoSkills.js#registerCfoSkills",
+      "risk": "safe"
+    },
+    {
+      "id": "real_estate_cap_rate_modeling",
+      "capability": "capital_allocation",
+      "description": "Provides execution capability for physical asset investments and property portfolio allocations. [Open product-scope question — see BACKLOG-skill-expansion.md]",
+      "disableModelInvocation": true,
+      "inputSchema": {
+        "propertyValue": {
+          "type": "number",
+          "required": true
+        },
+        "noi": {
+          "type": "number",
+          "required": true
+        },
+        "marketRate": {
+          "type": "number",
+          "required": false
+        }
+      },
+      "outputSchema": {
+        "capRate": {
+          "type": "number",
+          "required": true
+        },
+        "analysis": {
+          "type": "object",
+          "required": true
+        }
+      },
+      "permissions": {
+        "requiresAgentAssignment": true
+      },
+      "handler": "core/skills/cfoSkills.js#registerCfoSkills",
+      "risk": "safe"
+    },
+    {
+      "id": "payment_gateway_sync",
+      "capability": "api_webhook_orchestration",
+      "description": "Handles the operational side of revenue — processing Stripe API webhooks, verifying transaction statuses, and triggering subsequent access or CRM updates.",
+      "disableModelInvocation": true,
+      "inputSchema": {
+        "webhookEvent": {
+          "type": "object",
+          "required": true
+        },
+        "provider": {
+          "type": "string",
+          "required": false
+        }
+      },
+      "outputSchema": {
+        "transactionStatus": {
+          "type": "string",
+          "required": true
+        },
+        "actions": {
+          "type": "array",
+          "required": true
+        }
+      },
+      "permissions": {
+        "requiresAgentAssignment": true
+      },
+      "handler": "core/skills/cooSkills.js#registerCooSkills",
+      "risk": "safe"
+    },
+    {
+      "id": "webhook_payload_parsing",
+      "capability": "api_webhook_orchestration",
+      "description": "Intercepts incoming data arrays, extracts critical operational variables, and routes them to the correct department.",
+      "disableModelInvocation": true,
+      "inputSchema": {
+        "payload": {
+          "type": "object",
+          "required": true
+        },
+        "source": {
+          "type": "string",
+          "required": false
+        }
+      },
+      "outputSchema": {
+        "parsed": {
+          "type": "object",
+          "required": true
+        },
+        "routedTo": {
+          "type": "string",
+          "required": true
+        }
+      },
+      "permissions": {
+        "requiresAgentAssignment": true
+      },
+      "handler": "core/skills/cooSkills.js#registerCooSkills",
+      "risk": "safe"
+    },
+    {
+      "id": "react_tailwind_ui_generation",
+      "capability": "full_stack_architecture",
+      "description": "Rapidly scaffolds modern, responsive frontend code for digital web development and brand identity starter packages.",
+      "disableModelInvocation": true,
+      "inputSchema": {
+        "componentType": {
+          "type": "string",
+          "required": true
+        },
+        "designSpec": {
+          "type": "object",
+          "required": false
+        },
+        "brandColors": {
+          "type": "array",
+          "required": false
+        }
+      },
+      "outputSchema": {
+        "code": {
+          "type": "string",
+          "required": true
+        },
+        "files": {
+          "type": "array",
+          "required": true
+        }
+      },
+      "permissions": {
+        "requiresAgentAssignment": true
+      },
+      "handler": "core/skills/ctoSkills.js#registerCtoSkills",
+      "risk": "safe"
+    },
+    {
+      "id": "node_flask_backend_integration",
+      "capability": "full_stack_architecture",
+      "description": "Structures server-side logic and API handling using versatile JavaScript or Python environments.",
+      "disableModelInvocation": true,
+      "inputSchema": {
+        "stack": {
+          "type": "string",
+          "required": true
+        },
+        "endpoints": {
+          "type": "array",
+          "required": true
+        },
+        "database": {
+          "type": "string",
+          "required": false
+        }
+      },
+      "outputSchema": {
+        "architecture": {
+          "type": "object",
+          "required": true
+        },
+        "apiSpec": {
+          "type": "object",
+          "required": true
+        }
+      },
+      "permissions": {
+        "requiresAgentAssignment": true
+      },
+      "handler": "core/skills/ctoSkills.js#registerCtoSkills",
+      "risk": "safe"
+    },
+    {
+      "id": "firebase_vercel_deployment_config",
+      "capability": "cloud_deployment_orchestration",
+      "description": "Audits and corrects environment parameters to ensure proper build modes across Firebase and Vercel.",
+      "disableModelInvocation": true,
+      "inputSchema": {
+        "projectRoot": {
+          "type": "string",
+          "required": true
+        },
+        "platform": {
+          "type": "string",
+          "required": false
+        },
+        "envVars": {
+          "type": "object",
+          "required": false
+        }
+      },
+      "outputSchema": {
+        "configReport": {
+          "type": "object",
+          "required": true
+        },
+        "fixes": {
+          "type": "array",
+          "required": true
+        }
+      },
+      "permissions": {
+        "requiresAgentAssignment": true
+      },
+      "handler": "core/skills/ctoSkills.js#registerCtoSkills",
+      "risk": "safe"
+    },
+    {
+      "id": "docker_environment_blueprinting",
+      "capability": "ai_agent_containerization",
+      "description": "Architects technical blueprints and risk moat rules for autonomous trading frameworks, keeping them isolated and secure.",
+      "disableModelInvocation": true,
+      "inputSchema": {
+        "frameworkName": {
+          "type": "string",
+          "required": true
+        },
+        "isolationLevel": {
+          "type": "string",
+          "required": false
+        },
+        "riskRules": {
+          "type": "array",
+          "required": false
+        }
+      },
+      "outputSchema": {
+        "blueprint": {
+          "type": "object",
+          "required": true
+        },
+        "dockerfile": {
+          "type": "string",
+          "required": true
+        }
+      },
+      "permissions": {
+        "requiresAgentAssignment": true
+      },
+      "handler": "core/skills/ctoSkills.js#registerCtoSkills",
+      "risk": "safe"
+    },
+    {
+      "id": "open_source_dependency_audit",
+      "capability": "open_source_risk_assessment",
+      "description": "Reviews terminal logs, shell scripts, and third-party code libraries to identify security flaws before deployment.",
+      "disableModelInvocation": true,
+      "inputSchema": {
+        "dependencies": {
+          "type": "array",
+          "required": true
+        },
+        "packageLockPath": {
+          "type": "string",
+          "required": false
+        }
+      },
+      "outputSchema": {
+        "vulnerabilities": {
+          "type": "array",
+          "required": true
+        },
+        "riskScore": {
+          "type": "number",
+          "required": true
+        }
+      },
+      "permissions": {
+        "requiresAgentAssignment": true
+      },
+      "handler": "core/skills/ctoSkills.js#registerCtoSkills",
+      "risk": "safe"
+    },
+    {
+      "id": "social_post_architect_prompting",
+      "capability": "social_media_automation",
+      "description": "Engineers highly precise system prompts that govern how lower-level bots generate daily platform content.",
+      "disableModelInvocation": true,
+      "inputSchema": {
+        "platform": {
+          "type": "string",
+          "required": true
+        },
+        "brandVoice": {
+          "type": "string",
+          "required": false
+        },
+        "postingFrequency": {
+          "type": "string",
+          "required": false
+        }
+      },
+      "outputSchema": {
+        "systemPrompt": {
+          "type": "string",
+          "required": true
+        },
+        "contentGuidelines": {
+          "type": "object",
+          "required": true
+        }
+      },
+      "permissions": {
+        "requiresAgentAssignment": true
+      },
+      "handler": "core/skills/cmoSkills.js#registerCmoSkills",
+      "risk": "safe"
+    },
+    {
+      "id": "local_keyword_campaign_builder",
+      "capability": "seo_and_local_directory_optimization",
+      "description": "Constructs targeted search engine optimization strategies to capture regional commercial intent.",
+      "disableModelInvocation": true,
+      "inputSchema": {
+        "businessType": {
+          "type": "string",
+          "required": true
+        },
+        "location": {
+          "type": "string",
+          "required": true
+        },
+        "targetKeywords": {
+          "type": "array",
+          "required": false
+        }
+      },
+      "outputSchema": {
+        "campaign": {
+          "type": "object",
+          "required": true
+        },
+        "keywordClusters": {
+          "type": "array",
+          "required": true
+        }
+      },
+      "permissions": {
+        "requiresAgentAssignment": true
+      },
+      "handler": "core/skills/cmoSkills.js#registerCmoSkills",
+      "risk": "safe"
+    },
+    {
+      "id": "brand_guideline_generation",
+      "capability": "brand_identity_architecture",
+      "description": "Generates full digital starter packages, including exact typography rules and color palettes.",
+      "disableModelInvocation": true,
+      "inputSchema": {
+        "brandName": {
+          "type": "string",
+          "required": true
+        },
+        "industry": {
+          "type": "string",
+          "required": false
+        },
+        "preferences": {
+          "type": "object",
+          "required": false
+        }
+      },
+      "outputSchema": {
+        "guidelines": {
+          "type": "object",
+          "required": true
+        },
+        "colorPalette": {
+          "type": "array",
+          "required": true
+        },
+        "typography": {
+          "type": "object",
+          "required": true
+        }
+      },
+      "permissions": {
+        "requiresAgentAssignment": true
+      },
+      "handler": "core/skills/cmoSkills.js#registerCmoSkills",
+      "risk": "safe"
+    },
+    {
+      "id": "ai_brand_training_manual_creation",
+      "capability": "brand_identity_architecture",
+      "description": "Compiles historical metrics, backgrounds, and product profiles into comprehensive training manuals for AI customer service agents.",
+      "disableModelInvocation": true,
+      "inputSchema": {
+        "brandProfile": {
+          "type": "object",
+          "required": true
+        },
+        "productCatalog": {
+          "type": "array",
+          "required": false
+        },
+        "historicalData": {
+          "type": "object",
+          "required": false
+        }
+      },
+      "outputSchema": {
+        "trainingManual": {
+          "type": "object",
+          "required": true
+        }
+      },
+      "permissions": {
+        "requiresAgentAssignment": true
+      },
+      "handler": "core/skills/cmoSkills.js#registerCmoSkills",
+      "risk": "safe"
+    },
+    {
+      "id": "visual_layout_review",
+      "capability": "brand_identity_architecture",
+      "description": "Audits graphics, ensuring text strings are placed correctly, logos are positioned, and unnecessary buttons are stripped.",
+      "disableModelInvocation": true,
+      "inputSchema": {
+        "imageUrl": {
+          "type": "string",
+          "required": false
+        },
+        "layoutSpec": {
+          "type": "object",
+          "required": false
+        }
+      },
+      "outputSchema": {
+        "review": {
+          "type": "object",
+          "required": true
+        },
+        "issues": {
+          "type": "array",
+          "required": true
+        }
+      },
+      "permissions": {
+        "requiresAgentAssignment": true
+      },
+      "handler": "core/skills/cmoSkills.js#registerCmoSkills",
+      "risk": "safe"
+    },
+    {
+      "id": "public_vs_internal_copy_separation",
+      "capability": "social_media_automation",
+      "description": "Strips out internal business strategy notes or operational constraints before content is published to public-facing channels.",
+      "disableModelInvocation": true,
+      "inputSchema": {
+        "content": {
+          "type": "string",
+          "required": true
+        },
+        "internalMarkers": {
+          "type": "array",
+          "required": false
+        }
+      },
+      "outputSchema": {
+        "publicCopy": {
+          "type": "string",
+          "required": true
+        },
+        "internalNotes": {
+          "type": "array",
+          "required": true
+        }
+      },
+      "permissions": {
+        "requiresAgentAssignment": true
+      },
+      "handler": "core/skills/cmoSkills.js#registerCmoSkills",
+      "risk": "safe"
+    },
+    {
+      "id": "spans_and_layers_analysis",
+      "capability": "organizational_design",
+      "description": "Audits the organizational chart, identifying middle-management bloat or stretched managers.",
+      "disableModelInvocation": true,
+      "inputSchema": {
+        "orgChart": {
+          "type": "object",
+          "required": true
+        },
+        "maxSpan": {
+          "type": "number",
+          "required": false
+        }
+      },
+      "outputSchema": {
+        "analysis": {
+          "type": "object",
+          "required": true
+        },
+        "recommendations": {
+          "type": "array",
+          "required": true
+        }
+      },
+      "permissions": {
+        "requiresAgentAssignment": true
+      },
+      "handler": "core/skills/chroSkills.js#registerChroSkills",
+      "risk": "safe"
+    },
+    {
+      "id": "nine_box_talent_mapping",
+      "capability": "talent_density_management",
+      "description": "Evaluates personnel on a grid of performance versus potential to generate succession plans.",
+      "disableModelInvocation": true,
+      "inputSchema": {
+        "employees": {
+          "type": "array",
+          "required": true
+        },
+        "performanceScale": {
+          "type": "string",
+          "required": false
+        }
+      },
+      "outputSchema": {
+        "grid": {
+          "type": "array",
+          "required": true
+        },
+        "successionPlan": {
+          "type": "object",
+          "required": true
+        }
+      },
+      "permissions": {
+        "requiresAgentAssignment": true
+      },
+      "handler": "core/skills/chroSkills.js#registerChroSkills",
+      "risk": "safe"
+    },
+    {
+      "id": "compensation_equity_audit",
+      "capability": "performance_and_rewards_strategy",
+      "description": "Scans payroll and market data to identify pay disparities, flight risks, or misalignment with rewards philosophy.",
+      "disableModelInvocation": true,
+      "inputSchema": {
+        "payrollData": {
+          "type": "array",
+          "required": true
+        },
+        "marketBenchmarks": {
+          "type": "object",
+          "required": false
+        }
+      },
+      "outputSchema": {
+        "disparities": {
+          "type": "array",
+          "required": true
+        },
+        "flightRisks": {
+          "type": "array",
+          "required": true
+        }
+      },
+      "permissions": {
+        "requiresAgentAssignment": true
+      },
+      "handler": "core/skills/chroSkills.js#registerChroSkills",
+      "risk": "safe"
+    },
+    {
+      "id": "adkar_readiness_assessment",
+      "capability": "change_management_orchestration",
+      "description": "Diagnoses where a team is stuck during a major change and recommends targeted interventions (Awareness, Desire, Knowledge, Ability, Reinforcement).",
+      "disableModelInvocation": true,
+      "inputSchema": {
+        "changeInitiative": {
+          "type": "string",
+          "required": true
+        },
+        "teamData": {
+          "type": "object",
+          "required": true
+        }
+      },
+      "outputSchema": {
+        "adkarScores": {
+          "type": "object",
+          "required": true
+        },
+        "interventions": {
+          "type": "array",
+          "required": true
+        }
+      },
+      "permissions": {
+        "requiresAgentAssignment": true
+      },
+      "handler": "core/skills/chroSkills.js#registerChroSkills",
+      "risk": "safe"
+    },
+    {
+      "id": "okr_alignment_review",
+      "capability": "organizational_design",
+      "description": "Audits departmental objectives to ensure goals cascade logically from overarching targets.",
+      "disableModelInvocation": true,
+      "inputSchema": {
+        "okrs": {
+          "type": "array",
+          "required": true
+        },
+        "topLevelObjective": {
+          "type": "string",
+          "required": false
+        }
+      },
+      "outputSchema": {
+        "alignmentReport": {
+          "type": "object",
+          "required": true
+        },
+        "misalignments": {
+          "type": "array",
+          "required": true
+        }
+      },
+      "permissions": {
+        "requiresAgentAssignment": true
+      },
+      "handler": "core/skills/chroSkills.js#registerChroSkills",
+      "risk": "safe"
+    },
+    {
+      "id": "interview_rubric_generation",
+      "capability": "talent_density_management",
+      "description": "Dynamically generates structured, behavioral interview questions tailored to specific role capabilities.",
+      "disableModelInvocation": true,
+      "inputSchema": {
+        "roleTitle": {
+          "type": "string",
+          "required": true
+        },
+        "capabilities": {
+          "type": "array",
+          "required": true
+        },
+        "seniority": {
+          "type": "string",
+          "required": false
+        }
+      },
+      "outputSchema": {
+        "rubric": {
+          "type": "object",
+          "required": true
+        },
+        "questions": {
+          "type": "array",
+          "required": true
+        }
+      },
+      "permissions": {
+        "requiresAgentAssignment": true
+      },
+      "handler": "core/skills/chroSkills.js#registerChroSkills",
+      "risk": "safe"
+    },
+    {
+      "id": "scarf_threat_assessment",
+      "capability": "change_management_orchestration",
+      "description": "Predicts and mitigates employee backlash regarding Status, Certainty, Autonomy, Relatedness, or Fairness before communications are sent.",
+      "disableModelInvocation": true,
+      "inputSchema": {
+        "communication": {
+          "type": "string",
+          "required": true
+        },
+        "audience": {
+          "type": "object",
+          "required": false
+        }
+      },
+      "outputSchema": {
+        "threatScores": {
+          "type": "object",
+          "required": true
+        },
+        "mitigations": {
+          "type": "array",
+          "required": true
+        }
+      },
+      "permissions": {
+        "requiresAgentAssignment": true
+      },
+      "handler": "core/skills/chroSkills.js#registerChroSkills",
+      "risk": "safe"
+    },
+    {
+      "id": "irac_legal_analysis_memo",
+      "capability": "corporate_governance_and_structuring",
+      "description": "Structures legal triage using the Issue, Rule, Application, and Conclusion framework.",
+      "disableModelInvocation": true,
+      "inputSchema": {
+        "issue": {
+          "type": "string",
+          "required": true
+        },
+        "jurisdiction": {
+          "type": "string",
+          "required": false
+        },
+        "facts": {
+          "type": "array",
+          "required": false
+        }
+      },
+      "outputSchema": {
+        "memo": {
+          "type": "object",
+          "required": true
+        }
+      },
+      "permissions": {
+        "requiresAgentAssignment": true
+      },
+      "handler": "core/skills/cloSkills.js#registerCloSkills",
+      "risk": "safe"
+    },
+    {
+      "id": "regulatory_horizon_scanning",
+      "capability": "enterprise_risk_management",
+      "description": "Tracks upcoming legal changes across operating regions to assess their impact on current obligations.",
+      "disableModelInvocation": true,
+      "inputSchema": {
+        "regions": {
+          "type": "array",
+          "required": true
+        },
+        "currentObligations": {
+          "type": "array",
+          "required": false
+        }
+      },
+      "outputSchema": {
+        "upcomingChanges": {
+          "type": "array",
+          "required": true
+        },
+        "impactAssessment": {
+          "type": "object",
+          "required": true
+        }
+      },
+      "permissions": {
+        "requiresAgentAssignment": true
+      },
+      "handler": "core/skills/cloSkills.js#registerCloSkills",
+      "risk": "safe"
+    },
+    {
+      "id": "contract_risk_allocation_audit",
+      "capability": "contract_lifecycle_management",
+      "description": "Scans vendor agreements or partnership plans to flag dangerous indemnification, liability, or termination clauses.",
+      "disableModelInvocation": true,
+      "inputSchema": {
+        "contractText": {
+          "type": "string",
+          "required": true
+        },
+        "contractType": {
+          "type": "string",
+          "required": false
+        }
+      },
+      "outputSchema": {
+        "flaggedClauses": {
+          "type": "array",
+          "required": true
+        },
+        "riskScore": {
+          "type": "number",
+          "required": true
+        }
+      },
+      "permissions": {
+        "requiresAgentAssignment": true
+      },
+      "handler": "core/skills/cloSkills.js#registerCloSkills",
+      "risk": "safe"
+    },
+    {
+      "id": "legislative_language_review",
+      "capability": "enterprise_risk_management",
+      "description": "Conducts technical reviews of legislative language to verify structural flaws and liabilities confronting developers.",
+      "disableModelInvocation": true,
+      "inputSchema": {
+        "legislativeText": {
+          "type": "string",
+          "required": true
+        },
+        "focusAreas": {
+          "type": "array",
+          "required": false
+        }
+      },
+      "outputSchema": {
+        "review": {
+          "type": "object",
+          "required": true
+        },
+        "liabilities": {
+          "type": "array",
+          "required": true
+        }
+      },
+      "permissions": {
+        "requiresAgentAssignment": true
+      },
+      "handler": "core/skills/cloSkills.js#registerCloSkills",
+      "risk": "safe"
+    },
+    {
+      "id": "corporate_entity_structuring",
+      "capability": "corporate_governance_and_structuring",
+      "description": "Generates and organizes documentation for establishing new entities, obtaining EINs, and mapping the corporate structure.",
+      "disableModelInvocation": true,
+      "inputSchema": {
+        "entityType": {
+          "type": "string",
+          "required": true
+        },
+        "state": {
+          "type": "string",
+          "required": false
+        },
+        "ownership": {
+          "type": "object",
+          "required": false
+        }
+      },
+      "outputSchema": {
+        "documentation": {
+          "type": "object",
+          "required": true
+        },
+        "structure": {
+          "type": "object",
+          "required": true
+        }
+      },
+      "permissions": {
+        "requiresAgentAssignment": true
+      },
+      "handler": "core/skills/cloSkills.js#registerCloSkills",
+      "risk": "safe"
+    },
+    {
+      "id": "credit_infrastructure_compliance_check",
+      "capability": "consumer_credit_compliance",
+      "description": "Ensures backend processing in credit mediation groups aligns with regulations before consumer launch roadmaps are activated.",
+      "disableModelInvocation": true,
+      "inputSchema": {
+        "processFlow": {
+          "type": "object",
+          "required": true
+        },
+        "regulations": {
+          "type": "array",
+          "required": false
+        }
+      },
+      "outputSchema": {
+        "complianceReport": {
+          "type": "object",
+          "required": true
+        },
+        "gaps": {
+          "type": "array",
+          "required": true
+        }
+      },
+      "permissions": {
+        "requiresAgentAssignment": true
+      },
+      "handler": "core/skills/cloSkills.js#registerCloSkills",
+      "risk": "safe"
+    },
+    {
+      "id": "incident_response_orchestration",
+      "capability": "enterprise_risk_management",
+      "description": "Quarterbacks the enterprise response to data breaches, PR crises, or regulatory inquiries.",
+      "disableModelInvocation": true,
+      "inputSchema": {
+        "incidentType": {
+          "type": "string",
+          "required": true
+        },
+        "severity": {
+          "type": "string",
+          "required": true
+        },
+        "affectedSystems": {
+          "type": "array",
+          "required": false
+        }
+      },
+      "outputSchema": {
+        "responsePlan": {
+          "type": "object",
+          "required": true
+        },
+        "stakeholders": {
+          "type": "array",
+          "required": true
+        }
+      },
+      "permissions": {
+        "requiresAgentAssignment": true
+      },
+      "handler": "core/skills/cloSkills.js#registerCloSkills",
+      "risk": "safe"
     }
   ]
 }
