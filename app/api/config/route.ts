@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 const { loadConfig, saveConfig, maskKey, setProviderKey, resetRuntimeCache, getRuntime, ensureModelsResolved } = require('../../../lib/ceoAgentServer');
 const { PROVIDERS, PROVIDER_IDS, ACTIVE_PROVIDER_IDS } = require('../../../lib/providers');
 const { ALL_DEPARTMENTS, buildConnections, buildCatalog, sanitizeDepartmentModelDefaults } = require('../../../lib/connectionsConfig');
+const { CEO_MODES, DEFAULT_CEO_MODE } = require('../../../core/ceoModes');
 
 async function buildConfigResponse(config: any) {
   const { runtime } = getRuntime();
@@ -30,6 +31,13 @@ async function buildConfigResponse(config: any) {
     businessContext: config.businessContext,
     activeDepartments: config.activeDepartments,
     costMode: config.costMode,
+    ceoMode: config.ceoMode || DEFAULT_CEO_MODE,
+    // id+label+hint only (no thresholds) — relayed through this
+    // already-fetched response so client components never need to
+    // require() core/ceoModes.js directly into the client bundle, same
+    // reasoning as `providers` below re: lib/providers.js and the
+    // import.meta client-bundle break documented in ConnectionsView.tsx.
+    ceoModes: Object.values(CEO_MODES).map((m: any) => ({ id: m.id, label: m.label, hint: m.hint })),
     departmentModelDefaults: config.departmentModelDefaults || {},
     connections: buildConnections(process.env, maskKey),
     activeProviderIds: ACTIVE_PROVIDER_IDS,
@@ -74,6 +82,14 @@ export async function POST(request: Request) {
     businessContext: typeof body.businessContext === 'string' ? body.businessContext.trim() : existing.businessContext || '',
     activeDepartments,
     costMode: body.costMode === 'efficient' ? 'efficient' : 'flagship',
+    // Unlike costMode above, an omitted/invalid ceoMode falls back to the
+    // EXISTING config value, not always to the default — a caller that
+    // POSTs only { ceoMode } (the chat chip toggle) must not silently
+    // reset unrelated fields, and a caller that never mentions ceoMode at
+    // all (e.g. SettingsView's save) must not silently reset this one.
+    ceoMode: typeof body.ceoMode === 'string' && CEO_MODES[body.ceoMode]
+      ? body.ceoMode
+      : (existing.ceoMode || DEFAULT_CEO_MODE),
     departmentModelDefaults: sanitizeDepartmentModelDefaults(body.departmentModelDefaults, existing.departmentModelDefaults),
     createdAt: existing.createdAt || new Date().toISOString(),
     updatedAt: new Date().toISOString(),

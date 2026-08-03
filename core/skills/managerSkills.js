@@ -1,4 +1,5 @@
 const Organization = require('../../organization/Organization');
+const { resolveCeoMode } = require('../ceoModes');
 
 const MANAGER_PERMISSION = Object.freeze({ requiresAgentAssignment: true });
 
@@ -8,6 +9,13 @@ function clampScore(value) {
 
 function registerManagerSkills(registry, options = {}) {
   const organization = options.organization || Organization.createDefault();
+  // CEO Modes (Stream B2, core/ceoModes.js): resolved once at registration
+  // time, same lifecycle as `organization` above. An explicit per-call
+  // `threshold`/`passThreshold` in a skill's input always overrides the
+  // configured mode's default — see escalation_assessment/quality_review
+  // below — this only changes what happens when the caller doesn't supply
+  // one, exactly like a config default, not new decision logic.
+  const ceoMode = options.ceoMode || resolveCeoMode();
   const register = (name, capability, description, inputSchema, outputSchema, handler) => registry.register(name, {
     capability,
     description,
@@ -127,17 +135,23 @@ function registerManagerSkills(registry, options = {}) {
       urgency: { type: 'number', required: true },
       reversible: { type: 'boolean', required: true },
       withinAuthority: { type: 'boolean', required: true },
+      // Optional per-call override of the configured CEO mode's escalation
+      // threshold (core/ceoModes.js). Omit to use the mode's default —
+      // this is the same "explicit input wins over configured default"
+      // shape budget_token_allocation/quality_review already use.
+      threshold: { type: 'number', required: false },
     },
     { assessment: { type: 'object', required: true } },
     async input => {
       const score = clampScore(input.impact) + clampScore(input.urgency)
         + (input.reversible ? 0 : 2) + (input.withinAuthority ? 0 : 3);
+      const threshold = input.threshold != null ? input.threshold : ceoMode.escalationThreshold;
       const reasons = [];
       if (!input.withinAuthority) reasons.push('Decision exceeds assigned authority.');
       if (!input.reversible) reasons.push('Decision is difficult to reverse.');
       if (clampScore(input.impact) >= 4) reasons.push('Potential impact is high.');
       if (clampScore(input.urgency) >= 4) reasons.push('Time sensitivity is high.');
-      return { assessment: { issue: input.issue, score, escalate: score >= 7, reasons } };
+      return { assessment: { issue: input.issue, score, threshold, escalate: score >= threshold, reasons } };
     },
   );
 
@@ -199,14 +213,19 @@ function registerManagerSkills(registry, options = {}) {
       passThreshold: { type: 'number', required: false },
     },
     { review: { type: 'object', required: true } },
-    async ({ artifact, criteria, passThreshold = 0.8 }) => {
+    async ({ artifact, criteria, passThreshold }) => {
+      // Same "explicit input wins over configured mode default" shape as
+      // escalation_assessment's threshold above — an explicit passThreshold
+      // still always wins over the configured CEO mode's default.
+      const threshold = passThreshold != null ? passThreshold : ceoMode.qualityPassThreshold;
       const passedCount = criteria.filter(item => item.passed === true).length;
       const score = criteria.length ? passedCount / criteria.length : 0;
       return {
         review: {
           artifact,
           score,
-          passed: score >= passThreshold,
+          passThreshold: threshold,
+          passed: score >= threshold,
           gaps: criteria.filter(item => item.passed !== true).map(item => ({ criterion: item.name, note: item.note || null })),
         },
       };

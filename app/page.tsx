@@ -47,7 +47,7 @@ export default function Home() {
     <div className="app-shell">
       <Sidebar agentName={config.agentName} tab={tab} onSelect={setTab} />
       <main className="content">
-        {tab === 'chat' && <ChatView config={config} />}
+        {tab === 'chat' && <ChatView config={config} onConfigChange={refreshConfig} />}
         {tab === 'org' && <OrgView />}
         {tab === 'status' && <StatusView />}
         {tab === 'activity' && <ActivityView />}

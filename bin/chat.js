@@ -64,6 +64,7 @@ const { saveUpload, MAX_UPLOAD_BYTES } = require('../lib/uploadStore');
 const { recordUsage } = require('../core/UsageTracker');
 const { resolveRoleForAgent } = require('../core/resolveDepartmentRole');
 const { resolveClientForModel } = require('../core/resolveClientForModel');
+const { CEO_MODES, DEFAULT_CEO_MODE } = require('../core/ceoModes');
 const { dispatchSkillMessage } = require('../core/skillDispatch');
 
 function loadConfig() {
@@ -108,8 +109,14 @@ function formatUsageLine(usage) {
 async function main() {
   const config = loadConfig();
   if (!config.costMode) config.costMode = 'flagship'; // backward compatibility for pre-existing configs
+  if (!config.ceoMode) config.ceoMode = DEFAULT_CEO_MODE; // backward compatibility for pre-existing configs
 
-  const runtime = createRuntime(config, { root: ROOT });
+  // `let`, not `const`: /mode rebuilds this after a mode change, same as
+  // the web side's resetRuntimeCache()+lazy-rebuild (lib/ceoAgentServer.js)
+  // — escalation_assessment/quality_review's ceoMode is resolved once at
+  // registerManagerSkills() time (a closure), so changing config.ceoMode
+  // alone would not actually affect the next skill call without this.
+  let runtime = createRuntime(config, { root: ROOT });
 
   const openRouterClient = new OpenRouterClient();
   const anthropicClient = new AnthropicClient();
@@ -127,6 +134,7 @@ async function main() {
   console.log(`Business: ${config.businessContext || 'not specified'}`);
   console.log(`Active departments: ${config.activeDepartments.join(', ')}`);
   console.log(`Cost mode: ${config.costMode}`);
+  console.log(`CEO mode: ${runtime.ceoMode.label}`);
   console.log('');
 
   if (!process.env.OPENROUTER_API_KEY) {
@@ -266,6 +274,30 @@ async function main() {
       saveConfig(config);
       console.log('');
       console.log(`  Cost mode set to: ${config.costMode}`);
+      console.log('');
+      rl.prompt();
+      return;
+    }
+
+    if (input === '/mode') {
+      console.log('');
+      console.log(`  Current CEO mode: ${runtime.ceoMode.label} (${runtime.ceoMode.hint})`);
+      console.log('  Available: ' + Object.values(CEO_MODES).map(m => m.id).join(', '));
+      console.log('');
+      rl.prompt();
+      return;
+    }
+
+    const modeMatch = input.match(/^\/mode\s+(\S+)$/);
+    if (modeMatch && CEO_MODES[modeMatch[1]]) {
+      config.ceoMode = modeMatch[1];
+      saveConfig(config);
+      // Rebuild so the new mode's threshold actually applies to the next
+      // escalation_assessment/quality_review call — see the comment on
+      // `let runtime` above for why this isn't just a config write.
+      runtime = createRuntime(config, { root: ROOT });
+      console.log('');
+      console.log(`  CEO mode set to: ${runtime.ceoMode.label} (${runtime.ceoMode.hint})`);
       console.log('');
       rl.prompt();
       return;

@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import ModelSelector, { ChatRole, CostTier } from './ModelSelector';
+import CeoModeSelector from './CeoModeSelector';
 
 type Message = {
   role: 'user' | 'agent' | 'system' | 'skill';
@@ -17,7 +18,7 @@ type Message = {
 
 type Attachment = { fileId: string; filename: string; size: number };
 
-export default function ChatView({ config }: { config: any }) {
+export default function ChatView({ config, onConfigChange }: { config: any; onConfigChange?: () => void | Promise<void> }) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
@@ -31,12 +32,45 @@ export default function ChatView({ config }: { config: any }) {
   // selection ultimately "should" live long-term is explicitly flagged as
   // unresolved in docs/design/BYNGE-connection-scoping.md §3).
   const [modelOverride, setModelOverride] = useState<{ role: ChatRole; tier: CostTier } | null>(null);
+  const [savingCeoMode, setSavingCeoMode] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const defaultTier: CostTier = config.costMode === 'efficient' ? 'efficient' : 'flagship';
   const selectorValue = modelOverride || { role: 'claude' as ChatRole, tier: defaultTier };
   const openRouterConnection = config.connections?.openrouter || { hasKey: false, active: true };
+  const ceoModes = config.ceoModes || [];
+  const ceoModeValue = config.ceoMode || 'aggressive';
+
+  // Persists like SettingsView's save, not modelOverride's session-only
+  // state above -- CEO mode is a runtime-wide setting (bin/chat.js's `/mode`
+  // persists+rebuilds the same way), not a per-message override. Sends the
+  // existing costMode/activeDepartments through explicitly: the shared
+  // POST /api/config handler resets costMode to 'flagship' whenever a
+  // request omits it (see route.ts), so a ceoMode-only body would silently
+  // downgrade an efficient-tier setup.
+  async function handleCeoModeChange(nextMode: string) {
+    if (nextMode === ceoModeValue || savingCeoMode) return;
+    setSavingCeoMode(true);
+    try {
+      await fetch('/api/config', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          agentName: config.agentName,
+          principalName: config.principalName,
+          businessContext: config.businessContext,
+          activeDepartments: config.activeDepartments,
+          costMode: config.costMode,
+          departmentModelDefaults: config.departmentModelDefaults,
+          ceoMode: nextMode,
+        }),
+      });
+      await onConfigChange?.();
+    } finally {
+      setSavingCeoMode(false);
+    }
+  }
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -186,6 +220,14 @@ export default function ChatView({ config }: { config: any }) {
           disabled={sending}
         />
         <button onClick={send} disabled={sending}>{sending ? 'Sending...' : 'Send'}</button>
+        {ceoModes.length > 0 && (
+          <CeoModeSelector
+            modes={ceoModes}
+            value={ceoModeValue}
+            onChange={handleCeoModeChange}
+            disabled={sending || savingCeoMode}
+          />
+        )}
         <div className="chat-model-selector">
           <ModelSelector
             mode="compact"
