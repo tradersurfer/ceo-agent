@@ -7,6 +7,7 @@ const frameworkCatalog = require('./frameworks/catalog');
 const { createWorkflowPersistence } = require('./persistence');
 const { WorkflowScheduler } = require('./WorkflowScheduler');
 const { InMemoryAuditLog } = require('./WorkflowRuntime');
+const { resolveCeoMode } = require('./ceoModes');
 
 const SESSION_PROJECTS = Object.freeze(['cli-session', 'web-session']);
 
@@ -47,6 +48,10 @@ function createRuntime(config, options = {}) {
     || new AgentRegistry(path.join(root, 'registry', 'agent-registry.json'));
   const organization = options.organization || Organization.createDefault();
   const activeAgents = buildConfiguredAgentList(agentRegistry, config);
+  // CEO Modes (Stream B2, core/ceoModes.js): resolved from config.ceoMode
+  // once here, same lifecycle as organization/agentRegistry above — an
+  // explicit options.ceoMode (tests/advanced installs) wins over config.
+  const ceoMode = options.ceoMode || resolveCeoMode(config.ceoMode);
 
   for (const agent of config.customAgents || []) organization.registerAgent({
     ...agent,
@@ -76,6 +81,7 @@ function createRuntime(config, options = {}) {
   const connectedRegistries = loadRuntimeRegistries({
     root,
     organization,
+    ceoMode,
     bridgeOptions: options.bridgeOptions,
     workflowRuntimeOptions,
     skillAudit,
@@ -96,6 +102,7 @@ function createRuntime(config, options = {}) {
   runtime.initialize();
 
   runtime.organization = organization;
+  runtime.ceoMode = ceoMode;
   runtime.agentRegistry = agentRegistry;
   runtime.activeAgents = activeAgents;
   runtime.registries = connectedRegistries.documents;

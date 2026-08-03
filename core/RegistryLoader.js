@@ -48,7 +48,7 @@ function loadRuntimeRegistries(options = {}) {
 
   const skillRegistry = new SkillRegistry();
   registerExampleSkills(skillRegistry);
-  registerManagerSkills(skillRegistry, { organization: options.organization });
+  registerManagerSkills(skillRegistry, { organization: options.organization, ceoMode: options.ceoMode });
   registerScopeCreepSkill(skillRegistry);
   registerSchemaMarkupSkills(skillRegistry);
   registerContentQualitySkill(skillRegistry);

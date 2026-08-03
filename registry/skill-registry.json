@@ -117,7 +117,8 @@
         "impact": { "type": "number", "required": true },
         "urgency": { "type": "number", "required": true },
         "reversible": { "type": "boolean", "required": true },
-        "withinAuthority": { "type": "boolean", "required": true }
+        "withinAuthority": { "type": "boolean", "required": true },
+        "threshold": { "type": "number", "required": false }
       },
       "outputSchema": { "assessment": { "type": "object", "required": true } },
       "permissions": { "requiresAgentAssignment": true },
