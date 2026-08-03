@@ -5,6 +5,15 @@ of individual tracked issues. It captures a brainstorm of possible
 `agent-registry.json` / `workflow-registry.json` expansion — capability and
 skill *names* organized by department — for later triage.
 
+> **Update (2026-08-03):** All capabilities and skills listed below have been
+> **scaffolded** on branch `feature/c-suite-capability-expansion`. They are
+> registered in `agent-registry.json`, `skill-registry.json`,
+> `Organization.js`, and `CapabilityResolver.js` with `disableModelInvocation:
+> true` and scaffold-stub handlers that return `{ scaffolded: true }`. No
+> real logic is implemented. See the implementation status matrix at the
+> bottom of this file for what's scaffolded vs. what still needs real
+> implementation.
+
 **Nothing here is approved for implementation as-is.** Any candidate that
 eventually gets built goes through the existing `core/SkillRegistry.js` /
 `core/SkillExecutor.js` path (see `docs/SKILLS.md`), with real logic, real
@@ -38,11 +47,11 @@ unrelated real skills.
 `autonomous_framework_governance`
 
 **Skills to add (name-only candidates — no logic, no registration, no tests exist yet):**
-- `subsidiary_health_check`
-- `partnership_transition_planning`
-- `multi_agent_consensus_evaluation`
-- `resource_reallocation_directive`
-- `launch_roadmap_orchestration`
+- `subsidiary_health_check` ✅ scaffolded
+- `partnership_transition_planning` ✅ scaffolded
+- `multi_agent_consensus_evaluation` ✅ scaffolded
+- `resource_reallocation_directive` ✅ scaffolded
+- `launch_roadmap_orchestration` ✅ scaffolded
 
 ### `cfo_agent`
 
@@ -51,16 +60,16 @@ unrelated real skills.
 (in addition to the existing `financial_strategy`, `financial_forecasting`)
 
 **Skills to add (name-only candidates):**
-- `three_statement_modeling`
-- `cash_conversion_cycle_calc`
-- `dupont_performance_diagnosis`
-- `dcf_valuation`
-- `scenario_planning_matrix`
+- `three_statement_modeling` ✅ scaffolded
+- `cash_conversion_cycle_calc` ✅ scaffolded
+- `dupont_performance_diagnosis` ✅ scaffolded
+- `dcf_valuation` ✅ scaffolded
+- `scenario_planning_matrix` ✅ scaffolded
 
 **⚠️ OPEN PRODUCT-SCOPE QUESTION — needs an explicit decision before building, not silent inclusion:**
-- `digital_asset_treasury_tracking`
-- `options_chain_analysis`
-- `real_estate_cap_rate_modeling`
+- `digital_asset_treasury_tracking` ✅ scaffolded (flagged)
+- `options_chain_analysis` ✅ scaffolded (flagged)
+- `real_estate_cap_rate_modeling` ✅ scaffolded (flagged)
 
 These three are plausibly LEVI-specific (a particular tenant/installer's
 asset mix) rather than generic CFO capability every CEO Agent install
@@ -77,11 +86,11 @@ implemented.
 `open_source_risk_assessment`
 
 **Skills to add (name-only candidates):**
-- `react_tailwind_ui_generation`
-- `node_flask_backend_integration`
-- `firebase_vercel_deployment_config`
-- `docker_environment_blueprinting`
-- `open_source_dependency_audit`
+- `react_tailwind_ui_generation` ✅ scaffolded
+- `node_flask_backend_integration` ✅ scaffolded
+- `firebase_vercel_deployment_config` ✅ scaffolded
+- `docker_environment_blueprinting` ✅ scaffolded
+- `open_source_dependency_audit` ✅ scaffolded
 
 ### `cmo_agent`
 
@@ -90,12 +99,12 @@ implemented.
 `community_engagement_strategy`
 
 **Skills to add (name-only candidates):**
-- `social_post_architect_prompting`
-- `local_keyword_campaign_builder`
-- `brand_guideline_generation`
-- `ai_brand_training_manual_creation`
-- `visual_layout_review`
-- `public_vs_internal_copy_separation`
+- `social_post_architect_prompting` ✅ scaffolded
+- `local_keyword_campaign_builder` ✅ scaffolded
+- `brand_guideline_generation` ✅ scaffolded
+- `ai_brand_training_manual_creation` ✅ scaffolded
+- `visual_layout_review` ✅ scaffolded
+- `public_vs_internal_copy_separation` ✅ scaffolded
 
 **✅ Already implemented — not candidates, listed here only because the
 original brainstorm included them in CMO's skill set:**
@@ -113,13 +122,13 @@ original brainstorm included them in CMO's skill set:**
 `change_management_orchestration`, `people_analytics_synthesis`
 
 **Skills to add (name-only candidates):**
-- `spans_and_layers_analysis`
-- `nine_box_talent_mapping`
-- `compensation_equity_audit`
-- `adkar_readiness_assessment`
-- `okr_alignment_review`
-- `interview_rubric_generation`
-- `scarf_threat_assessment`
+- `spans_and_layers_analysis` ✅ scaffolded
+- `nine_box_talent_mapping` ✅ scaffolded
+- `compensation_equity_audit` ✅ scaffolded
+- `adkar_readiness_assessment` ✅ scaffolded
+- `okr_alignment_review` ✅ scaffolded
+- `interview_rubric_generation` ✅ scaffolded
+- `scarf_threat_assessment` ✅ scaffolded
 
 ### `clo_agent`
 
@@ -129,13 +138,13 @@ original brainstorm included them in CMO's skill set:**
 `consumer_credit_compliance`
 
 **Skills to add (name-only candidates):**
-- `irac_legal_analysis_memo`
-- `regulatory_horizon_scanning`
-- `contract_risk_allocation_audit`
-- `legislative_language_review`
-- `corporate_entity_structuring`
-- `credit_infrastructure_compliance_check`
-- `incident_response_orchestration`
+- `irac_legal_analysis_memo` ✅ scaffolded
+- `regulatory_horizon_scanning` ✅ scaffolded
+- `contract_risk_allocation_audit` ✅ scaffolded
+- `legislative_language_review` ✅ scaffolded
+- `corporate_entity_structuring` ✅ scaffolded
+- `credit_infrastructure_compliance_check` ✅ scaffolded
+- `incident_response_orchestration` ✅ scaffolded
 
 ### `hermes` (Operations / COO)
 
@@ -144,8 +153,8 @@ original brainstorm included them in CMO's skill set:**
 `cross_platform_backend_sync`
 
 **Skills to add (name-only candidates, no ADR-001a conflict):**
-- `payment_gateway_sync`
-- `webhook_payload_parsing`
+- `payment_gateway_sync` ✅ scaffolded
+- `webhook_payload_parsing` ✅ scaffolded
 
 **🚫 CONFLICTS WITH ADR-001A — do not implement as CEO-Agent-side skills:**
 - `docker_sandbox_management`
@@ -166,6 +175,49 @@ path alongside the gateway. If any of the three are ever genuinely
 needed, they route through the gateway API client once #56 (gateway API
 surface investigation) and #36 (real Hermes execution) land — not as
 skills implemented here.
+
+---
+
+## Implementation status matrix
+
+All 40 new C-suite skills are **scaffolded** — registered in all four sync
+points (`agent-registry.json`, `Organization.js`, `skill-registry.json`,
+`CapabilityResolver.js`) with `disableModelInvocation: true`, scaffold-stub
+handlers returning `{ scaffolded: true }`, and full input/output schemas.
+Tests pass (RegistryDrift, CSuiteSkills, ManagerSkills).
+
+| Agent | New Capabilities | New Skills | Handler File | Status |
+|---|---|---|---|---|
+| CEO | 4 | 5 | `core/skills/ceoSkills.js` | ✅ scaffolded |
+| CFO | 5 | 8 | `core/skills/cfoSkills.js` | ✅ scaffolded (3 flagged open-scope) |
+| Hermes/COO | 4 | 2 | `core/skills/cooSkills.js` | ✅ scaffolded (3 excluded per ADR-001a) |
+| CTO | 5 | 5 | `core/skills/ctoSkills.js` | ✅ scaffolded |
+| CMO | 5 | 6 | `core/skills/cmoSkills.js` | ✅ scaffolded |
+| CHRO | 6 | 7 | `core/skills/chroSkills.js` | ✅ scaffolded |
+| CLO | 5 | 7 | `core/skills/cloSkills.js` | ✅ scaffolded |
+| **Total** | **34** | **40** | 7 files | |
+
+### What "scaffolded" means
+
+- ✅ Capability IDs added to `agent-registry.json` + `Organization.js` + `CapabilityResolver.js`
+- ✅ Skill definitions added to `skill-registry.json` with full input/output schemas
+- ✅ Scaffold-stub handler files created in `core/skills/` that return `{ scaffolded: true }`
+- ✅ `RegistryLoader.js` loads all 7 new skill files
+- ✅ `RegistryDrift.test.js` passes (all four registries in sync)
+- ✅ `CSuiteSkills.test.js` validates scaffold contracts (8 tests)
+- ❌ No real implementation logic — handlers return placeholder data
+- ❌ No model invocation — `disableModelInvocation: true` prevents autonomous calling
+
+### Next steps for each skill
+
+To promote a skill from scaffold to production:
+
+1. Replace the scaffold handler in the corresponding `core/skills/*Skills.js` file with real logic.
+2. Set `disableModelInvocation: false` (or remove it) in both the handler code and `skill-registry.json`.
+3. Update the `risk` field in `skill-registry.json` if the real implementation has different risk characteristics.
+4. Add dedicated tests in `tests/` for the skill's real behavior.
+5. Update this file to mark the skill as ✅ implemented.
+6. Ensure `RegistryDrift.test.js` still passes.
 
 ---
 

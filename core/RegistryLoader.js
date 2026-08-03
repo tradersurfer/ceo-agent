@@ -10,6 +10,13 @@ const { registerContentQualitySkill } = require('./skills/contentQualitySkill');
 const { registerDocumentCreationSkills } = require('./skills/documentCreationSkills');
 const { registerFinancialModelSkills } = require('./skills/financialModelSkill');
 const { registerWebSearchSkill } = require('./skills/webSearchSkill');
+const { registerCeoSkills } = require('./skills/ceoSkills');
+const { registerCfoSkills } = require('./skills/cfoSkills');
+const { registerCooSkills } = require('./skills/cooSkills');
+const { registerCtoSkills } = require('./skills/ctoSkills');
+const { registerCmoSkills } = require('./skills/cmoSkills');
+const { registerChroSkills } = require('./skills/chroSkills');
+const { registerCloSkills } = require('./skills/cloSkills');
 const { WorkflowRuntime } = require('./WorkflowRuntime');
 const { registerBridgeExecutors } = require('./BridgeExecutors');
 
@@ -55,6 +62,13 @@ function loadRuntimeRegistries(options = {}) {
   registerDocumentCreationSkills(skillRegistry);
   registerFinancialModelSkills(skillRegistry);
   registerWebSearchSkill(skillRegistry);
+  registerCeoSkills(skillRegistry);
+  registerCfoSkills(skillRegistry);
+  registerCooSkills(skillRegistry);
+  registerCtoSkills(skillRegistry);
+  registerCmoSkills(skillRegistry);
+  registerChroSkills(skillRegistry);
+  registerCloSkills(skillRegistry);
   const skillExecutor = new SkillExecutor(skillRegistry, {
     agentResolver: options.organization
       ? agentId => options.organization.findAgent(agentId)
