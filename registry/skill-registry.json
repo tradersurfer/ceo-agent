@@ -940,7 +940,7 @@
     {
       "id": "partnership_transition_planning",
       "capability": "joint_venture_oversight",
-      "description": "Structures and executes operational takeover proposals or transition plans for external enterprises.",
+      "description": "Structures a typed operational transition plan (acquisition, joint venture, divestiture, outsourcing) with phased milestones and type-specific workstreams. Does not execute the transition.",
       "disableModelInvocation": true,
       "inputSchema": {
         "partnerName": {
@@ -1014,7 +1014,7 @@
     {
       "id": "resource_reallocation_directive",
       "capability": "portfolio_resource_allocation",
-      "description": "Generates formal, structured mandates for the CFO and CTO to shift assets or development bandwidth into new strategic sectors.",
+      "description": "Generates a formal reallocation mandate document for CFO/CTO (or a named target agent) describing sector shift intent, assignees, and success metrics. Does not move budget or capacity itself.",
       "disableModelInvocation": true,
       "inputSchema": {
         "fromSector": {
@@ -1115,7 +1115,7 @@
     {
       "id": "cash_conversion_cycle_calc",
       "capability": "treasury_management",
-      "description": "Measures how fast capital moves through the operating cycle (DIO + DSO − DPO).",
+      "description": "Measures how fast capital moves through the operating cycle (DIO + DSO \u2212 DPO).",
       "inputSchema": {
         "inventoryDays": {
           "type": "number",
@@ -1256,7 +1256,7 @@
     {
       "id": "digital_asset_treasury_tracking",
       "capability": "treasury_management",
-      "description": "Monitors on-chain metrics, long-term holder data, and corporate treasury accumulation strategies. [Open product-scope question — see BACKLOG-skill-expansion.md]",
+      "description": "Monitors on-chain metrics, long-term holder data, and corporate treasury accumulation strategies. [Open product-scope question \u2014 see BACKLOG-skill-expansion.md]",
       "disableModelInvocation": true,
       "inputSchema": {
         "assetSymbols": {
@@ -1283,7 +1283,7 @@
     {
       "id": "options_chain_analysis",
       "capability": "macro_market_analysis",
-      "description": "Tracks and evaluates short-term equity swing strategies and contract premiums. [Open product-scope question — see BACKLOG-skill-expansion.md]",
+      "description": "Tracks and evaluates short-term equity swing strategies and contract premiums. [Open product-scope question \u2014 see BACKLOG-skill-expansion.md]",
       "disableModelInvocation": true,
       "inputSchema": {
         "ticker": {
@@ -1314,7 +1314,7 @@
     {
       "id": "real_estate_cap_rate_modeling",
       "capability": "capital_allocation",
-      "description": "Provides execution capability for physical asset investments and property portfolio allocations. [Open product-scope question — see BACKLOG-skill-expansion.md]",
+      "description": "Provides execution capability for physical asset investments and property portfolio allocations. [Open product-scope question \u2014 see BACKLOG-skill-expansion.md]",
       "disableModelInvocation": true,
       "inputSchema": {
         "propertyValue": {
@@ -1347,9 +1347,9 @@
       "risk": "safe"
     },
     {
-      "id": "payment_gateway_sync",
+      "id": "payment_webhook_event_classify",
       "capability": "api_webhook_orchestration",
-      "description": "Handles the operational side of revenue — processing Stripe API webhooks, verifying transaction statuses, and triggering subsequent access or CRM updates.",
+      "description": "Classifies a caller-supplied payment webhook event shape (e.g. Stripe-style type strings) into a status label and suggested follow-up actions. Does not verify webhook authenticity, does not read credentials, and does not call payment provider APIs.",
       "disableModelInvocation": true,
       "inputSchema": {
         "webhookEvent": {
@@ -1380,7 +1380,7 @@
     {
       "id": "webhook_payload_parsing",
       "capability": "api_webhook_orchestration",
-      "description": "Intercepts incoming data arrays, extracts critical operational variables, and routes them to the correct department.",
+      "description": "Extracts common operational fields from a webhook payload object and routes it to a department by content heuristics.",
       "disableModelInvocation": true,
       "inputSchema": {
         "payload": {
@@ -1411,7 +1411,7 @@
     {
       "id": "react_tailwind_ui_generation",
       "capability": "full_stack_architecture",
-      "description": "Rapidly scaffolds modern, responsive frontend code for digital web development and brand identity starter packages.",
+      "description": "Scaffolds a React + Tailwind component from componentType (hero, card, pricing, form, or generic), with optional title and brand color tokens.",
       "disableModelInvocation": true,
       "inputSchema": {
         "componentType": {
@@ -1481,7 +1481,7 @@
     {
       "id": "firebase_vercel_deployment_config",
       "capability": "cloud_deployment_orchestration",
-      "description": "Audits and corrects environment parameters to ensure proper build modes across Firebase and Vercel.",
+      "description": "Audits provided env vars for Firebase/Vercel hygiene and uses projectRoot to recommend config file paths and path-derived project labels. Does not mutate the filesystem.",
       "disableModelInvocation": true,
       "inputSchema": {
         "projectRoot": {
@@ -1516,7 +1516,7 @@
     {
       "id": "docker_environment_blueprinting",
       "capability": "ai_agent_containerization",
-      "description": "Architects technical blueprints and risk moat rules for autonomous trading frameworks, keeping them isolated and secure.",
+      "description": "Emits an isolation blueprint and a Dockerfile tailored to frameworkName and isolationLevel. Does not build or run containers (ADR-001a).",
       "disableModelInvocation": true,
       "inputSchema": {
         "frameworkName": {
@@ -1551,7 +1551,7 @@
     {
       "id": "open_source_dependency_audit",
       "capability": "open_source_risk_assessment",
-      "description": "Reviews terminal logs, shell scripts, and third-party code libraries to identify security flaws before deployment.",
+      "description": "Heuristic risk scoring over a provided dependency list (name/version/deprecated flags). Does not parse lockfiles, terminal logs, or shell scripts, and does not call npm audit.",
       "disableModelInvocation": true,
       "inputSchema": {
         "dependencies": {
@@ -1652,7 +1652,7 @@
     {
       "id": "brand_guideline_generation",
       "capability": "brand_identity_architecture",
-      "description": "Generates full digital starter packages, including exact typography rules and color palettes.",
+      "description": "Generates a starter brand guideline package: industry-aware color palette, typography defaults, and basic voice/do-not rules from brandName, industry, and optional preferences.",
       "disableModelInvocation": true,
       "inputSchema": {
         "brandName": {
@@ -1722,7 +1722,7 @@
     {
       "id": "visual_layout_review",
       "capability": "brand_identity_architecture",
-      "description": "Audits graphics, ensuring text strings are placed correctly, logos are positioned, and unnecessary buttons are stripped.",
+      "description": "Audits a structured layoutSpec (text contrast/overflow, logo bounds, redundant buttons). Does not analyze image pixels; imageUrl alone returns a spec_required limitation.",
       "disableModelInvocation": true,
       "inputSchema": {
         "imageUrl": {
