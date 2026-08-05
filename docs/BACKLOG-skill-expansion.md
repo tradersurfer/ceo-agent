@@ -153,8 +153,8 @@ original brainstorm included them in CMO's skill set:**
 `cross_platform_backend_sync`
 
 **Skills to add (name-only candidates, no ADR-001a conflict):**
-- `payment_gateway_sync` ✅ scaffolded
-- `webhook_payload_parsing` ✅ scaffolded
+- `payment_webhook_event_classify` (renamed from `payment_gateway_sync`) ✅ implemented — classification only, no signature verification; see `docs/ISSUE-stripe-webhook-verification-route-layer.md` for the route-layer verification work this does not do
+- `webhook_payload_parsing` ✅ implemented
 
 **🚫 CONFLICTS WITH ADR-001A — do not implement as CEO-Agent-side skills:**
 - `docker_sandbox_management`

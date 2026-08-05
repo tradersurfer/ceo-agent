@@ -360,7 +360,7 @@
         "workload_balancing",
         "quality_review",
         "budget_token_allocation",
-        "payment_gateway_sync",
+        "payment_webhook_event_classify",
         "webhook_payload_parsing"
       ],
       "authorized_projects": "Configured per install via CEO_AGENT_PROJECTS env var.",
