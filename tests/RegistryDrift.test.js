@@ -4,6 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const Organization = require('../organization/Organization');
 const AgentRegistry = require('../sdk/AgentRegistry');
+const CapabilityResolver = require('../sdk/CapabilityResolver');
 const { createRuntime, SESSION_PROJECTS } = require('../core/runtimeFactory');
 
 const ROOT = path.resolve(__dirname, '..');
@@ -75,5 +76,25 @@ test('project, skill, tool, and workflow registries match connected runtime stat
   assert.deepEqual(
     sorted(runtime.registryCatalog.capabilities),
     sorted(Organization.createDefault().listAgents().flatMap(agent => agent.capabilities)),
+  );
+});
+
+// CapabilityResolver.RECOGNIZED_CAPABILITIES is a fourth, independently
+// maintained list of capability strings (used by TaskRouter/Supervisor's
+// capability-based routing) that drifted silently from the real agent
+// capability set before this test existed — see docs/design/registry-
+// architecture.md for the full history. This assertion is the one thing
+// standing between that and happening again.
+test('CapabilityResolver.RECOGNIZED_CAPABILITIES matches the real capability set exactly', () => {
+  const realCapabilities = Organization.createDefault().listAgents().flatMap(agent => agent.capabilities);
+  assert.deepEqual(
+    sorted(CapabilityResolver.RECOGNIZED_CAPABILITIES),
+    sorted(new Set(realCapabilities)),
+    'RECOGNIZED_CAPABILITIES must contain exactly the capabilities real agents declare — no missing, no dead entries',
+  );
+  assert.equal(
+    CapabilityResolver.RECOGNIZED_CAPABILITIES.length,
+    new Set(CapabilityResolver.RECOGNIZED_CAPABILITIES).size,
+    'RECOGNIZED_CAPABILITIES must not contain duplicates',
   );
 });
