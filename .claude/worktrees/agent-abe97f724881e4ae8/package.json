@@ -1,0 +1,46 @@
+{
+  "name": "ceo-agent",
+  "version": "0.1.0",
+  "description": "CEO Agent — the AI that runs your AI workforce.",
+  "license": "MIT",
+  "private": true,
+  "type": "commonjs",
+  "bin": {
+    "ceo-agent-setup": "./bin/setup.js",
+    "ceo-agent": "./bin/chat.js"
+  },
+  "scripts": {
+    "test": "node scripts/run-tests.js",
+    "test:core": "node --test tests/*.test.js",
+    "test:components": "node --require ./tests/components/registerTsx.js --require ./tests/components/setupJsdom.js --test tests/components/*.test.jsx",
+    "setup": "node bin/setup.js",
+    "start": "node bin/chat.js",
+    "web": "next dev -H 127.0.0.1",
+    "web:build": "next build",
+    "web:start": "next start -H 127.0.0.1 -p 3000"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.0",
+    "docx": "^9.7.1",
+    "exceljs": "^4.4.0",
+    "marked": "^15.0.12",
+    "marked-terminal": "^7.3.0",
+    "next": "^15.0.0",
+    "pdf-lib": "^1.17.1",
+    "react": "^18.3.0",
+    "react-dom": "^18.3.0",
+    "react-markdown": "^10.1.0",
+    "remark-gfm": "^4.0.1"
+  },
+  "devDependencies": {
+    "@testing-library/react": "^16.3.2",
+    "@types/node": "^22.0.0",
+    "@types/react": "^18.3.0",
+    "esbuild": "^0.28.1",
+    "jsdom": "^30.0.0",
+    "typescript": "^5.5.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
