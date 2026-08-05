@@ -26,29 +26,10 @@ const ALL_NEW_SKILLS = registrars.flatMap(({ fn }) => {
 });
 
 // Promoted from scaffold stub to real pure-computation implementations
-// (see core/skills/cfoSkills.js's module comment and tests/CfoSkills.test.js).
-<<<<<<< HEAD
-<<<<<<< HEAD
-// Excluded from the two "still a scaffold stub" assertions below; every
-// other generic assertion in this file (schema presence, permission
-// metadata, capability coverage, unique IDs) still applies to them.
-const PROMOTED_TO_REAL = new Set(['cash_conversion_cycle_calc', 'dupont_performance_diagnosis', 'dcf_valuation']);
-const SCAFFOLD_SKILLS = ALL_NEW_SKILLS.filter(skill => !PROMOTED_TO_REAL.has(skill.name));
-=======
-=======
->>>>>>> origin/main
-// Excluded from the "still a scaffold stub" disableModelInvocation assertion
-// below because these 3 (unlike the batch below) were promoted with
-// disableModelInvocation explicitly removed (defaults to false) — a
-// deliberate difference from the batch below, not an oversight to reconcile
-// here; see this PR's description for the full explanation.
 const PROMOTED_TO_REAL_CFO = new Set(['cash_conversion_cycle_calc', 'dupont_performance_diagnosis', 'dcf_valuation']);
 const SCAFFOLD_SKILLS = ALL_NEW_SKILLS.filter(skill => !PROMOTED_TO_REAL_CFO.has(skill.name));
 
-// Promoted from scaffold stub to real deterministic handlers (payment webhook
-// rename + reconciliation batch). Unlike the CFO batch above, these keep
-// disableModelInvocation: true — still explicit-command-only, not reachable
-// by autonomous model invocation, even though the handler logic is now real.
+// Promoted from scaffold stub to real deterministic handlers (payment webhook rename + reconciliation batch).
 const PROMOTED_TO_REAL_BATCH = new Set([
   'subsidiary_health_check', 'partnership_transition_planning', 'multi_agent_consensus_evaluation',
   'resource_reallocation_directive', 'launch_roadmap_orchestration',
@@ -59,16 +40,9 @@ const PROMOTED_TO_REAL_BATCH = new Set([
   'ai_brand_training_manual_creation', 'visual_layout_review', 'public_vs_internal_copy_separation',
 ]);
 
-// Union of every skill name that must NOT return { scaffolded: true } from
-// its handler. Genuinely-still-scaffold skills are everything else (the
-// remaining 5 CFO stubs, plus all of CHRO and CLO).
 const NON_SCAFFOLD_HANDLERS = new Set([...PROMOTED_TO_REAL_CFO, ...PROMOTED_TO_REAL_BATCH]);
 const STILL_SCAFFOLD_SKILLS = ALL_NEW_SKILLS.filter(skill => !NON_SCAFFOLD_HANDLERS.has(skill.name));
 
-// Valid-enough sample input covering every field any of the 18-skill batch's
-// real handlers require, so a generic call doesn't throw on missing/invalid
-// input — this test only asserts "not a scaffold stub," not specific
-// per-skill behavior (that's tests/PromotedCSuiteBehavior.test.js's job).
 const BATCH_SAMPLE_INPUT = {
   subsidiaryIds: ['s1'], metrics: [], partnerName: 'Acme', transitionType: 'acquisition',
   frameworkId: 'fw1', consensusLogic: { minAgents: 2, agreementThreshold: 0.7, humanVeto: true, killSwitch: true, maxPositionPct: 10 },
@@ -79,10 +53,6 @@ const BATCH_SAMPLE_INPUT = {
   businessType: 'bakery', location: 'Austin', brandName: 'Brand', brandProfile: { name: 'Brand' },
   content: 'Hello', layoutSpec: { texts: [], buttons: [], logo: { x: 0, y: 0 } },
 };
-<<<<<<< HEAD
->>>>>>> 235173269f385bdce8fd34659f4135a8150fcbbe
-=======
->>>>>>> origin/main
 
 test('each C-suite skill registrar registers the expected number of skills', () => {
   for (const { name, fn, count } of registrars) {
@@ -99,26 +69,13 @@ test('all still-scaffold C-suite skills have disableModelInvocation=true', () =>
 });
 
 test('the 3 promoted CFO skills are real: disableModelInvocation=false', () => {
-<<<<<<< HEAD
-<<<<<<< HEAD
-  const promoted = ALL_NEW_SKILLS.filter(skill => PROMOTED_TO_REAL.has(skill.name));
-=======
   const promoted = ALL_NEW_SKILLS.filter(skill => PROMOTED_TO_REAL_CFO.has(skill.name));
->>>>>>> 235173269f385bdce8fd34659f4135a8150fcbbe
-=======
-  const promoted = ALL_NEW_SKILLS.filter(skill => PROMOTED_TO_REAL_CFO.has(skill.name));
->>>>>>> origin/main
   assert.equal(promoted.length, 3);
   for (const skill of promoted) {
     assert.equal(skill.disableModelInvocation, false, `${skill.name} is real — must not be disableModelInvocation=true`);
   }
 });
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-=======
->>>>>>> origin/main
 test('the 18 payment/reconciliation-batch skills are real but remain disableModelInvocation=true', () => {
   const promoted = ALL_NEW_SKILLS.filter(skill => PROMOTED_TO_REAL_BATCH.has(skill.name));
   assert.equal(promoted.length, 18);
@@ -127,10 +84,6 @@ test('the 18 payment/reconciliation-batch skills are real but remain disableMode
   }
 });
 
-<<<<<<< HEAD
->>>>>>> 235173269f385bdce8fd34659f4135a8150fcbbe
-=======
->>>>>>> origin/main
 test('all C-suite scaffold skills require agent assignment', () => {
   for (const skill of ALL_NEW_SKILLS) {
     assert.equal(skill.permissions.requiresAgentAssignment, true, `${skill.name} must require agent assignment`);
@@ -144,20 +97,9 @@ test('all C-suite scaffold skills have non-empty input and output schemas', () =
   }
 });
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-test('all still-scaffold C-suite handlers return scaffolded:true', async () => {
-  for (const skill of SCAFFOLD_SKILLS) {
-=======
 test('all genuinely-still-scaffold C-suite handlers return scaffolded:true', async () => {
   for (const skill of STILL_SCAFFOLD_SKILLS) {
->>>>>>> 235173269f385bdce8fd34659f4135a8150fcbbe
-=======
-test('all genuinely-still-scaffold C-suite handlers return scaffolded:true', async () => {
-  for (const skill of STILL_SCAFFOLD_SKILLS) {
->>>>>>> origin/main
     const reg = new SkillRegistry();
-    // Re-register to get the full skill object including handler
     for (const { fn } of registrars) fn(reg);
     const full = reg.get(skill.name);
     const result = await full.handler({ test: 'input' });
