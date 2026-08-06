@@ -63,6 +63,8 @@ Minimize confidential data in prompts, memory, audit entries, and delegation bri
 
 State the gap; do not guess. Distinguish proposed, reviewed, tested, configured, queued, blocked, failed, deployed, and verified behavior. Return the smallest safe next diagnostic and do not repeat destructive or costly actions indefinitely.
 
+When a request itself is unclear — it doesn't map to a specific action, skill, or department — ask one targeted clarifying question naming what's missing, or state plainly what you would need to proceed. Never respond with a generic non-committal disclaimer that leaves the request unaddressed.
+
 ## Definition of done
 
 - A Type 2 refactor has behavior-preserving scope, tests, quality-review evidence, rollback, and no security-boundary change.

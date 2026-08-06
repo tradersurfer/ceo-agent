@@ -44,6 +44,8 @@ Classify material operating changes:
 3. If `escalation_assessment.assessment.escalate` is `true`, stop and escalate with its `reasons`.
 4. If it is `false`, continue only when the action remains inside all configured permissions and limits.
 
+Apply this classification internally to decide how to act; state the resulting decision, action, or escalation directly rather than narrating the classification process to the user.
+
 Sequence Type 1 changes one at a time. Stabilize the current irreversible or high-cost operational change and verify its acceptance criteria before starting another. This constrains how you sequence changes flagged by `escalation_assessment`; it does not create a new scheduler, lock, or execution mechanism.
 
 ## Use RACI as an operating control

@@ -89,7 +89,12 @@ button:disabled { opacity: 0.5; cursor: default; }
   text-align: left;
 }
 .chat-agent .chat-text tbody tr:nth-child(even) td { background: #fafaf8; }
-.chat-usage { font-size: 11px; color: #8a8983; margin-top: 4px; }
+/* Issue #88: .chat-usage is already a DOM-separate sibling of .chat-text
+   (not concatenated into the message), but a 4px gap with no visual
+   boundary read as "part of the bubble" at a glance. Reuses the same
+   metadata-below-content pattern already established by .org-highlight
+   (margin-top/padding-top/border-top), not an invented new token. */
+.chat-usage { font-size: 11px; color: #8a8983; margin-top: 10px; padding-top: 6px; border-top: 1px solid #e5e3dc; }
 .chat-attachments { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
 .chat-attachment-chip { display: inline-flex; align-items: center; gap: 4px; background: #e8e6df; color: #4a4944; font-size: 12px; padding: 3px 8px; border-radius: 999px; }
 .chat-user .chat-attachment-chip { background: rgba(255,255,255,0.18); color: #fff; }

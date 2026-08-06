@@ -190,3 +190,44 @@ test('an agent message with a markdown table renders real thead/th and tbody/tr 
     },
   );
 });
+
+// Issue #88: token usage metadata was reported as reading like it was
+// concatenated into the message body. Prior investigation (and this test)
+// confirm the API response and the render tree never actually concatenate
+// it -- .chat-usage is a real DOM-separate sibling of .chat-text, not a
+// child of it and not part of the message string. This is the first test
+// to actually exercise that render path: every prior test in this file
+// passes usage: {} (no promptTokens), which never satisfies the render
+// guard, so .chat-usage never previously rendered in any test.
+test('token usage metadata renders as a sibling DOM node of .chat-text, never nested inside the message body', async () => {
+  await withFetch(
+    async () => ({
+      json: async () => ({
+        status: 'ok',
+        agentName: 'CEO Agent',
+        usage: { promptTokens: 2791, completionTokens: 1024 },
+        text: 'Here is the analysis you asked for.',
+      }),
+    }),
+    async () => {
+      render(React.createElement(ChatView, { config: MINIMAL_CONFIG }));
+      await sendMessage('give me the analysis');
+
+      await waitFor(() => assert.ok(screen.getByText('2791 prompt · 1024 completion')));
+      const usageEl = screen.getByText('2791 prompt · 1024 completion');
+      assert.equal(usageEl.className, 'chat-usage');
+
+      const bubble = usageEl.closest('.chat-bubble');
+      assert.ok(bubble, 'usage metadata must live inside the same message bubble as the text it describes');
+      const textEl = bubble.querySelector('.chat-text');
+      assert.ok(textEl, 'the bubble must still have a real .chat-text node');
+
+      // The real assertion: usage is a sibling of .chat-text, not a
+      // descendant of it -- and the message text itself never contains the
+      // token-count string.
+      assert.equal(textEl.contains(usageEl), false, '.chat-usage must not be nested inside .chat-text');
+      assert.equal(usageEl.contains(textEl), false, '.chat-text must not be nested inside .chat-usage');
+      assert.doesNotMatch(textEl.textContent, /2791 prompt/, 'the message text itself must never contain the usage string');
+    },
+  );
+});

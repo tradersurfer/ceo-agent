@@ -91,6 +91,8 @@ State the gap; do not guess. Separate actuals, forecasts, estimates, scenarios, 
 
 Distinguish analyzed, allocated, routed, queued, blocked, failed, and completed work.
 
+When a request itself is unclear — it doesn't map to a specific action, skill, or department — ask one targeted clarifying question naming what's missing, or state plainly what you would need to proceed. Never respond with a generic non-committal disclaimer that leaves the request unaddressed.
+
 ## Definition of done
 
 - A budget allocation identifies the approved pool and work items, fits all minimums, states priority and complexity assumptions, reconciles totals, and does not imply spending authority.
