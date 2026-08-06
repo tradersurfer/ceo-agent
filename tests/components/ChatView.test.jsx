@@ -231,3 +231,142 @@ test('token usage metadata renders as a sibling DOM node of .chat-text, never ne
     },
   );
 });
+
+// Citation rendering: a model may emit <cite> tags unprompted (no doctrine
+// instructs this format). ChatView uses react-markdown with no rehype-raw,
+// so an unhandled <cite> tag would render as literal, visible tag syntax.
+// lib/citations.js's sanitizeCitations() is applied before ReactMarkdown
+// sees the text -- this confirms it's actually wired in, not just unit-
+// tested in isolation.
+test('a <cite> tag in agent text renders as clean styled text, not raw tag syntax', async () => {
+  await withFetch(
+    async () => ({
+      json: async () => ({
+        status: 'ok',
+        agentName: 'CEO Agent',
+        usage: {},
+        text: 'The Act applies here <cite index="1">EU AI Act Article 6</cite> and elsewhere.',
+      }),
+    }),
+    async () => {
+      render(React.createElement(ChatView, { config: MINIMAL_CONFIG }));
+      await sendMessage('what does the act say');
+
+      await waitFor(() => assert.ok(screen.getByText(/EU AI Act Article 6/)));
+      const textEl = document.querySelector('.chat-agent .chat-text');
+      assert.ok(textEl, 'agent message must render');
+      assert.doesNotMatch(textEl.innerHTML, /<cite\b/i, 'raw <cite tag markup must never reach the DOM as visible text');
+      assert.doesNotMatch(textEl.textContent, /<cite|<\/cite>/, 'no literal cite tag characters should be visible to the user');
+      // Converted to markdown emphasis -> a real <em> element, not plain text.
+      const emphasized = textEl.querySelector('em');
+      assert.ok(emphasized, 'the citation content should render as a real emphasized element');
+      assert.match(emphasized.textContent, /EU AI Act Article 6/);
+    },
+  );
+});
+
+// Hover actions: copy/edit/regenerate. jsdom does support navigator.clipboard
+// once stubbed (it has no real implementation), so copy is testable here;
+// the actual hover-triggered visibility (CSS :hover) is a real-browser
+// concern verified separately, not something jsdom's non-rendering layout
+// engine can assert -- these tests exercise the click handlers directly.
+test('Copy on an agent message writes its text to the clipboard', async () => {
+  const originalClipboard = global.navigator.clipboard;
+  let written = null;
+  global.navigator.clipboard = { writeText: async (text) => { written = text; } };
+  try {
+    await withFetch(
+      async () => ({ json: async () => ({ status: 'ok', agentName: 'CEO Agent', usage: {}, text: 'Here is the answer.' }) }),
+      async () => {
+        render(React.createElement(ChatView, { config: MINIMAL_CONFIG }));
+        await sendMessage('question');
+        await waitFor(() => assert.ok(screen.getByText('Here is the answer.')));
+
+        const bubble = screen.getByText('Here is the answer.').closest('.chat-bubble');
+        const copyButton = Array.from(bubble.querySelectorAll('.chat-action-button')).find(b => b.textContent === 'Copy');
+        assert.ok(copyButton, 'agent message must have a Copy action');
+        fireEvent.click(copyButton);
+
+        await waitFor(() => assert.equal(written, 'Here is the answer.'));
+      },
+    );
+  } finally {
+    global.navigator.clipboard = originalClipboard;
+  }
+});
+
+test('Edit on a user message populates the input with that message text', async () => {
+  await withFetch(
+    async () => ({ json: async () => ({ status: 'ok', agentName: 'CEO Agent', usage: {}, text: 'ok' }) }),
+    async () => {
+      render(React.createElement(ChatView, { config: MINIMAL_CONFIG }));
+      await sendMessage('the original message');
+      await waitFor(() => assert.ok(screen.getByText('the original message')));
+
+      const bubble = screen.getByText('the original message').closest('.chat-bubble');
+      const editButton = Array.from(bubble.querySelectorAll('.chat-action-button')).find(b => b.textContent === 'Edit');
+      assert.ok(editButton, 'user message must have an Edit action');
+      fireEvent.click(editButton);
+
+      const textarea = screen.getByPlaceholderText('Message your CEO Agent...');
+      assert.equal(textarea.value, 'the original message');
+    },
+  );
+});
+
+test('Regenerate on an agent message replays the exact original request and replaces that message in place', async () => {
+  let callCount = 0;
+  const bodies = [];
+  await withFetch(
+    async (url, options) => {
+      callCount += 1;
+      bodies.push(JSON.parse(options.body));
+      const text = callCount === 1 ? 'first answer' : 'second, regenerated answer';
+      return { json: async () => ({ status: 'ok', agentName: 'CEO Agent', usage: {}, text }) };
+    },
+    async () => {
+      render(React.createElement(ChatView, { config: MINIMAL_CONFIG }));
+      await sendMessage('the question');
+      await waitFor(() => assert.ok(screen.getByText('first answer')));
+
+      const bubble = screen.getByText('first answer').closest('.chat-bubble');
+      const regenButton = Array.from(bubble.querySelectorAll('.chat-action-button')).find(b => b.textContent === 'Regenerate');
+      assert.ok(regenButton, 'agent message must have a Regenerate action');
+      fireEvent.click(regenButton);
+
+      await waitFor(() => assert.ok(screen.getByText('second, regenerated answer')));
+      // Same message replaced in place, not appended -- only one agent bubble.
+      assert.equal(document.querySelectorAll('.chat-agent').length, 1);
+      assert.throws(() => screen.getByText('first answer'));
+      assert.equal(callCount, 2);
+      assert.deepEqual(bodies[0], bodies[1], 'regenerate must replay the exact same request body as the original send');
+    },
+  );
+});
+
+// Auto-resize textarea: the compose input is now a real <textarea>, not a
+// single-line <input>. jsdom's layout engine always reports scrollHeight
+// as 0 (a well-known jsdom limitation -- see the markdown-table test above
+// for the same caveat applied to CSS), so the actual pixel-growth behavior
+// cannot be meaningfully asserted here and was verified in a real browser
+// (PR description, not this file). What IS real and testable in jsdom:
+// this is a genuine multi-line-capable <textarea>, and Shift+Enter inserts
+// a newline instead of sending (a plain Enter still sends, unchanged from
+// the existing IME-guard tests above).
+test('the chat input is a real textarea, and Shift+Enter does not send', async () => {
+  let fetchCalled = false;
+  await withFetch(
+    async () => { fetchCalled = true; return { json: async () => ({ status: 'ok', text: 'unexpected', agentName: 'CEO Agent', usage: {} }) }; },
+    async () => {
+      render(React.createElement(ChatView, { config: MINIMAL_CONFIG }));
+      const textarea = screen.getByPlaceholderText('Message your CEO Agent...');
+      assert.equal(textarea.tagName, 'TEXTAREA', 'chat input must be a real textarea, not a single-line input');
+
+      fireEvent.change(textarea, { target: { value: 'line one' } });
+      fireEvent.keyDown(textarea, { key: 'Enter', shiftKey: true });
+
+      await new Promise(resolve => setTimeout(resolve, 0));
+      assert.equal(fetchCalled, false, 'Shift+Enter must not trigger send()');
+    },
+  );
+});
