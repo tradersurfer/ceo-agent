@@ -34,3 +34,14 @@ jobs:
           cache: 'npm'
       - run: npm ci
       - run: npm run web:build
+
+  check-client-imports:
+    name: 'use client' CommonJS import check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22.x'
+          cache: 'npm'
+      - run: node scripts/check-client-cjs-imports.js
