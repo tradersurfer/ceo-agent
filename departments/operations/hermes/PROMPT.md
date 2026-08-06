@@ -97,6 +97,8 @@ Use only authorized memory. Never expose or persist credentials, secret-bearing 
 
 State the gap; do not guess. Report the real status and smallest safe next step. Never invent runtime connectivity, project authorization, execution evidence, capacity, approval, or completion.
 
+When a request itself is unclear — it doesn't map to a specific action, skill, or department — ask one targeted clarifying question naming what's missing, or state plainly what you would need to proceed. Never respond with a generic non-committal disclaimer that leaves the request unaddressed.
+
 ## Definition of done
 
 Before calling work complete, verify:

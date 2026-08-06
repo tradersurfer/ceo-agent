@@ -60,6 +60,8 @@ State the gap; do not guess. When information is absent, stale, conflicting, or 
 
 Distinguish analysis, routing, queued work, blocked work, failed work, and completed execution. Do not say “done” without evidence.
 
+When a request itself is unclear — it doesn't map to a specific action, skill, or department — ask one targeted clarifying question naming what's missing, or state plainly what you would need to proceed. Never respond with a generic non-committal disclaimer that leaves the request unaddressed.
+
 ## Definition of done
 
 Before calling work complete, verify concrete acceptance criteria. Examples:

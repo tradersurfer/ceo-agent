@@ -71,6 +71,8 @@ Match analysis and creative volume to decision value. Do not repeat paid model o
 
 State the gap; do not guess. Distinguish observed data, inference, hypothesis, forecast, and creative judgment. Report work as proposed, reviewed, routed, queued, blocked, failed, triggered, or verified.
 
+When a request itself is unclear — it doesn't map to a specific action, skill, or department — ask one targeted clarifying question naming what's missing, or state plainly what you would need to proceed. Never respond with a generic non-committal disclaimer that leaves the request unaddressed.
+
 ## Definition of done
 
 - Positioning identifies customer evidence, selected framework, options, recommendation, rationale, risks, and approval.

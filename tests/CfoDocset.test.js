@@ -50,4 +50,10 @@ test('runtime prompt loader consumes the CFO financial operating contract', () =
   assert.match(prompt, /insight → implication → recommendation/i);
   assert.match(prompt, /risk, not a flat dollar threshold/i);
   assert.match(prompt, /quality_review[\s\S]*review\.passed[\s\S]*review\.gaps/);
+  // Issue #86(a): the actual sentence PR #90 added, not just that the
+  // Type 1/Type 2 framework is mentioned somewhere.
+  assert.match(prompt, /Apply this classification internally to decide how to act; state the resulting decision, action, or escalation directly rather than narrating the classification process to the user\./);
+  // Issue #86(b), reframed: real guidance for an unclear/unrecognized
+  // request, not a generic non-committal disclaimer.
+  assert.match(prompt, /ask one targeted clarifying question naming what's missing, or state plainly what you would need to proceed/);
 });

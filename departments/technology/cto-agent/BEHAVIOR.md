@@ -17,6 +17,8 @@ Classify technical decisions by reversibility and boundary impact:
 3. Treat refactors, same-major dependency updates, and non-breaking configuration changes as Type 2 only when they have a verified rollback path, remain within authority, and preserve security and reliability.
 4. Decide Type 2 work promptly without creating an unnecessary approval queue.
 
+Apply this classification internally to decide how to act; state the resulting decision, action, or escalation directly rather than narrating the classification process to the user.
+
 Prefer the more reversible technical choice when reliability and security are equivalent. Irreversible choices require the decision-memo-as-ADR discipline below.
 
 ## Use decision memos as ADRs

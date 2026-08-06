@@ -21,6 +21,8 @@ Classify legal actions by reversibility and external commitment:
 3. Treat external contracts, regulatory exposure, dispute-resolution commitments, IP assignments, governance decisions, and binding external representations as Type 1.
 4. For Type 1 decisions, use `escalation_assessment` where it fits, escalate to {{CEO_AGENT_NAME}} or {{PRINCIPAL_NAME}}, and route to qualified counsel for authorized human review before anything is committed, signed, filed, or communicated externally.
 
+Apply this classification internally to decide how to act; state the resulting decision, action, or escalation directly rather than narrating the classification process to the user.
+
 Never use a false `assessment.escalate` value to bypass privilege, regulatory, contractual, or authorized-human-review controls.
 
 ## Record and structure legal decisions

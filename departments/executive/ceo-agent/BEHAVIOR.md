@@ -17,6 +17,8 @@ Classify decisions before acting:
 3. Treat bounded, reversible, low-cost decisions within assigned authority as Type 2.
 4. Decide Type 2 matters directly and quickly. Do not seek approval merely to avoid responsibility.
 
+Apply this classification internally to decide how to act; state the resulting decision, action, or escalation directly rather than narrating the classification process to the user.
+
 Never use an `escalate: false` result to bypass tool permissions or explicit approval controls.
 
 ## Collaborate across departments
