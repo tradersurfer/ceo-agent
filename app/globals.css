@@ -91,11 +91,47 @@ select:focus-visible,
   background: var(--bg-panel);
   padding: 16px 12px;
   flex-shrink: 0;
+  /* Width is the only thing that changes between expanded/collapsed --
+     transitioning it (rather than a hard display:none swap) is what makes
+     .content's flex:1 reflow read as a slide instead of a jump cut. */
+  transition: width 0.15s ease;
+  overflow: hidden;
 }
-.sidebar-header { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 15px; margin-bottom: 20px; padding: 0 8px; }
+/* 56px: real content-area math at the narrowest viewport this app
+   supports (390px, iPhone-class -- see tests/browser/
+   ChatInputResponsive.test.js), not a round-number guess. The chat input
+   row needs ~281px (attach button + gap + textarea's 160px floor + gap +
+   Send button) to render with zero horizontal overflow; .content's own
+   padding takes 48px (24px each side); 390 - 48 - 281 = 61px is the most
+   this can be. 56px leaves a few px of margin. */
+.sidebar-collapsed { width: 56px; padding: 16px 8px; }
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-weight: 600;
+  font-size: 15px;
+  margin-bottom: 20px;
+  padding: 0 8px;
+}
+.sidebar-collapsed .sidebar-header { justify-content: center; padding: 0; }
 .sidebar-logo { flex-shrink: 0; }
+.sidebar-header-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sidebar-toggle {
+  background: transparent;
+  color: var(--text-secondary);
+  padding: 4px 8px;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+.sidebar-toggle:hover { background: var(--border-color); }
 .nav-item {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 8px;
   width: 100%;
   text-align: left;
   background: transparent;
@@ -105,6 +141,8 @@ select:focus-visible,
   margin-bottom: 2px;
   font-weight: 400;
 }
+.nav-item-icon { flex-shrink: 0; font-size: 15px; line-height: 1; }
+.nav-item-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 /* Active tab: navy text on an elevated (white) chip, plus a thin gold
    left-border as the "you are here" indicator -- gold is deliberately
    reserved for this kind of current-state marker (see also the CEO Modes
@@ -118,7 +156,13 @@ select:focus-visible,
   border-left: 3px solid var(--accent-gold);
   padding-left: 7px;
 }
-.content { flex: 1; padding: 24px; overflow-y: auto; }
+/* Comes after .nav-item.active so the collapsed rail's symmetric,
+   icon-centered padding always wins over the active tab's asymmetric
+   padding-left -- an active item while collapsed still gets the gold
+   border (different property, not overridden), just without the
+   layout shift that padding-left would cause in a centered icon rail. */
+.sidebar-collapsed .nav-item { justify-content: center; padding: 8px; }
+.content { flex: 1; padding: 24px; overflow-y: auto; min-width: 0; }
 
 .empty-state { padding: 40px; color: var(--text-tertiary); }
 
@@ -175,7 +219,34 @@ select:focus-visible,
 .chat-attachment-remove { background: transparent; border: none; color: inherit; padding: 0; margin-left: 2px; cursor: pointer; font-size: 13px; line-height: 1; }
 .chat-pending-attachments { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding: 8px 0 0; }
 .chat-upload-error { font-size: 12px; color: #b0473f; }
-.chat-input-row { display: flex; gap: 8px; border-top: 1px solid var(--border-color); padding-top: 12px; align-items: flex-end; }
+/* Below MOBILE_BREAKPOINT_PX (640px, this file's existing "compact layout"
+   threshold -- see .chat-view/.status-cards max-width:640px), the input
+   controls and the toggle chips stack into two separate full-width rows
+   instead of sharing one row. Sharing one row is what crushed the
+   textarea: 11 toggle chips (3 CEO Modes + 5 model roles + 3 cost tiers)
+   are flex-shrink:0 by design (see .chat-model-selector/.ceo-mode-selector
+   below), so at a narrow viewport they claimed nearly all the row's width
+   and left the textarea's flex:1 nothing to grow into -- a min-width
+   floor just made it stop shrinking, it didn't make it usable. Above the
+   breakpoint this is unchanged from before: one row, chips beside the
+   input, exactly as it already worked on desktop. */
+.chat-input-row { display: flex; flex-direction: column; gap: 8px; border-top: 1px solid var(--border-color); padding-top: 12px; }
+.chat-input-primary { display: flex; gap: 8px; align-items: flex-end; }
+.chat-input-toggles { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+@media (min-width: 641px) {
+  /* Only undo the mobile column-stack, nothing else -- .chat-input-primary
+     and .chat-input-toggles stay unflexed (default flex: 0 1 auto), which
+     reproduces the exact same one-row layout and the exact same
+     shrink-to-min-width behavior this had before the mobile fix. Giving
+     .chat-input-primary flex:1 here plus flex-shrink:0 on
+     .chat-input-toggles looked like the "obvious" desktop equivalent but
+     wasn't: with 11 chips' true unwrapped content width (~720px) exceeding
+     the row's own 640px cap (.chat-view max-width), flex-shrink:0 forced
+     toggles to claim all of it and left .chat-input-primary's flex:1
+     nothing to grow into -- verified this actually squeezed the textarea
+     to 0px width, a regression, before reverting to this simpler rule. */
+  .chat-input-row { flex-direction: row; align-items: flex-end; }
+}
 /* Auto-resize textarea: grows with content up to TEXTAREA_MAX_HEIGHT_PX
    (ChatView.tsx), then scrolls. resize: none because the height is
    controlled by the auto-resize effect, not a manual drag handle. */
@@ -183,9 +254,12 @@ select:focus-visible,
   flex: 1;
   /* overflow-y: auto zeroes a flex item's automatic min-width (unlike the
      plain <input> this replaced, which defaults to overflow: visible and
-     so kept a sane intrinsic min-width) -- without this, the row's other
-     flex-shrink:0 children (mode/model selector chips) crush this down to
-     a few px. */
+     so kept a sane intrinsic min-width). min-width here is now a real
+     floor for extreme cases, not the only thing standing between the
+     textarea and a handful of px -- .chat-input-primary has the row to
+     itself below the mobile breakpoint (see above), and gets flex:1 of
+     the shared row above it, so this rarely needs to bind in practice
+     anymore. */
   min-width: 160px;
   resize: none;
   overflow-y: auto;
@@ -305,9 +379,22 @@ select:focus-visible,
    rule's comment for why the two selection states are deliberately
    different. */
 .chip-active { background: var(--accent-navy); color: #fff; }
-.chat-model-selector { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+/* flex-shrink:0 used to be safe here because this always shared a row
+   with the textarea, which had its own min-width floor absorbing the
+   squeeze. Now that .chat-input-toggles gives this its own row (see the
+   mobile chat-input-row rule above), flex-shrink:0 became actively
+   harmful: a flex item that refuses to shrink at all is sized to its full
+   unconstrained content width regardless of available space, which means
+   the flex-wrap:wrap on .model-selector-axis inside it never actually
+   gets a "not enough room" signal to wrap on -- confirmed via a real
+   390px Playwright check that the tier chips (Flagship/Efficient/
+   Affordable) rendered past the viewport edge instead of wrapping, even
+   though .chat-input-toggles itself had plenty of flex-wrap room. Letting
+   this shrink (default flex-shrink:1, min-width:0 so shrinking isn't
+   blocked by content's intrinsic minimum) lets that wrap actually trigger. */
+.chat-model-selector { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; min-width: 0; max-width: 100%; }
 .chat-model-reset { background: transparent; color: var(--text-tertiary); padding: 2px 6px; font-size: 11px; }
-.ceo-mode-selector { display: flex; flex-direction: column; gap: 2px; flex-shrink: 0; }
+.ceo-mode-selector { display: flex; flex-direction: column; gap: 2px; min-width: 0; max-width: 100%; }
 .ceo-mode-selector-hint { display: none; }
 /* CEO Modes gets the gold treatment (not navy) deliberately: it's the one
    toggle that sets a standing executive-decision posture for the whole

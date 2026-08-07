@@ -315,66 +315,75 @@ export default function ChatView({ config, onConfigChange }: { config: any; onCo
       )}
       <div className="chat-input-row">
         <input type="file" ref={fileInputRef} onChange={handleFileSelected} style={{ display: 'none' }} />
-        <button
-          type="button"
-          className="chat-attach-button"
-          onClick={() => fileInputRef.current?.click()}
-          disabled={busy || uploading}
-          title="Attach a file"
-        >
-          {uploading ? '…' : '📎'}
-        </button>
-        <textarea
-          ref={textareaRef}
-          value={input}
-          placeholder="Message your CEO Agent..."
-          className="chat-textarea"
-          rows={1}
-          onChange={e => setInput(e.target.value)}
-          onKeyDown={e => {
-            if (e.key !== 'Enter') return;
-            // Shift+Enter inserts a newline (now that this is a real
-            // multi-line textarea) instead of sending.
-            if (e.shiftKey) return;
-            // Issue #87: an Enter keystroke that confirms an IME composition
-            // (e.g. selecting a candidate while typing CJK/predictive text)
-            // also fires a native/synthetic 'Enter' keydown. Treating that as
-            // a send trigger races the composition-confirming update against
-            // the controlled input's value, which can send a garbled or
-            // partial in-progress value instead of the finished text.
-            // `isComposing` is the standard signal; `keyCode === 229` is the
-            // long-standing fallback for browsers/IMEs that don't set
-            // `isComposing` reliably on the keydown event.
-            if (e.nativeEvent.isComposing || e.keyCode === 229) return;
-            e.preventDefault();
-            send();
-          }}
-          disabled={busy}
-        />
-        <button onClick={send} disabled={busy}>{sending ? 'Sending...' : 'Send'}</button>
-        {ceoModes.length > 0 && (
-          <CeoModeSelector
-            modes={ceoModes}
-            value={ceoModeValue}
-            onChange={handleCeoModeChange}
-            disabled={busy || savingCeoMode}
-          />
-        )}
-        <div className="chat-model-selector">
-          <ModelSelector
-            mode="compact"
-            active={openRouterConnection.active !== false}
-            connected={!!openRouterConnection.hasKey}
-            catalog={config.catalog || null}
-            value={selectorValue}
-            onChange={setModelOverride}
+        {/* Grouped so the responsive breakpoint in globals.css can stack
+            .chat-input-toggles (CEO Modes + model role/tier chips -- 11
+            toggle chips between them) onto its own row below this one at
+            narrow widths, instead of all 11 sharing the same flex row as
+            the textarea and crushing it toward zero width. */}
+        <div className="chat-input-primary">
+          <button
+            type="button"
+            className="chat-attach-button"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={busy || uploading}
+            title="Attach a file"
+          >
+            {uploading ? '…' : '📎'}
+          </button>
+          <textarea
+            ref={textareaRef}
+            value={input}
+            placeholder="Message your CEO Agent..."
+            className="chat-textarea"
+            rows={1}
+            onChange={e => setInput(e.target.value)}
+            onKeyDown={e => {
+              if (e.key !== 'Enter') return;
+              // Shift+Enter inserts a newline (now that this is a real
+              // multi-line textarea) instead of sending.
+              if (e.shiftKey) return;
+              // Issue #87: an Enter keystroke that confirms an IME composition
+              // (e.g. selecting a candidate while typing CJK/predictive text)
+              // also fires a native/synthetic 'Enter' keydown. Treating that as
+              // a send trigger races the composition-confirming update against
+              // the controlled input's value, which can send a garbled or
+              // partial in-progress value instead of the finished text.
+              // `isComposing` is the standard signal; `keyCode === 229` is the
+              // long-standing fallback for browsers/IMEs that don't set
+              // `isComposing` reliably on the keydown event.
+              if (e.nativeEvent.isComposing || e.keyCode === 229) return;
+              e.preventDefault();
+              send();
+            }}
             disabled={busy}
           />
-          {modelOverride && (
-            <button type="button" className="chat-model-reset" onClick={() => setModelOverride(null)}>
-              Use department default
-            </button>
+          <button onClick={send} disabled={busy}>{sending ? 'Sending...' : 'Send'}</button>
+        </div>
+        <div className="chat-input-toggles">
+          {ceoModes.length > 0 && (
+            <CeoModeSelector
+              modes={ceoModes}
+              value={ceoModeValue}
+              onChange={handleCeoModeChange}
+              disabled={busy || savingCeoMode}
+            />
           )}
+          <div className="chat-model-selector">
+            <ModelSelector
+              mode="compact"
+              active={openRouterConnection.active !== false}
+              connected={!!openRouterConnection.hasKey}
+              catalog={config.catalog || null}
+              value={selectorValue}
+              onChange={setModelOverride}
+              disabled={busy}
+            />
+            {modelOverride && (
+              <button type="button" className="chat-model-reset" onClick={() => setModelOverride(null)}>
+                Use department default
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </div>
