@@ -13,6 +13,7 @@
     "test": "node scripts/run-tests.js",
     "test:core": "node --test tests/*.test.js",
     "test:components": "node --require ./tests/components/registerTsx.js --require ./tests/components/setupJsdom.js --test tests/components/*.test.jsx",
+    "test:browser": "node --test tests/browser/*.test.js",
     "setup": "node bin/setup.js",
     "start": "node bin/chat.js",
     "web": "next dev -H 127.0.0.1",
@@ -38,6 +39,7 @@
     "@types/react": "^18.3.0",
     "esbuild": "^0.28.1",
     "jsdom": "^30.0.0",
+    "playwright": "^1.62.1",
     "typescript": "^5.5.0"
   },
   "engines": {

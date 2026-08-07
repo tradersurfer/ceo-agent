@@ -175,7 +175,34 @@ select:focus-visible,
 .chat-attachment-remove { background: transparent; border: none; color: inherit; padding: 0; margin-left: 2px; cursor: pointer; font-size: 13px; line-height: 1; }
 .chat-pending-attachments { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding: 8px 0 0; }
 .chat-upload-error { font-size: 12px; color: #b0473f; }
-.chat-input-row { display: flex; gap: 8px; border-top: 1px solid var(--border-color); padding-top: 12px; align-items: flex-end; }
+/* Below MOBILE_BREAKPOINT_PX (640px, this file's existing "compact layout"
+   threshold -- see .chat-view/.status-cards max-width:640px), the input
+   controls and the toggle chips stack into two separate full-width rows
+   instead of sharing one row. Sharing one row is what crushed the
+   textarea: 11 toggle chips (3 CEO Modes + 5 model roles + 3 cost tiers)
+   are flex-shrink:0 by design (see .chat-model-selector/.ceo-mode-selector
+   below), so at a narrow viewport they claimed nearly all the row's width
+   and left the textarea's flex:1 nothing to grow into -- a min-width
+   floor just made it stop shrinking, it didn't make it usable. Above the
+   breakpoint this is unchanged from before: one row, chips beside the
+   input, exactly as it already worked on desktop. */
+.chat-input-row { display: flex; flex-direction: column; gap: 8px; border-top: 1px solid var(--border-color); padding-top: 12px; }
+.chat-input-primary { display: flex; gap: 8px; align-items: flex-end; }
+.chat-input-toggles { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+@media (min-width: 641px) {
+  /* Only undo the mobile column-stack, nothing else -- .chat-input-primary
+     and .chat-input-toggles stay unflexed (default flex: 0 1 auto), which
+     reproduces the exact same one-row layout and the exact same
+     shrink-to-min-width behavior this had before the mobile fix. Giving
+     .chat-input-primary flex:1 here plus flex-shrink:0 on
+     .chat-input-toggles looked like the "obvious" desktop equivalent but
+     wasn't: with 11 chips' true unwrapped content width (~720px) exceeding
+     the row's own 640px cap (.chat-view max-width), flex-shrink:0 forced
+     toggles to claim all of it and left .chat-input-primary's flex:1
+     nothing to grow into -- verified this actually squeezed the textarea
+     to 0px width, a regression, before reverting to this simpler rule. */
+  .chat-input-row { flex-direction: row; align-items: flex-end; }
+}
 /* Auto-resize textarea: grows with content up to TEXTAREA_MAX_HEIGHT_PX
    (ChatView.tsx), then scrolls. resize: none because the height is
    controlled by the auto-resize effect, not a manual drag handle. */
@@ -183,9 +210,12 @@ select:focus-visible,
   flex: 1;
   /* overflow-y: auto zeroes a flex item's automatic min-width (unlike the
      plain <input> this replaced, which defaults to overflow: visible and
-     so kept a sane intrinsic min-width) -- without this, the row's other
-     flex-shrink:0 children (mode/model selector chips) crush this down to
-     a few px. */
+     so kept a sane intrinsic min-width). min-width here is now a real
+     floor for extreme cases, not the only thing standing between the
+     textarea and a handful of px -- .chat-input-primary has the row to
+     itself below the mobile breakpoint (see above), and gets flex:1 of
+     the shared row above it, so this rarely needs to bind in practice
+     anymore. */
   min-width: 160px;
   resize: none;
   overflow-y: auto;
