@@ -26,19 +26,10 @@ const ALL_NEW_SKILLS = registrars.flatMap(({ fn }) => {
 });
 
 // Promoted from scaffold stub to real pure-computation implementations
-// (see core/skills/cfoSkills.js's module comment and tests/CfoSkills.test.js).
-// Excluded from the "still a scaffold stub" disableModelInvocation assertion
-// below because these 3 (unlike the batch below) were promoted with
-// disableModelInvocation explicitly removed (defaults to false) — a
-// deliberate difference from the batch below, not an oversight to reconcile
-// here; see this PR's description for the full explanation.
 const PROMOTED_TO_REAL_CFO = new Set(['cash_conversion_cycle_calc', 'dupont_performance_diagnosis', 'dcf_valuation']);
 const SCAFFOLD_SKILLS = ALL_NEW_SKILLS.filter(skill => !PROMOTED_TO_REAL_CFO.has(skill.name));
 
-// Promoted from scaffold stub to real deterministic handlers (payment webhook
-// rename + reconciliation batch). Unlike the CFO batch above, these keep
-// disableModelInvocation: true — still explicit-command-only, not reachable
-// by autonomous model invocation, even though the handler logic is now real.
+// Promoted from scaffold stub to real deterministic handlers (payment webhook rename + reconciliation batch).
 const PROMOTED_TO_REAL_BATCH = new Set([
   'subsidiary_health_check', 'partnership_transition_planning', 'multi_agent_consensus_evaluation',
   'resource_reallocation_directive', 'launch_roadmap_orchestration',
@@ -49,16 +40,9 @@ const PROMOTED_TO_REAL_BATCH = new Set([
   'ai_brand_training_manual_creation', 'visual_layout_review', 'public_vs_internal_copy_separation',
 ]);
 
-// Union of every skill name that must NOT return { scaffolded: true } from
-// its handler. Genuinely-still-scaffold skills are everything else (the
-// remaining 5 CFO stubs, plus all of CHRO and CLO).
 const NON_SCAFFOLD_HANDLERS = new Set([...PROMOTED_TO_REAL_CFO, ...PROMOTED_TO_REAL_BATCH]);
 const STILL_SCAFFOLD_SKILLS = ALL_NEW_SKILLS.filter(skill => !NON_SCAFFOLD_HANDLERS.has(skill.name));
 
-// Valid-enough sample input covering every field any of the 18-skill batch's
-// real handlers require, so a generic call doesn't throw on missing/invalid
-// input — this test only asserts "not a scaffold stub," not specific
-// per-skill behavior (that's tests/PromotedCSuiteBehavior.test.js's job).
 const BATCH_SAMPLE_INPUT = {
   subsidiaryIds: ['s1'], metrics: [], partnerName: 'Acme', transitionType: 'acquisition',
   frameworkId: 'fw1', consensusLogic: { minAgents: 2, agreementThreshold: 0.7, humanVeto: true, killSwitch: true, maxPositionPct: 10 },
@@ -116,7 +100,6 @@ test('all C-suite scaffold skills have non-empty input and output schemas', () =
 test('all genuinely-still-scaffold C-suite handlers return scaffolded:true', async () => {
   for (const skill of STILL_SCAFFOLD_SKILLS) {
     const reg = new SkillRegistry();
-    // Re-register to get the full skill object including handler
     for (const { fn } of registrars) fn(reg);
     const full = reg.get(skill.name);
     const result = await full.handler({ test: 'input' });

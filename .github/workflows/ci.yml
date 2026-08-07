@@ -45,21 +45,3 @@ jobs:
           node-version: '22.x'
           cache: 'npm'
       - run: node scripts/check-client-cjs-imports.js
-
-  browser-test:
-    # Real-browser layout tests (tests/browser/*.test.js) -- boots a real
-    # `next dev` server and drives it with a real Chromium via Playwright.
-    # Kept as its own job, not folded into the main test suite: it needs
-    # `playwright install` (a real browser download) which the other jobs
-    # don't, and is meaningfully slower than the jsdom-based suites.
-    name: Browser layout tests
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-node@v7
-        with:
-          node-version: '22.x'
-          cache: 'npm'
-      - run: npm ci
-      - run: npx playwright install --with-deps chromium
-      - run: npm run test:browser

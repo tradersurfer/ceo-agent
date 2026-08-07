@@ -1,0 +1,371 @@
+{
+  "$schema": "./registry.schema.json",
+  "schemaVersion": "2.0.0",
+  "registryType": "skills",
+  "skills": [
+    {
+      "id": "summarize_text",
+      "capability": "text_summarization",
+      "inputSchema": {
+        "text": { "type": "string", "required": true }
+      },
+      "handler": "core/skills/exampleSkills.js#registerExampleSkills",
+      "risk": "safe"
+    },
+    {
+      "id": "format_currency",
+      "capability": "currency_formatting",
+      "inputSchema": {
+        "amount": { "type": "number", "required": true },
+        "currency": { "type": "string", "required": false }
+      },
+      "handler": "core/skills/exampleSkills.js#registerExampleSkills",
+      "risk": "safe"
+    },
+    {
+      "id": "lookup_department",
+      "capability": "org_lookup",
+      "inputSchema": {
+        "departmentId": { "type": "string", "required": true }
+      },
+      "handler": "core/skills/exampleSkills.js#registerExampleSkills",
+      "risk": "safe"
+    },
+    {
+      "id": "task_decomposition",
+      "capability": "management_planning",
+      "inputSchema": {
+        "objective": { "type": "string", "required": true },
+        "deliverables": { "type": "array", "required": false },
+        "constraints": { "type": "array", "required": false }
+      },
+      "outputSchema": {
+        "objective": { "type": "string", "required": true },
+        "tasks": { "type": "array", "required": true },
+        "assumptions": { "type": "array", "required": true }
+      },
+      "permissions": { "requiresAgentAssignment": true },
+      "handler": "core/skills/managerSkills.js#registerManagerSkills",
+      "risk": "safe"
+    },
+    {
+      "id": "delegation_brief",
+      "capability": "management_delegation",
+      "inputSchema": {
+        "task": { "type": "string", "required": true },
+        "assignee": { "type": "string", "required": true },
+        "desiredOutcome": { "type": "string", "required": true },
+        "context": { "type": "string", "required": false },
+        "deadline": { "type": "string", "required": false }
+      },
+      "outputSchema": { "brief": { "type": "object", "required": true } },
+      "permissions": { "requiresAgentAssignment": true },
+      "handler": "core/skills/managerSkills.js#registerManagerSkills",
+      "risk": "safe"
+    },
+    {
+      "id": "priority_scoring",
+      "capability": "management_prioritization",
+      "inputSchema": { "items": { "type": "array", "required": true } },
+      "outputSchema": { "rankedItems": { "type": "array", "required": true } },
+      "permissions": { "requiresAgentAssignment": true },
+      "handler": "core/skills/managerSkills.js#registerManagerSkills",
+      "risk": "safe"
+    },
+    {
+      "id": "decision_memo",
+      "capability": "management_decision_support",
+      "inputSchema": {
+        "decision": { "type": "string", "required": true },
+        "options": { "type": "array", "required": true },
+        "recommendation": { "type": "string", "required": true },
+        "rationale": { "type": "string", "required": true },
+        "risks": { "type": "array", "required": false }
+      },
+      "outputSchema": { "memo": { "type": "object", "required": true } },
+      "permissions": { "requiresAgentAssignment": true },
+      "handler": "core/skills/managerSkills.js#registerManagerSkills",
+      "risk": "safe"
+    },
+    {
+      "id": "status_synthesis",
+      "capability": "management_reporting",
+      "inputSchema": { "updates": { "type": "array", "required": true } },
+      "outputSchema": {
+        "summary": { "type": "object", "required": true },
+        "blockers": { "type": "array", "required": true },
+        "nextActions": { "type": "array", "required": true }
+      },
+      "permissions": { "requiresAgentAssignment": true },
+      "handler": "core/skills/managerSkills.js#registerManagerSkills",
+      "risk": "safe"
+    },
+    {
+      "id": "escalation_assessment",
+      "capability": "management_escalation",
+      "inputSchema": {
+        "issue": { "type": "string", "required": true },
+        "impact": { "type": "number", "required": true },
+        "urgency": { "type": "number", "required": true },
+        "reversible": { "type": "boolean", "required": true },
+        "withinAuthority": { "type": "boolean", "required": true }
+      },
+      "outputSchema": { "assessment": { "type": "object", "required": true } },
+      "permissions": { "requiresAgentAssignment": true },
+      "handler": "core/skills/managerSkills.js#registerManagerSkills",
+      "risk": "safe"
+    },
+    {
+      "id": "department_capability_lookup",
+      "capability": "management_org_lookup",
+      "inputSchema": { "query": { "type": "string", "required": true } },
+      "outputSchema": { "matches": { "type": "array", "required": true } },
+      "permissions": { "requiresAgentAssignment": true },
+      "handler": "core/skills/managerSkills.js#registerManagerSkills",
+      "risk": "safe"
+    },
+    {
+      "id": "workload_balancing",
+      "capability": "management_capacity",
+      "inputSchema": { "assignments": { "type": "array", "required": true } },
+      "outputSchema": {
+        "workloads": { "type": "array", "required": true },
+        "recommendations": { "type": "array", "required": true }
+      },
+      "permissions": { "requiresAgentAssignment": true },
+      "handler": "core/skills/managerSkills.js#registerManagerSkills",
+      "risk": "safe"
+    },
+    {
+      "id": "quality_review",
+      "capability": "management_quality",
+      "inputSchema": {
+        "artifact": { "type": "string", "required": true },
+        "criteria": { "type": "array", "required": true },
+        "passThreshold": { "type": "number", "required": false }
+      },
+      "outputSchema": { "review": { "type": "object", "required": true } },
+      "permissions": { "requiresAgentAssignment": true },
+      "handler": "core/skills/managerSkills.js#registerManagerSkills",
+      "risk": "safe"
+    },
+    {
+      "id": "budget_token_allocation",
+      "capability": "management_budgeting",
+      "inputSchema": {
+        "totalTokens": { "type": "number", "required": true },
+        "workItems": { "type": "array", "required": true }
+      },
+      "outputSchema": {
+        "allocations": { "type": "array", "required": true },
+        "totalAllocated": { "type": "number", "required": true },
+        "unusedTokens": { "type": "number", "required": true }
+      },
+      "permissions": { "requiresAgentAssignment": true },
+      "handler": "core/skills/managerSkills.js#registerManagerSkills",
+      "risk": "safe"
+    },
+    {
+      "id": "scope_creep_detection",
+      "capability": "code_review_scope_analysis",
+      "inputSchema": {
+        "diffText": { "type": "string", "required": true },
+        "intent": { "type": "string", "required": true },
+        "hunkThreshold": { "type": "number", "required": false }
+      },
+      "outputSchema": {
+        "intent": { "type": "string", "required": true },
+        "inScope": { "type": "array", "required": true },
+        "likelyCreep": { "type": "array", "required": true },
+        "newDependencies": { "type": "array", "required": true },
+        "apiRenames": { "type": "array", "required": true },
+        "configEdits": { "type": "array", "required": true },
+        "stats": { "type": "object", "required": true }
+      },
+      "permissions": { "requiresAgentAssignment": true },
+      "handler": "core/skills/scopeCreepSkill.js#registerScopeCreepSkill",
+      "risk": "safe"
+    },
+    {
+      "id": "schema_reservation_markup",
+      "capability": "marketing_schema_markup",
+      "inputSchema": {
+        "provider": { "type": "string", "required": true },
+        "start": { "type": "string", "required": true },
+        "end": { "type": "string", "required": false },
+        "partySize": { "type": "number", "required": false },
+        "reservationId": { "type": "string", "required": false },
+        "reservationForName": { "type": "string", "required": false },
+        "customerName": { "type": "string", "required": false },
+        "customerEmail": { "type": "string", "required": false },
+        "kind": { "type": "string", "required": false }
+      },
+      "outputSchema": { "jsonLd": { "type": "object", "required": true } },
+      "permissions": { "requiresAgentAssignment": true },
+      "handler": "core/skills/schemaMarkupSkills.js#registerSchemaMarkupSkills",
+      "risk": "safe"
+    },
+    {
+      "id": "schema_order_markup",
+      "capability": "marketing_schema_markup",
+      "inputSchema": {
+        "merchant": { "type": "string", "required": true },
+        "orderUrl": { "type": "string", "required": true },
+        "name": { "type": "string", "required": false },
+        "acceptedPaymentMethod": { "type": "array", "required": false },
+        "deliveryMethod": { "type": "array", "required": false }
+      },
+      "outputSchema": { "jsonLd": { "type": "object", "required": true } },
+      "permissions": { "requiresAgentAssignment": true },
+      "handler": "core/skills/schemaMarkupSkills.js#registerSchemaMarkupSkills",
+      "risk": "safe"
+    },
+    {
+      "id": "schema_discussion_markup",
+      "capability": "marketing_schema_markup",
+      "inputSchema": {
+        "headline": { "type": "string", "required": true },
+        "author": { "type": "string", "required": true },
+        "url": { "type": "string", "required": true },
+        "datePublished": { "type": "string", "required": true },
+        "text": { "type": "string", "required": false },
+        "dateModified": { "type": "string", "required": false },
+        "commentCount": { "type": "number", "required": false },
+        "likes": { "type": "number", "required": false }
+      },
+      "outputSchema": { "jsonLd": { "type": "object", "required": true } },
+      "permissions": { "requiresAgentAssignment": true },
+      "handler": "core/skills/schemaMarkupSkills.js#registerSchemaMarkupSkills",
+      "risk": "safe"
+    },
+    {
+      "id": "schema_profile_markup",
+      "capability": "marketing_schema_markup",
+      "inputSchema": {
+        "name": { "type": "string", "required": true },
+        "url": { "type": "string", "required": true },
+        "description": { "type": "string", "required": false },
+        "sameAs": { "type": "array", "required": false },
+        "knowsAbout": { "type": "array", "required": false },
+        "worksFor": { "type": "string", "required": false },
+        "image": { "type": "string", "required": false },
+        "jobTitle": { "type": "string", "required": false }
+      },
+      "outputSchema": { "jsonLd": { "type": "object", "required": true } },
+      "permissions": { "requiresAgentAssignment": true },
+      "handler": "core/skills/schemaMarkupSkills.js#registerSchemaMarkupSkills",
+      "risk": "safe"
+    },
+    {
+      "id": "content_quality_analysis",
+      "capability": "marketing_content_quality",
+      "inputSchema": {
+        "text": { "type": "string", "required": true },
+        "threshold": { "type": "number", "required": false }
+      },
+      "outputSchema": {
+        "fillerScore": { "type": "number", "required": true },
+        "aiPatternScore": { "type": "number", "required": true },
+        "informationDensity": { "type": "number", "required": true },
+        "repetitionScore": { "type": "number", "required": true },
+        "overallQuality": { "type": "number", "required": true },
+        "flags": { "type": "array", "required": true },
+        "matches": { "type": "object", "required": true },
+        "tokens": { "type": "number", "required": true },
+        "uniqueTokens": { "type": "number", "required": true },
+        "passesThreshold": { "type": "boolean", "required": true }
+      },
+      "permissions": { "requiresAgentAssignment": true },
+      "handler": "core/skills/contentQualitySkill.js#registerContentQualitySkill",
+      "risk": "safe"
+    },
+    {
+      "id": "generate_docx",
+      "capability": "document_generation_docx",
+      "inputSchema": {
+        "title": { "type": "string", "required": true },
+        "content": { "type": "string", "required": true },
+        "filename": { "type": "string", "required": false }
+      },
+      "outputSchema": {
+        "fileId": { "type": "string", "required": true },
+        "filename": { "type": "string", "required": true },
+        "size": { "type": "number", "required": true },
+        "mimeType": { "type": "string", "required": true }
+      },
+      "permissions": { "requiresAgentAssignment": true },
+      "handler": "core/skills/documentCreationSkills.js#registerDocumentCreationSkills",
+      "risk": "safe"
+    },
+    {
+      "id": "generate_pdf",
+      "capability": "document_generation_pdf",
+      "inputSchema": {
+        "title": { "type": "string", "required": true },
+        "content": { "type": "string", "required": true },
+        "filename": { "type": "string", "required": false }
+      },
+      "outputSchema": {
+        "fileId": { "type": "string", "required": true },
+        "filename": { "type": "string", "required": true },
+        "size": { "type": "number", "required": true },
+        "mimeType": { "type": "string", "required": true }
+      },
+      "permissions": { "requiresAgentAssignment": true },
+      "handler": "core/skills/documentCreationSkills.js#registerDocumentCreationSkills",
+      "risk": "safe"
+    },
+    {
+      "id": "generate_spreadsheet",
+      "capability": "document_generation_spreadsheet",
+      "inputSchema": {
+        "title": { "type": "string", "required": true },
+        "rows": { "type": "array", "required": true },
+        "headers": { "type": "array", "required": false },
+        "filename": { "type": "string", "required": false }
+      },
+      "outputSchema": {
+        "fileId": { "type": "string", "required": true },
+        "filename": { "type": "string", "required": true },
+        "size": { "type": "number", "required": true },
+        "mimeType": { "type": "string", "required": true }
+      },
+      "permissions": { "requiresAgentAssignment": true },
+      "handler": "core/skills/documentCreationSkills.js#registerDocumentCreationSkills",
+      "risk": "safe"
+    },
+    {
+      "id": "compute_financial_model",
+      "capability": "financial_projection",
+      "inputSchema": {
+        "model": { "type": "object", "required": true },
+        "scenario": { "type": "string", "required": false },
+        "horizon": { "type": "number", "required": false }
+      },
+      "outputSchema": {
+        "months": { "type": "array", "required": true },
+        "fy": { "type": "object", "required": true },
+        "kpis": { "type": "object", "required": true },
+        "lowCash": { "type": "object", "required": true }
+      },
+      "permissions": { "requiresAgentAssignment": true },
+      "handler": "core/skills/financialModelSkill.js#registerFinancialModelSkills",
+      "risk": "safe"
+    },
+    {
+      "id": "import_revenue_csv",
+      "capability": "financial_csv_import",
+      "inputSchema": {
+        "fileId": { "type": "string", "required": true }
+      },
+      "outputSchema": {
+        "monthsFound": { "type": "number", "required": true },
+        "last3Values": { "type": "array", "required": true },
+        "average": { "type": "number", "required": true }
+      },
+      "permissions": { "requiresAgentAssignment": true },
+      "handler": "core/skills/financialModelSkill.js#registerFinancialModelSkills",
+      "risk": "safe"
+    }
+  ]
+}

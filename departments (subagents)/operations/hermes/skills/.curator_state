@@ -1,0 +1,9 @@
+{
+  "last_report_path": "C:\\Users\\jorda\\AppData\\Local\\hermes\\logs\\curator\\20260622-210121",
+  "last_run_at": "2026-06-22T21:01:21.398178+00:00",
+  "last_run_duration_seconds": 1.036088,
+  "last_run_summary": "auto: no changes; llm: skipped (no candidates)",
+  "last_run_summary_shown_at": null,
+  "paused": false,
+  "run_count": 1
+}

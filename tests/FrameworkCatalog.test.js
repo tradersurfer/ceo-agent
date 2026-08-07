@@ -1,3 +1,4 @@
+// tests/FrameworkCatalog.test.js
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const {
@@ -7,6 +8,7 @@ const {
   getFrameworksByDomain,
   getFrameworkById,
 } = require('../core/frameworks/catalog');
+const { loadFrameworkContent, searchCatalogIndex } = require('../core/frameworks/FrameworkReader');
 const { createRuntime } = require('../core/runtimeFactory');
 
 test('catalog frameworks are structurally valid and match the declared domain list', () => {
@@ -21,11 +23,13 @@ test('catalog frameworks are structurally valid and match the declared domain li
   for (const framework of frameworks) {
     assert.deepEqual(
       Object.keys(framework).sort(),
-      ['definition', 'domain', 'expectedOutput', 'id', 'name', 'whenToUse'].sort(),
+      ['definition', 'domain', 'expectedOutput', 'filePath', 'id', 'name', 'summary', 'whenToUse'].sort(),
     );
     assert.ok(framework.definition);
     assert.ok(framework.whenToUse);
     assert.ok(framework.expectedOutput);
+    assert.ok(framework.filePath);
+    assert.ok(framework.filePath.endsWith('.md'));
   }
 });
 
@@ -48,6 +52,15 @@ test('catalog helpers return the canonical read-only framework data', () => {
   assert.equal(getFrameworkById('missing'), null);
   assert.equal(Object.isFrozen(frameworks), true);
   assert.equal(Object.isFrozen(frameworks[0]), true);
+});
+
+test('FrameworkReader loads Markdown content on demand from disk', async () => {
+  const mece = await loadFrameworkContent('mece_principle');
+  assert.ok(mece.instructions.includes('# MECE Principle Framework'));
+  assert.equal(mece.domain, 'strategy');
+
+  const porters = await loadFrameworkContent('porters_five_forces');
+  assert.ok(porters.instructions.includes("# Porter's Five Forces Framework"));
 });
 
 test('runtimeFactory exposes the shared framework catalog as reference data', () => {

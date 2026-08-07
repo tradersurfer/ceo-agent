@@ -1115,7 +1115,7 @@
     {
       "id": "cash_conversion_cycle_calc",
       "capability": "treasury_management",
-      "description": "Measures how fast capital moves through the operating cycle (DIO + DSO \u2212 DPO).",
+      "description": "Measures how fast capital moves through the operating cycle (DIO + DSO - DPO).",
       "inputSchema": {
         "inventoryDays": {
           "type": "number",

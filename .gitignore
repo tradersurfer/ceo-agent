@@ -27,3 +27,15 @@ departments/_tools/.copilot/
 
 departments/operations/hermes/logs/
 departments/operations/hermes/skills/
+departments (subagents)/_tools/
+.claude/downloads/
+*.exe
+*.sqlite
+
+departments (subagents)/_tools/
+
+.claude/downloads/
+
+*.exe
+
+*.sqlite
