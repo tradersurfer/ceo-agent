@@ -21,7 +21,10 @@ export default function Sidebar({
 }) {
   return (
     <aside className="sidebar">
-      <div className="sidebar-header">{agentName}</div>
+      <div className="sidebar-header">
+        <img src="/logo-mark.png" alt="" width={20} height={20} className="sidebar-logo" />
+        <span>{agentName}</span>
+      </div>
       <nav>
         {TABS.map(t => (
           <button

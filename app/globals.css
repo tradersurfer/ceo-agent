@@ -32,7 +32,8 @@ button:disabled { opacity: 0.5; cursor: default; }
   padding: 16px 12px;
   flex-shrink: 0;
 }
-.sidebar-header { font-weight: 600; font-size: 15px; margin-bottom: 20px; padding: 0 8px; }
+.sidebar-header { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 15px; margin-bottom: 20px; padding: 0 8px; }
+.sidebar-logo { flex-shrink: 0; }
 .nav-item {
   display: block;
   width: 100%;
