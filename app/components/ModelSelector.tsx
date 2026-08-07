@@ -37,6 +37,15 @@
 // `catalog` for the provider that actually has one (OpenRouter) — this
 // component still can't independently verify that, so the caller-discipline
 // note in the `catalog` prop doc below still applies.
+//
+// State priority is `connected` first, then `active`, then `catalog` --
+// deliberately matching ConnectionsView's own header badge, which gates on
+// `connected` (hasKey) before anything else. `active` is a static
+// capability flag (a ProviderClient class exists in the codebase) that's
+// true for Anthropic/OpenAI regardless of whether a key is saved; it must
+// never by itself produce a message that claims "connected" when no key is
+// stored. Checking `connected` first, unconditionally, keeps that word
+// meaning the same thing everywhere this component renders.
 
 export type ChatRole = 'claude' | 'codex' | 'gpt' | 'gemini' | 'grok';
 export type CostTier = 'flagship' | 'efficient' | 'cheapest';
@@ -89,17 +98,40 @@ export default function ModelSelector({
   onChange: (next: { role: ChatRole; tier: CostTier }) => void;
   disabled?: boolean;
 }) {
+  // Bug: this used to gate the "direct calls enabled" message on `active`
+  // alone (a static capability flag -- whether a real ProviderClient class
+  // exists at all, from lib/providers.js's ACTIVE_PROVIDER_IDS -- true for
+  // Anthropic/OpenAI regardless of whether a key is saved). That let a
+  // provider with `active: true, connected: false` claim "Connected —
+  // direct calls enabled" while ConnectionsView's own header badge, gated
+  // on `connected` (hasKey), correctly said "Not connected" right above it
+  // -- the same word meaning two different things in the same card. Fixed
+  // by checking `connected` first, same priority as the header badge, so
+  // "connected" means the same thing (a key is actually saved) everywhere
+  // this component renders. `active` now only shapes which message a
+  // connected provider gets, never triggers a "connected" claim on its own.
+  if (!connected) {
+    return (
+      <div className={`model-selector model-selector-inactive model-selector-${mode}`} data-testid="model-selector-inactive">
+        <span className="model-selector-status">Not connected</span>
+        {mode === 'expanded' && (
+          <p className="hint">
+            {active
+              ? 'Add an API key above to enable direct calls through this provider.'
+              : 'Add an API key above to store a connection for this provider.'}
+          </p>
+        )}
+      </div>
+    );
+  }
+
   if (!active) {
     return (
       <div className={`model-selector model-selector-inactive model-selector-${mode}`} data-testid="model-selector-inactive">
-        <span className="model-selector-status">
-          {connected ? 'Connected — not yet active' : 'Not connected'}
-        </span>
+        <span className="model-selector-status">Connected — not yet active</span>
         {mode === 'expanded' && (
           <p className="hint">
-            {connected
-              ? "This provider's key is stored, but model calls still route through OpenRouter until a direct connection is built."
-              : 'Add an API key above to store a connection for this provider.'}
+            This provider's key is stored, but model calls still route through OpenRouter until a direct connection is built.
           </p>
         )}
       </div>

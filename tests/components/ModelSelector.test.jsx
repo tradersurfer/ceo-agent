@@ -232,6 +232,69 @@ test('compact mode\'s "direct calls enabled" state has no expanded hint paragrap
   assert.throws(() => screen.getByText(/There's no separate model catalog/));
 });
 
+// --- Real bug found via actual mobile screenshots: Anthropic/OpenAI cards
+// showed "Not connected" in ConnectionsView's header badge (gated on
+// `connected`/hasKey) while this component's OWN status text, one line
+// below, claimed "Connected — direct calls enabled" for the same card
+// (gated on `active` alone, true for these providers regardless of
+// whether a key was ever saved). `active: true, connected: false` was
+// never covered by any prior test -- exactly the gap that let it ship. ---
+
+test('BUG: an active provider with NO key stored must say "Not connected", never "direct calls enabled"', () => {
+  render(
+    React.createElement(ModelSelector, {
+      mode: 'expanded',
+      active: true,
+      connected: false,
+      catalog: null,
+      value: { role: 'claude', tier: 'flagship' },
+      onChange: () => {},
+    })
+  );
+
+  assert.ok(screen.getByText('Not connected'), 'must say the same "Not connected" ConnectionsView\'s header badge says for hasKey=false');
+  assert.throws(
+    () => screen.getByText('Connected — direct calls enabled'),
+    'must never claim calls are enabled when no key is stored -- there is nothing to call with',
+  );
+  assert.throws(() => screen.getByTestId('model-selector-direct'));
+  assert.equal(screen.getByTestId('model-selector-inactive').getAttribute('data-testid'), 'model-selector-inactive');
+});
+
+test('an active provider with no key stored still gets a distinct expanded hint from a fully inactive provider', () => {
+  render(
+    React.createElement(ModelSelector, {
+      mode: 'expanded',
+      active: true,
+      connected: false,
+      catalog: null,
+      value: { role: 'claude', tier: 'flagship' },
+      onChange: () => {},
+    })
+  );
+
+  // Distinct copy from the plain "!active" hint below -- a real
+  // ProviderClient already exists for this provider, so the promise is
+  // stronger ("will work as soon as you add a key") than the generic
+  // "stores a connection" hint an unbuilt provider gets.
+  assert.ok(screen.getByText('Add an API key above to enable direct calls through this provider.'));
+});
+
+test('an inactive, unconnected provider keeps its original, more generic hint', () => {
+  render(
+    React.createElement(ModelSelector, {
+      mode: 'expanded',
+      active: false,
+      connected: false,
+      catalog: null,
+      value: { role: 'claude', tier: 'flagship' },
+      onChange: () => {},
+    })
+  );
+
+  assert.ok(screen.getByText('Add an API key above to store a connection for this provider.'));
+});
+
 test('compact mode does not render the expanded per-role resolved-model detail panel', () => {
   render(
     React.createElement(ModelSelector, {
