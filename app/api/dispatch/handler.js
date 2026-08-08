@@ -1,10 +1,10 @@
 const crypto = require('crypto');
-const { InMemoryRateLimiter, createRateLimiter } = require('../../../core/RateLimiter');
+const { InMemoryRateLimiter, createRateLimiter } = require('../../../ceo-core/RateLimiter');
 const MemoryClient = require('../../../sdk/MemoryClient');
-const SalesIntakeBridge = require('../../../departments/marketing/sales-intake/src/SalesIntakeBridge');
-const OnboardingCommsBridge = require('../../../departments/marketing/onboarding-comms/src/OnboardingCommsBridge');
+const SalesIntakeBridge = require('../../../departments-subagents/marketing/sales-intake/src/SalesIntakeBridge');
+const OnboardingCommsBridge = require('../../../departments-subagents/marketing/onboarding-comms/src/OnboardingCommsBridge');
 const DisputeAgentBridge = require('../../../examples/dispute-agent/src/DisputeAgentBridge');
-const HermesBridge = require('../../../departments/operations/hermes/src/HermesBridge');
+const HermesBridge = require('../../../departments-subagents/operations/hermes/src/HermesBridge');
 
 /**
  * Supervisor dispatch handler — pure Node.js, no Next.js dependency.

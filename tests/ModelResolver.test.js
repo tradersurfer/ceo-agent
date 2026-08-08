@@ -1,6 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { resolveRoleModels, extractPricing, pickCheapest, pickEfficient, PROVIDER_PREFIXES } = require('../core/ModelResolver');
+const { resolveRoleModels, extractPricing, pickCheapest, pickEfficient, PROVIDER_PREFIXES } = require('../ceo-core/ModelResolver');
 
 function model(id, created, prompt = '0.000001') {
   return {

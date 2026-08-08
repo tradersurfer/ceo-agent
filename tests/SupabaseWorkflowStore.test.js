@@ -1,7 +1,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { SupabaseWorkflowStore } = require('../core/persistence/SupabaseWorkflowStore');
-const { InMemoryWorkflowStore } = require('../core/WorkflowRuntime');
+const { SupabaseWorkflowStore } = require('../ceo-core/persistence/SupabaseWorkflowStore');
+const { InMemoryWorkflowStore } = require('../ceo-core/WorkflowRuntime');
 const { makeFakeSupabase } = require('./helpers/fakeSupabase');
 
 function sampleRecord(overrides = {}) {

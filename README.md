@@ -221,17 +221,17 @@ This will enable secure, relay-based workspace connectivity so CEO Agent and the
 | Path | What it is |
 |---|---|
 | `IDENTITY.md` | The CEO Agent's white-label identity template |
-| `departments/` | C-suite identity documents and department-specific bridges |
-| `core/` | Runtime configuration, departments, model routing, workflows, and skill execution |
+| `departments-subagents/` | C-suite identity documents and department-specific bridges |
+| `ceo-core/` | Runtime configuration, departments, model routing, workflows, and skill execution |
 | `sdk/` | Agent lifecycle, task routing, memory, permissions, prompts, and provider clients |
 | `organization/` | The programmatic C-suite organizational model |
 | `registry/agent-registry.json` | Canonical built-in agent roster and reporting structure |
 | `bin/setup.js` | Interactive CLI setup wizard shown above |
 | `bin/chat.js` | CLI chat with live model calls, cost switching, org chart, and status |
 | `app/` | Local web dashboard and API routes for chat, configuration, status, org data, agents, and dispatch |
-| `departments/operations/hermes/` | Hermes, the Operations department head and bridge, powered by [NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent) |
-| `departments/marketing/sales-intake/` | Marketing-owned sales intake bridge |
-| `departments/marketing/onboarding-comms/` | Marketing-owned onboarding communications bridge |
+| `departments-subagents/operations/hermes/` | Hermes, the Operations department head and bridge, powered by [NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent) |
+| `departments-subagents/marketing/sales-intake/` | Marketing-owned sales intake bridge |
+| `departments-subagents/marketing/onboarding-comms/` | Marketing-owned onboarding communications bridge |
 | `examples/dispute-agent/` | Optional domain-specific reference implementation; not in the default roster |
 | `tests/` | 57 automated suites with 497 tests covering workflows, bridges, skills, persistence, scheduling, rate limiting, health reporting, custom agents, runtime parity, user messages, department doctrine, multi-provider connections, CEO Modes, and the web dashboard's components |
 | `ARCHITECTURE.md` | The full department and agent product model |

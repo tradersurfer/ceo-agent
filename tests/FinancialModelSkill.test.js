@@ -3,15 +3,15 @@ const assert = require('node:assert/strict');
 const fs = require('fs');
 const path = require('path');
 const Organization = require('../organization/Organization');
-const { SkillRegistry } = require('../core/SkillRegistry');
-const { SkillExecutor } = require('../core/SkillExecutor');
+const { SkillRegistry } = require('../ceo-core/SkillRegistry');
+const { SkillExecutor } = require('../ceo-core/SkillExecutor');
 const {
   registerFinancialModelSkills,
   compute,
   defaultModel,
   parseRevenueCsv,
   averageOfLastThree,
-} = require('../core/skills/financialModelSkill');
+} = require('../ceo-core/skills/financialModelSkill');
 const { UPLOAD_ROOT, saveUpload } = require('../lib/uploadStore');
 
 function build() {

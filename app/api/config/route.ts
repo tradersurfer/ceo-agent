@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 const { loadConfig, saveConfig, maskKey, setProviderKey, resetRuntimeCache, getRuntime, ensureModelsResolved } = require('../../../lib/ceoAgentServer');
 const { PROVIDERS, PROVIDER_IDS, ACTIVE_PROVIDER_IDS } = require('../../../lib/providers');
 const { ALL_DEPARTMENTS, buildConnections, buildCatalog, sanitizeDepartmentModelDefaults } = require('../../../lib/connectionsConfig');
-const { CEO_MODES, DEFAULT_CEO_MODE } = require('../../../core/ceoModes');
+const { CEO_MODES, DEFAULT_CEO_MODE } = require('../../../ceo-core/ceoModes');
 
 async function buildConfigResponse(config: any) {
   const { runtime } = getRuntime();

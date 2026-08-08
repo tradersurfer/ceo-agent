@@ -43,8 +43,8 @@ business or tenant.
 Register the real bridge executors, define a workflow, and execute it:
 
 ```js
-const { WorkflowRuntime } = require('../core/WorkflowRuntime');
-const { registerBridgeExecutors } = require('../core/BridgeExecutors');
+const { WorkflowRuntime } = require('../ceo-core/WorkflowRuntime');
+const { registerBridgeExecutors } = require('../ceo-core/BridgeExecutors');
 
 const runtime = new WorkflowRuntime();
 registerBridgeExecutors(runtime, { project: 'your-project-id' });

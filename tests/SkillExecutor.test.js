@@ -1,9 +1,9 @@
 const { test } = require('node:test');
 const assert = require('node:assert');
-const { SkillRegistry } = require('../core/SkillRegistry');
-const { SkillExecutor } = require('../core/SkillExecutor');
-const { registerExampleSkills } = require('../core/skills/exampleSkills');
-const { InMemoryAuditLog } = require('../core/WorkflowRuntime');
+const { SkillRegistry } = require('../ceo-core/SkillRegistry');
+const { SkillExecutor } = require('../ceo-core/SkillExecutor');
+const { registerExampleSkills } = require('../ceo-core/skills/exampleSkills');
+const { InMemoryAuditLog } = require('../ceo-core/WorkflowRuntime');
 
 function buildExecutor() {
   const registry = new SkillRegistry();

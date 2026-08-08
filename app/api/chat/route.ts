@@ -3,11 +3,11 @@ import { checkRateLimit } from '../dispatch/handler';
 const { getRuntime, ensureModelsResolved, openRouterClient, anthropicClient, openAIClient, googleClient, xaiClient, buildSystemPrompt } = require('../../../lib/ceoAgentServer');
 const { friendlyMessageFor } = require('../../../lib/userMessages');
 const { getUploadMetadata } = require('../../../lib/uploadStore');
-const { recordUsage } = require('../../../core/UsageTracker');
-const { resolveRoleForAgent } = require('../../../core/resolveDepartmentRole');
-const { resolveClientForModel } = require('../../../core/resolveClientForModel');
+const { recordUsage } = require('../../../ceo-core/UsageTracker');
+const { resolveRoleForAgent } = require('../../../ceo-core/resolveDepartmentRole');
+const { resolveClientForModel } = require('../../../ceo-core/resolveClientForModel');
 const { CHAT_ROLES, COST_TIERS } = require('../../../lib/providers');
-const { dispatchSkillMessage } = require('../../../core/skillDispatch');
+const { dispatchSkillMessage } = require('../../../ceo-core/skillDispatch');
 
 export async function POST(request: Request) {
   const clientKey = request.headers.get('x-forwarded-for') || 'unknown';

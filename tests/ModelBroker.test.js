@@ -1,6 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const ModelBroker = require('../core/ModelBroker');
+const ModelBroker = require('../ceo-core/ModelBroker');
 
 test('getPricing returns the resolved tier pricing', () => {
   const broker = new ModelBroker([{

@@ -1,9 +1,9 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const Organization = require('../organization/Organization');
-const { SkillRegistry } = require('../core/SkillRegistry');
-const { SkillExecutor } = require('../core/SkillExecutor');
-const { registerScopeCreepSkill } = require('../core/skills/scopeCreepSkill');
+const { SkillRegistry } = require('../ceo-core/SkillRegistry');
+const { SkillExecutor } = require('../ceo-core/SkillExecutor');
+const { registerScopeCreepSkill } = require('../ceo-core/skills/scopeCreepSkill');
 
 function build() {
   const organization = Organization.createDefault();

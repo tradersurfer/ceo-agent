@@ -1,9 +1,9 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { WorkflowRuntime } = require('../core/WorkflowRuntime');
-const { SupabaseWorkflowStore } = require('../core/persistence/SupabaseWorkflowStore');
-const { SupabaseAuditLog } = require('../core/persistence/SupabaseAuditLog');
-const { createWorkflowPersistence } = require('../core/persistence');
+const { WorkflowRuntime } = require('../ceo-core/WorkflowRuntime');
+const { SupabaseWorkflowStore } = require('../ceo-core/persistence/SupabaseWorkflowStore');
+const { SupabaseAuditLog } = require('../ceo-core/persistence/SupabaseAuditLog');
+const { createWorkflowPersistence } = require('../ceo-core/persistence');
 const { makeFakeSupabase } = require('./helpers/fakeSupabase');
 
 test('WorkflowRuntime runs end-to-end on the Supabase store + audit doubles', async () => {

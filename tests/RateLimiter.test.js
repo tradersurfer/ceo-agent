@@ -1,6 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { InMemoryRateLimiter, SupabaseRateLimiter, createRateLimiter } = require('../core/RateLimiter');
+const { InMemoryRateLimiter, SupabaseRateLimiter, createRateLimiter } = require('../ceo-core/RateLimiter');
 const { makeFakeSupabase } = require('./helpers/fakeSupabase');
 
 // ---------------------------------------------------------------------------

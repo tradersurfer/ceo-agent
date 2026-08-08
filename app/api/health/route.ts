@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 const { getRuntime, openRouterClient } = require('../../../lib/ceoAgentServer');
-const { getHealthReport } = require('../../../core/HealthReporter');
+const { getHealthReport } = require('../../../ceo-core/HealthReporter');
 
 /**
  * GET /api/health

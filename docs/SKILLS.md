@@ -97,9 +97,9 @@ handler: (input, { signal }) => new Promise((resolve, reject) => {
 ## Usage
 
 ```js
-const { SkillRegistry } = require('../core/SkillRegistry');
-const { SkillExecutor } = require('../core/SkillExecutor');
-const { registerExampleSkills } = require('../core/skills/exampleSkills');
+const { SkillRegistry } = require('../ceo-core/SkillRegistry');
+const { SkillExecutor } = require('../ceo-core/SkillExecutor');
+const { registerExampleSkills } = require('../ceo-core/skills/exampleSkills');
 
 const registry = new SkillRegistry();
 registerExampleSkills(registry);
@@ -116,7 +116,7 @@ Both `bin/chat.js` (CLI) and `app/api/chat/route.ts` (web) call the same
 through to normal `@department`/model-call handling:
 
 ```js
-const { dispatchSkillMessage } = require('../core/skillDispatch');
+const { dispatchSkillMessage } = require('../ceo-core/skillDispatch');
 
 const dispatch = await dispatchSkillMessage('/format_currency {"amount": 42.5}', {
   skillRegistry: runtime.skillRegistry,

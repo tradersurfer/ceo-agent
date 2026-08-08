@@ -1,8 +1,8 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const Organization = require('../organization/Organization');
-const { SkillRegistry } = require('../core/SkillRegistry');
-const { SkillExecutor } = require('../core/SkillExecutor');
+const { SkillRegistry } = require('../ceo-core/SkillRegistry');
+const { SkillExecutor } = require('../ceo-core/SkillExecutor');
 const {
   registerCfoSkills,
   computeCashConversionCycle,
@@ -10,7 +10,7 @@ const {
   computeNpv,
   computeIrr,
   computeDcf,
-} = require('../core/skills/cfoSkills');
+} = require('../ceo-core/skills/cfoSkills');
 
 function build() {
   const organization = Organization.createDefault();

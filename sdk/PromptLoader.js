@@ -37,7 +37,7 @@ function loadAgentPrompt({ root, config, agent }) {
   }
 
   const promptParts = PROMPT_PATHS[agentId] || PROMPT_PATHS.ceo_agent;
-  const promptPath = path.join(root, 'departments', ...promptParts);
+  const promptPath = path.join(root, 'departments-subagents', ...promptParts);
   const template = fs.readFileSync(promptPath, 'utf8');
   return substitutePlaceholders(template, values);
 }

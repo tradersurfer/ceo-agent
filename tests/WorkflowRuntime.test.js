@@ -1,6 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { WorkflowRuntime } = require('../core/WorkflowRuntime');
+const { WorkflowRuntime } = require('../ceo-core/WorkflowRuntime');
 
 function makeRuntime(clockValues) {
   let i = 0;

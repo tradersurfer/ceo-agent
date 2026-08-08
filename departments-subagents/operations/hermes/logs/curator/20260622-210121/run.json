@@ -1,0 +1,40 @@
+{
+  "started_at": "2026-06-22T21:01:21.398178+00:00",
+  "duration_seconds": 1.04,
+  "model": "",
+  "provider": "",
+  "auto_transitions": {
+    "marked_stale": 0,
+    "archived": 0,
+    "reactivated": 0,
+    "checked": 0
+  },
+  "counts": {
+    "before": 0,
+    "after": 0,
+    "delta": 0,
+    "archived_this_run": 0,
+    "added_this_run": 0,
+    "consolidated_this_run": 0,
+    "pruned_this_run": 0,
+    "state_transitions": 0,
+    "cron_jobs_rewritten": 0,
+    "tool_calls_total": 0
+  },
+  "tool_call_counts": {},
+  "archived": [],
+  "consolidated": [],
+  "pruned": [],
+  "pruned_names": [],
+  "added": [],
+  "state_transitions": [],
+  "cron_rewrites": {
+    "rewrites": [],
+    "jobs_updated": 0,
+    "jobs_scanned": 0
+  },
+  "llm_final": "",
+  "llm_summary": "skipped (no candidates)",
+  "llm_error": null,
+  "tool_calls": []
+}

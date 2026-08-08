@@ -5,7 +5,7 @@ const {
   resolveRoleForAgent,
   BUILT_IN_DEPARTMENT_ROLES,
   FALLBACK_ROLE,
-} = require('../core/resolveDepartmentRole');
+} = require('../ceo-core/resolveDepartmentRole');
 
 test('day-one non-regression: technology defaults to codex with no override configured', () => {
   assert.equal(resolveDepartmentRole('technology', undefined), 'codex');

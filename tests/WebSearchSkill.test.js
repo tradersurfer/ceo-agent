@@ -1,12 +1,12 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const Organization = require('../organization/Organization');
-const { SkillRegistry } = require('../core/SkillRegistry');
-const { SkillExecutor } = require('../core/SkillExecutor');
-const { registerWebSearchSkill } = require('../core/skills/webSearchSkill');
-const { InMemoryAuditLog } = require('../core/WorkflowRuntime');
-const { createRuntime } = require('../core/runtimeFactory');
-const { dispatchSkillMessage } = require('../core/skillDispatch');
+const { SkillRegistry } = require('../ceo-core/SkillRegistry');
+const { SkillExecutor } = require('../ceo-core/SkillExecutor');
+const { registerWebSearchSkill } = require('../ceo-core/skills/webSearchSkill');
+const { InMemoryAuditLog } = require('../ceo-core/WorkflowRuntime');
+const { createRuntime } = require('../ceo-core/runtimeFactory');
+const { dispatchSkillMessage } = require('../ceo-core/skillDispatch');
 
 function fakeClient(searchImpl) {
   return { search: searchImpl };

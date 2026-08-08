@@ -1,9 +1,9 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { InMemoryAuditLog } = require('../core/WorkflowRuntime');
-const { SupabaseAuditLog } = require('../core/persistence/SupabaseAuditLog');
+const { InMemoryAuditLog } = require('../ceo-core/WorkflowRuntime');
+const { SupabaseAuditLog } = require('../ceo-core/persistence/SupabaseAuditLog');
 const { makeFakeSupabase } = require('./helpers/fakeSupabase');
-const { estimateCostUsd, recordUsage, summarizeUsage, USAGE_AUDIT_TABLE, USAGE_ENTRY_COLUMNS } = require('../core/UsageTracker');
+const { estimateCostUsd, recordUsage, summarizeUsage, USAGE_AUDIT_TABLE, USAGE_ENTRY_COLUMNS } = require('../ceo-core/UsageTracker');
 
 test('estimateCostUsd multiplies tokens by per-token pricing', () => {
   const usage = { promptTokens: 1000, completionTokens: 500 };

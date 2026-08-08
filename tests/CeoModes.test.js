@@ -1,6 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { CEO_MODES, DEFAULT_CEO_MODE, resolveCeoMode } = require('../core/ceoModes');
+const { CEO_MODES, DEFAULT_CEO_MODE, resolveCeoMode } = require('../ceo-core/ceoModes');
 
 test('all three named modes exist with distinct threshold pairs', () => {
   assert.equal(Object.keys(CEO_MODES).length, 3);

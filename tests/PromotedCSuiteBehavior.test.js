@@ -13,7 +13,7 @@ class SkillRegistry {
   list() { return [...this.skills.values()]; }
 }
 
-const skillsDir = path.join(__dirname, '..', 'core', 'skills');
+const skillsDir = path.join(__dirname, '..', 'ceo-core', 'skills');
 const { registerCeoSkills } = require(path.join(skillsDir, 'ceoSkills.js'));
 const { registerCooSkills } = require(path.join(skillsDir, 'cooSkills.js'));
 const { registerCtoSkills } = require(path.join(skillsDir, 'ctoSkills.js'));
