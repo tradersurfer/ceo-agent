@@ -90,11 +90,11 @@
       ],
       "authorized_projects": "Configured per install via CEO_AGENT_PROJECTS env var.",
       "off_limits": [
-        "Live financial transactions",
-        "Unauthorized production deployments",
-        "Changing secrets or credentials",
-        "Making legal guarantees",
-        "Making financial promises"
+        { "id": "live_financial_transactions", "label": "Live financial transactions", "restricts": [] },
+        { "id": "unauthorized_production_deployments", "label": "Unauthorized production deployments", "restricts": [] },
+        { "id": "change_credentials", "label": "Changing secrets or credentials", "restricts": [] },
+        { "id": "legal_guarantees", "label": "Making legal guarantees", "restricts": [] },
+        { "id": "financial_promises", "label": "Making financial promises", "restricts": [] }
       ]
     },
     {
@@ -136,8 +136,8 @@
       ],
       "authorized_projects": "Configured per install via CEO_AGENT_PROJECTS env var.",
       "off_limits": [
-        "Live financial transactions without approval",
-        "Overriding the CEO Agent"
+        { "id": "live_financial_transactions_unapproved", "label": "Live financial transactions without approval", "restricts": [] },
+        { "id": "override_ceo_agent", "label": "Overriding the CEO Agent", "restricts": [], "enforceable": false }
       ]
     },
     {
@@ -178,8 +178,8 @@
       ],
       "authorized_projects": "Configured per install via CEO_AGENT_PROJECTS env var.",
       "off_limits": [
-        "Unauthorized production deployments",
-        "Overriding the CEO Agent"
+        { "id": "unauthorized_production_deployments", "label": "Unauthorized production deployments", "restricts": [] },
+        { "id": "override_ceo_agent", "label": "Overriding the CEO Agent", "restricts": [], "enforceable": false }
       ]
     },
     {
@@ -232,7 +232,7 @@
       ],
       "authorized_projects": "Configured per install via CEO_AGENT_PROJECTS env var.",
       "off_limits": [
-        "Overriding the CEO Agent"
+        { "id": "override_ceo_agent", "label": "Overriding the CEO Agent", "restricts": [], "enforceable": false }
       ]
     },
     {
@@ -273,7 +273,7 @@
       ],
       "authorized_projects": "Configured per install via CEO_AGENT_PROJECTS env var.",
       "off_limits": [
-        "Overriding the CEO Agent"
+        { "id": "override_ceo_agent", "label": "Overriding the CEO Agent", "restricts": [], "enforceable": false }
       ]
     },
     {
@@ -311,8 +311,8 @@
       ],
       "authorized_projects": "Configured per install via CEO_AGENT_PROJECTS env var.",
       "off_limits": [
-        "Making legal guarantees",
-        "Overriding the CEO Agent"
+        { "id": "legal_guarantees", "label": "Making legal guarantees", "restricts": [] },
+        { "id": "override_ceo_agent", "label": "Overriding the CEO Agent", "restricts": [], "enforceable": false }
       ]
     },
     {
@@ -365,13 +365,13 @@
       ],
       "authorized_projects": "Configured per install via CEO_AGENT_PROJECTS env var.",
       "off_limits": [
-        "Changing credentials",
-        "Moving money",
-        "Making legal claims",
-        "Changing pricing",
-        "Approving production deployments",
-        "Deleting source files",
-        "Overriding the CEO Agent"
+        { "id": "change_credentials", "label": "Changing credentials", "restricts": [] },
+        { "id": "move_money", "label": "Moving money", "restricts": [] },
+        { "id": "legal_claims", "label": "Making legal claims", "restricts": [] },
+        { "id": "change_pricing", "label": "Changing pricing", "restricts": [] },
+        { "id": "approve_production_deployments", "label": "Approving production deployments", "restricts": [] },
+        { "id": "delete_source_files", "label": "Deleting source files", "restricts": [] },
+        { "id": "override_ceo_agent", "label": "Overriding the CEO Agent", "restricts": [], "enforceable": false }
       ]
     },
     {
@@ -394,9 +394,9 @@
       ],
       "authorized_projects": "Configured per install via CEO_AGENT_PROJECTS env var.",
       "off_limits": [
-        "Sending unauthorized emails",
-        "Modifying client records outside authorized scope",
-        "Overriding CEO Agent routing decisions"
+        { "id": "unauthorized_email", "label": "Sending unauthorized emails", "restricts": [] },
+        { "id": "modify_client_records_outside_scope", "label": "Modifying client records outside authorized scope", "restricts": ["create_lead", "intake_capture"], "enforceable": false },
+        { "id": "override_ceo_agent_routing", "label": "Overriding CEO Agent routing decisions", "restricts": [], "enforceable": false }
       ]
     },
     {
@@ -426,9 +426,9 @@
       ],
       "authorized_projects": "Configured per install via CEO_AGENT_PROJECTS env var.",
       "off_limits": [
-        "Sending unsolicited emails",
-        "Modifying client records outside authorized scope",
-        "Overriding CEO Agent routing decisions"
+        { "id": "unsolicited_email", "label": "Sending unsolicited emails", "restricts": ["email_welcome", "email_score_invite", "email_upload_reminder", "email_review_call", "email_scan_complete", "email_mail_reminder", "email_bureau_checkin", "email_sweep_upgrade", "email_testimonial", "email_sequence_queue"], "enforceable": false },
+        { "id": "modify_client_records_outside_scope", "label": "Modifying client records outside authorized scope", "restricts": [] },
+        { "id": "override_ceo_agent_routing", "label": "Overriding CEO Agent routing decisions", "restricts": [], "enforceable": false }
       ]
     }
   ]

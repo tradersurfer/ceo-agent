@@ -26,6 +26,14 @@ test('Organization and agent registry match on canonical agent state', () => {
     assert.equal(actual.reports_to, expected.reportsTo, `${id} reporting drift`);
     assert.deepEqual(sorted(actual.capabilities), sorted(expected.capabilities), `${id} capability drift`);
     assert.deepEqual(sorted(actual.skills || []), sorted(expected.skills), `${id} skill assignment drift`);
+    // ADR-010: off_limits entries must match id-for-id (including restricts
+    // and enforceable) between the JSON registry and Organization.createDefault
+    // -- the same drift discipline already applied to capabilities/skills above.
+    assert.deepEqual(
+      sorted((actual.off_limits || []).map(entry => JSON.stringify({ id: entry.id, restricts: sorted(entry.restricts || []), enforceable: entry.enforceable !== false }))),
+      sorted((expected.offLimits || []).map(entry => JSON.stringify({ id: entry.id, restricts: sorted(entry.restricts || []), enforceable: entry.enforceable !== false }))),
+      `${id} off_limits drift`,
+    );
   }
 });
 

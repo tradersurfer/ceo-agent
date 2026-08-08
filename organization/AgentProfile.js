@@ -12,6 +12,13 @@ class AgentProfile {
     this.capabilities = Array.isArray(options.capabilities) ? [...new Set(options.capabilities.map(item => item.id || item))] : [];
     this.models = Array.isArray(options.models) ? [...new Set(options.models)] : [];
     this.reportsTo = options.reportsTo || null;
+    // ADR-010: structured {id, label, restricts, enforceable} entries, same
+    // shape as registry/agent-registry.json's off_limits (registry.schema.json
+    // $defs/offLimitsEntry). Not validated here -- SkillExecutor only reads
+    // restricts/enforceable off whatever is passed in.
+    this.offLimits = Array.isArray(options.offLimits)
+      ? [...options.offLimits]
+      : (Array.isArray(options.off_limits) ? [...options.off_limits] : []);
   }
 
   /** Assigns a role. @param {string|object} role Role or id. @returns {string} Role id. */
@@ -65,6 +72,7 @@ class AgentProfile {
       capabilities: [...this.capabilities],
       models: [...this.models],
       reportsTo: this.reportsTo,
+      offLimits: this.offLimits.map(entry => ({ ...entry })),
     };
   }
 }

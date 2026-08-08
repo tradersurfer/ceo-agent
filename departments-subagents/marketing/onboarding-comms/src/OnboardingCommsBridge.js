@@ -17,6 +17,19 @@ const ALLOWED_TASK_TYPES = [
   'email_sequence_queue',
 ];
 
+// ADR-010: same ids/restricts as registry/agent-registry.json's
+// onboarding_comms_agent.off_limits. unsolicited_email names every real
+// task type here as what it "would" restrict, but stays enforceable: false
+// -- sending onboarding email IS this agent's entire job, and nothing here
+// can check the "unsolicited" qualifier yet (ADR-010 §1.2, Bucket B); a
+// bare category match would hard-block 100% of this agent's legitimate
+// work, which is worse than no enforcement, not safer.
+const OFF_LIMITS = [
+  { id: 'unsolicited_email', label: 'Sending unsolicited emails', restricts: [...ALLOWED_TASK_TYPES], enforceable: false },
+  { id: 'modify_client_records_outside_scope', label: 'Modifying client records outside authorized scope', restricts: [] },
+  { id: 'override_ceo_agent_routing', label: 'Overriding CEO Agent routing decisions', restricts: [], enforceable: false },
+];
+
 class OnboardingCommsBridge extends BaseBridge {
   constructor() {
     super({
@@ -27,6 +40,7 @@ class OnboardingCommsBridge extends BaseBridge {
       allowedApprovers: ALLOWED_APPROVERS,
       allowedProjects: ALLOWED_PROJECTS,
       allowedTaskTypes: ALLOWED_TASK_TYPES,
+      offLimits: OFF_LIMITS,
     });
   }
 
