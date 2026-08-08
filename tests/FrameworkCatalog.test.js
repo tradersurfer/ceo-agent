@@ -7,9 +7,9 @@ const {
   getAllFrameworks,
   getFrameworksByDomain,
   getFrameworkById,
-} = require('../core/frameworks/catalog');
-const { loadFrameworkContent, searchCatalogIndex } = require('../core/frameworks/FrameworkReader');
-const { createRuntime } = require('../core/runtimeFactory');
+} = require('../ceo-core/frameworks/catalog');
+const { loadFrameworkContent, searchCatalogIndex } = require('../ceo-core/frameworks/FrameworkReader');
+const { createRuntime } = require('../ceo-core/runtimeFactory');
 
 test('catalog frameworks are structurally valid and match the declared domain list', () => {
   assert.ok(frameworks.length > 0);

@@ -1,6 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { SupabaseAuditLog } = require('../core/persistence/SupabaseAuditLog');
+const { SupabaseAuditLog } = require('../ceo-core/persistence/SupabaseAuditLog');
 const { makeFakeSupabase } = require('./helpers/fakeSupabase');
 
 function entry(overrides = {}) {

@@ -5,7 +5,7 @@ const path = require('path');
 const Organization = require('../organization/Organization');
 const AgentRegistry = require('../sdk/AgentRegistry');
 const CapabilityResolver = require('../sdk/CapabilityResolver');
-const { createRuntime, SESSION_PROJECTS } = require('../core/runtimeFactory');
+const { createRuntime, SESSION_PROJECTS } = require('../ceo-core/runtimeFactory');
 
 const ROOT = path.resolve(__dirname, '..');
 const read = file => JSON.parse(fs.readFileSync(path.join(ROOT, 'registry', file), 'utf8'));

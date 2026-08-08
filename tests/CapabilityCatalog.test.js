@@ -6,7 +6,7 @@ const {
   getAllCapabilities,
   getCapabilitiesByDepartment,
   getCapabilityById,
-} = require('../core/capabilities/catalog');
+} = require('../ceo-core/capabilities/catalog');
 const Organization = require('../organization/Organization');
 
 test('catalog capabilities are structurally valid and match the declared department list', () => {

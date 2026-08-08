@@ -5,9 +5,9 @@ const path = require('path');
 const ExcelJS = require('exceljs');
 const { PDFDocument } = require('pdf-lib');
 const Organization = require('../organization/Organization');
-const { SkillRegistry } = require('../core/SkillRegistry');
-const { SkillExecutor } = require('../core/SkillExecutor');
-const { registerDocumentCreationSkills } = require('../core/skills/documentCreationSkills');
+const { SkillRegistry } = require('../ceo-core/SkillRegistry');
+const { SkillExecutor } = require('../ceo-core/SkillExecutor');
+const { registerDocumentCreationSkills } = require('../ceo-core/skills/documentCreationSkills');
 const { UPLOAD_ROOT, readUpload } = require('../lib/uploadStore');
 
 function build() {

@@ -1,6 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { resolveClientForModel } = require('../core/resolveClientForModel');
+const { resolveClientForModel } = require('../ceo-core/resolveClientForModel');
 
 function fakeClient(name) {
   return { name };

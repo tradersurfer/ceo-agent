@@ -1,7 +1,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { WorkflowRuntime } = require('../core/WorkflowRuntime');
-const { WorkflowScheduler } = require('../core/WorkflowScheduler');
+const { WorkflowRuntime } = require('../ceo-core/WorkflowRuntime');
+const { WorkflowScheduler } = require('../ceo-core/WorkflowScheduler');
 
 function makeClock(values) {
   let i = 0;

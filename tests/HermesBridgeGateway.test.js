@@ -12,8 +12,8 @@ const assert = require('node:assert/strict');
 // HermesBridge.js exports the class directly (module.exports = HermesBridge),
 // matching how core/BridgeExecutors.js already consumes it — not a
 // destructured named export.
-const HermesBridge = require('../departments/operations/hermes/src/HermesBridge');
-const { HermesGatewayClient } = require('../departments/operations/hermes/src/HermesGatewayClient');
+const HermesBridge = require('../departments-subagents/operations/hermes/src/HermesBridge');
+const { HermesGatewayClient } = require('../departments-subagents/operations/hermes/src/HermesGatewayClient');
 
 const VALID = {
   agent: 'hermes',

@@ -20,22 +20,16 @@ MEMORY.md
 
 offices/
 
-departments/_tools/.claude/
-departments/_tools/.codex/
-departments/_tools/.grok/
-departments/_tools/.copilot/
+departments-subagents/_tools/.claude/
+departments-subagents/_tools/.codex/
+departments-subagents/_tools/.grok/
+departments-subagents/_tools/.copilot/
 
-departments/operations/hermes/logs/
-departments/operations/hermes/skills/
-departments (subagents)/_tools/
-.claude/downloads/
-*.exe
-*.sqlite
-
-departments (subagents)/_tools/
+departments-subagents/operations/hermes/logs/
+departments-subagents/operations/hermes/skills/
 
 .claude/downloads/
-
+.claude/worktrees/
 *.exe
-
 *.sqlite
+*.tsbuildinfo

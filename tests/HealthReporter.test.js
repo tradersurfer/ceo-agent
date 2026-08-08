@@ -1,14 +1,14 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { WorkflowRuntime, InMemoryAuditLog } = require('../core/WorkflowRuntime');
-const { SkillRegistry } = require('../core/SkillRegistry');
-const { SkillExecutor } = require('../core/SkillExecutor');
-const { registerExampleSkills } = require('../core/skills/exampleSkills');
-const ModelBroker = require('../core/ModelBroker');
-const { SupabaseAuditLog } = require('../core/persistence/SupabaseAuditLog');
+const { WorkflowRuntime, InMemoryAuditLog } = require('../ceo-core/WorkflowRuntime');
+const { SkillRegistry } = require('../ceo-core/SkillRegistry');
+const { SkillExecutor } = require('../ceo-core/SkillExecutor');
+const { registerExampleSkills } = require('../ceo-core/skills/exampleSkills');
+const ModelBroker = require('../ceo-core/ModelBroker');
+const { SupabaseAuditLog } = require('../ceo-core/persistence/SupabaseAuditLog');
 const { makeFakeSupabase } = require('./helpers/fakeSupabase');
-const { getHealthReport, summarizeAudit, buildRouting } = require('../core/HealthReporter');
-const { recordUsage } = require('../core/UsageTracker');
+const { getHealthReport, summarizeAudit, buildRouting } = require('../ceo-core/HealthReporter');
+const { recordUsage } = require('../ceo-core/UsageTracker');
 
 function makeRuntime({ store = null, audit = null, skillAudit = null, usageAudit = null, models = [] } = {}) {
   const workflowRuntime = new WorkflowRuntime({ store: store || undefined, audit: audit || undefined });
@@ -61,7 +61,7 @@ test('Supabase not configured degrades gracefully to healthy in-memory mode, not
 
 test('Supabase configured and reachable reports persistent mode and healthy status', async () => {
   const supabase = makeFakeSupabase();
-  const { SupabaseWorkflowStore } = require('../core/persistence/SupabaseWorkflowStore');
+  const { SupabaseWorkflowStore } = require('../ceo-core/persistence/SupabaseWorkflowStore');
   const store = new SupabaseWorkflowStore({ supabase });
   const runtime = makeRuntime({ store, models: UNRESOLVED_MODELS });
   const env = { SUPABASE_URL: 'https://example.supabase.co', SUPABASE_SERVICE_ROLE_KEY: 'key' };

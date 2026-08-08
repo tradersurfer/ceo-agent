@@ -1,8 +1,8 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { createRuntime } = require('../core/runtimeFactory');
-const { InMemoryAuditLog } = require('../core/WorkflowRuntime');
-const { SupabaseAuditLog } = require('../core/persistence/SupabaseAuditLog');
+const { createRuntime } = require('../ceo-core/runtimeFactory');
+const { InMemoryAuditLog } = require('../ceo-core/WorkflowRuntime');
+const { SupabaseAuditLog } = require('../ceo-core/persistence/SupabaseAuditLog');
 
 const MINIMAL_CONFIG = { activeDepartments: ['executive'] };
 

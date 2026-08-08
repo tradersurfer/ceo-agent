@@ -1,10 +1,10 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { SkillRegistry } = require('../core/SkillRegistry');
-const { SkillExecutor } = require('../core/SkillExecutor');
-const { registerExampleSkills } = require('../core/skills/exampleSkills');
-const { createRuntime } = require('../core/runtimeFactory');
-const { parseSkillInvocation, parseSkillArgs, dispatchSkillMessage } = require('../core/skillDispatch');
+const { SkillRegistry } = require('../ceo-core/SkillRegistry');
+const { SkillExecutor } = require('../ceo-core/SkillExecutor');
+const { registerExampleSkills } = require('../ceo-core/skills/exampleSkills');
+const { createRuntime } = require('../ceo-core/runtimeFactory');
+const { parseSkillInvocation, parseSkillArgs, dispatchSkillMessage } = require('../ceo-core/skillDispatch');
 
 function buildRegistryAndExecutor() {
   const registry = new SkillRegistry();

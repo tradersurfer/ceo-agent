@@ -1,13 +1,13 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { SkillRegistry } = require('../core/SkillRegistry');
-const { registerCeoSkills } = require('../core/skills/ceoSkills');
-const { registerCfoSkills } = require('../core/skills/cfoSkills');
-const { registerCooSkills } = require('../core/skills/cooSkills');
-const { registerCtoSkills } = require('../core/skills/ctoSkills');
-const { registerCmoSkills } = require('../core/skills/cmoSkills');
-const { registerChroSkills } = require('../core/skills/chroSkills');
-const { registerCloSkills } = require('../core/skills/cloSkills');
+const { SkillRegistry } = require('../ceo-core/SkillRegistry');
+const { registerCeoSkills } = require('../ceo-core/skills/ceoSkills');
+const { registerCfoSkills } = require('../ceo-core/skills/cfoSkills');
+const { registerCooSkills } = require('../ceo-core/skills/cooSkills');
+const { registerCtoSkills } = require('../ceo-core/skills/ctoSkills');
+const { registerCmoSkills } = require('../ceo-core/skills/cmoSkills');
+const { registerChroSkills } = require('../ceo-core/skills/chroSkills');
+const { registerCloSkills } = require('../ceo-core/skills/cloSkills');
 
 const registrars = [
   { name: 'ceoSkills', fn: registerCeoSkills, count: 5 },

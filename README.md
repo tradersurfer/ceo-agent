@@ -87,6 +87,8 @@ Five steps, about two minutes, re-runnable anytime.
 
 *Every department shown here is a real setup toggle: Finance, Operations (Hermes/COO), Technology, Marketing, People, and Legal. Skip the API key and CEO Agent still boots in routing-only mode until you connect a model provider.*
 
+> **Note:** the setup-wizard screenshots above (steps 1–5, org chart summary) still match the current CLI. The chat screenshot does not — it predates the message hover actions (copy/edit/regenerate), the auto-resizing textarea, and citation rendering shipped since, and a planned navy/gold visual redesign will change it further. Flagging rather than retaking now, so it isn't retaken twice.
+
 ---
 
 ## Install and Run It
@@ -129,10 +131,15 @@ npm run web
 | `/status` | Runtime and agent status |
 | `/models` | Resolved model assignments for both cost tiers |
 | `/cost` | View or change cost mode (`flagship` or `efficient`) |
+| `/mode` | View or change CEO Mode (`conservative`, `aggressive`, `musk_mode`) |
+| `/skills` | List registered skills and their arguments |
+| `/attach <path>` | Attach a local file to your next message |
 | `/help` | Full command list |
 | `/exit` | Quit |
 
 Address a department head directly with `@department` — for example, `@legal draft an NDA clause`. Anything else goes to CEO Agent directly.
+
+Run a registered skill directly with `/<skill> {json}` or `@<skill> {json}` — for example, `/format_currency {"amount": 42.5}`. `/skills` lists every skill name and the arguments it accepts.
 
 ---
 
@@ -214,19 +221,19 @@ This will enable secure, relay-based workspace connectivity so CEO Agent and the
 | Path | What it is |
 |---|---|
 | `IDENTITY.md` | The CEO Agent's white-label identity template |
-| `departments/` | C-suite identity documents and department-specific bridges |
-| `core/` | Runtime configuration, departments, model routing, workflows, and skill execution |
+| `departments-subagents/` | C-suite identity documents and department-specific bridges |
+| `ceo-core/` | Runtime configuration, departments, model routing, workflows, and skill execution |
 | `sdk/` | Agent lifecycle, task routing, memory, permissions, prompts, and provider clients |
 | `organization/` | The programmatic C-suite organizational model |
 | `registry/agent-registry.json` | Canonical built-in agent roster and reporting structure |
 | `bin/setup.js` | Interactive CLI setup wizard shown above |
 | `bin/chat.js` | CLI chat with live model calls, cost switching, org chart, and status |
 | `app/` | Local web dashboard and API routes for chat, configuration, status, org data, agents, and dispatch |
-| `departments/operations/hermes/` | Hermes, the Operations department head and bridge, powered by [NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent) |
-| `departments/marketing/sales-intake/` | Marketing-owned sales intake bridge |
-| `departments/marketing/onboarding-comms/` | Marketing-owned onboarding communications bridge |
+| `departments-subagents/operations/hermes/` | Hermes, the Operations department head and bridge, powered by [NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent) |
+| `departments-subagents/marketing/sales-intake/` | Marketing-owned sales intake bridge |
+| `departments-subagents/marketing/onboarding-comms/` | Marketing-owned onboarding communications bridge |
 | `examples/dispute-agent/` | Optional domain-specific reference implementation; not in the default roster |
-| `tests/` | 27 automated suites with 166 tests covering workflows, bridges, skills, persistence, scheduling, rate limiting, health reporting, custom agents, runtime parity, and user messages |
+| `tests/` | 57 automated suites with 497 tests covering workflows, bridges, skills, persistence, scheduling, rate limiting, health reporting, custom agents, runtime parity, user messages, department doctrine, multi-provider connections, CEO Modes, and the web dashboard's components |
 | `ARCHITECTURE.md` | The full department and agent product model |
 | `SECURITY.md` | Current security posture, known limitations, and installer responsibilities |
 | `TASK_ROUTER.md`, `BEHAVIOR.md`, `ORGANIZATION-STRUCTURE.md` | Reference behavior and routing specifications |
@@ -266,7 +273,10 @@ Available through both the CLI and the local-only web dashboard.
 - [x] Health checks and observability
 - [x] Curated department skills: scope-creep detection, schema markup generation, content-quality analysis
 - [x] Hermes (COO / Ops) active in the default roster
-- [ ] Direct-provider adapter evaluation beyond OpenRouter
+- [x] Real Hermes gateway execution — the bridge posts work to `POST /v1/runs`, not just validates and queues it
+- [x] BYNGE: direct per-provider connections (Anthropic, OpenAI, Google, xAI) alongside OpenRouter, with per-department model defaults and a live resolved-model catalog
+- [x] CEO Modes (Conservative / Aggressive / Musk Mode) — presets over the existing escalation-assessment and quality-review thresholds
+- [x] Agent Performance Visibility / Activity feed — who ran what, cost, and outcome, read-only in the web dashboard
 - [ ] Swarm agents: OpenClaw & T3Agent
 - [ ] WORKSPACES™️ — relay Workspace connect with Buzz by Block
 - [ ] Marketplace listing

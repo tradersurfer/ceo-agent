@@ -58,14 +58,14 @@ const {
   createRuntime,
   buildActiveAgentList,
   buildConfiguredAgentList,
-} = require('../core/runtimeFactory');
+} = require('../ceo-core/runtimeFactory');
 const { friendlyMessageFor } = require('../lib/userMessages');
 const { saveUpload, MAX_UPLOAD_BYTES } = require('../lib/uploadStore');
-const { recordUsage } = require('../core/UsageTracker');
-const { resolveRoleForAgent } = require('../core/resolveDepartmentRole');
-const { resolveClientForModel } = require('../core/resolveClientForModel');
-const { CEO_MODES, DEFAULT_CEO_MODE } = require('../core/ceoModes');
-const { dispatchSkillMessage } = require('../core/skillDispatch');
+const { recordUsage } = require('../ceo-core/UsageTracker');
+const { resolveRoleForAgent } = require('../ceo-core/resolveDepartmentRole');
+const { resolveClientForModel } = require('../ceo-core/resolveClientForModel');
+const { CEO_MODES, DEFAULT_CEO_MODE } = require('../ceo-core/ceoModes');
+const { dispatchSkillMessage } = require('../ceo-core/skillDispatch');
 
 function loadConfig() {
   if (!fs.existsSync(CONFIG_PATH)) {

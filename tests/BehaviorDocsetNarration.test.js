@@ -24,7 +24,7 @@ const BEHAVIOR_PATHS = [
 
 for (const [department, agentDir] of BEHAVIOR_PATHS) {
   test(`${agentDir}/BEHAVIOR.md carries the same anti-narration instruction as PROMPT.md`, () => {
-    const behaviorPath = path.join(ROOT, 'departments', department, agentDir, 'BEHAVIOR.md');
+    const behaviorPath = path.join(ROOT, 'departments-subagents', department, agentDir, 'BEHAVIOR.md');
     const behavior = fs.readFileSync(behaviorPath, 'utf8');
     assert.match(
       behavior,

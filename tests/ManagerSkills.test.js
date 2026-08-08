@@ -1,10 +1,10 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const Organization = require('../organization/Organization');
-const { SkillRegistry } = require('../core/SkillRegistry');
-const { SkillExecutor } = require('../core/SkillExecutor');
-const { registerManagerSkills } = require('../core/skills/managerSkills');
-const { CEO_MODES } = require('../core/ceoModes');
+const { SkillRegistry } = require('../ceo-core/SkillRegistry');
+const { SkillExecutor } = require('../ceo-core/SkillExecutor');
+const { registerManagerSkills } = require('../ceo-core/skills/managerSkills');
+const { CEO_MODES } = require('../ceo-core/ceoModes');
 
 function build(options = {}) {
   const organization = Organization.createDefault();

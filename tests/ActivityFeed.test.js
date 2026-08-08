@@ -1,13 +1,13 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { WorkflowRuntime, InMemoryAuditLog } = require('../core/WorkflowRuntime');
-const { SkillRegistry } = require('../core/SkillRegistry');
-const { SkillExecutor } = require('../core/SkillExecutor');
-const { registerExampleSkills } = require('../core/skills/exampleSkills');
-const { SupabaseAuditLog } = require('../core/persistence/SupabaseAuditLog');
-const { SupabaseWorkflowStore } = require('../core/persistence/SupabaseWorkflowStore');
+const { WorkflowRuntime, InMemoryAuditLog } = require('../ceo-core/WorkflowRuntime');
+const { SkillRegistry } = require('../ceo-core/SkillRegistry');
+const { SkillExecutor } = require('../ceo-core/SkillExecutor');
+const { registerExampleSkills } = require('../ceo-core/skills/exampleSkills');
+const { SupabaseAuditLog } = require('../ceo-core/persistence/SupabaseAuditLog');
+const { SupabaseWorkflowStore } = require('../ceo-core/persistence/SupabaseWorkflowStore');
 const { makeFakeSupabase } = require('./helpers/fakeSupabase');
-const { recordUsage } = require('../core/UsageTracker');
+const { recordUsage } = require('../ceo-core/UsageTracker');
 const {
   buildActivityFeed,
   buildAgentDirectory,

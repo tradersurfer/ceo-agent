@@ -9,8 +9,8 @@ process.env.SALES_INTAKE_AGENT_SECRET = 'test-secret';
 
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { WorkflowRuntime } = require('../core/WorkflowRuntime');
-const { registerBridgeExecutors } = require('../core/BridgeExecutors');
+const { WorkflowRuntime } = require('../ceo-core/WorkflowRuntime');
+const { registerBridgeExecutors } = require('../ceo-core/BridgeExecutors');
 
 test('registers an executor for every allowed task type across all four bridges', () => {
   const runtime = new WorkflowRuntime();
