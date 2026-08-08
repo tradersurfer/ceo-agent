@@ -40,6 +40,10 @@ class BaseBridge {
       ? { ...options.runtimeInfo }
       : {};
     this.executionConnected = false;
+    // ADR-010: same {id, label, restricts, enforceable} shape as
+    // registry/agent-registry.json's off_limits (registry.schema.json
+    // $defs/offLimitsEntry) and organization/AgentProfile.js's offLimits.
+    this.offLimits = Array.isArray(options.offLimits) ? [...options.offLimits] : [];
   }
 
   /**
@@ -83,6 +87,21 @@ class BaseBridge {
     const taskType = task.type || (task.metadata && task.metadata.taskType) || null;
     if (!this.permissions.isApproved(task.approved_by)) errors.push('Task approver is not allowed.');
     if (!this.permissions.isTaskAllowed(taskType)) errors.push('Task type is not allowed.');
+
+    // ADR-010 §2: sibling off_limits check next to the allowlist check
+    // above, pushed onto the same `errors` array that already produces
+    // Statuses.BLOCKED via execute(). Only entries with a non-empty
+    // `restricts` and `enforceable !== false` are live -- see
+    // SkillExecutor.run()'s matching check and ADR-010 §1.2-§1.3 for why
+    // relational (Bucket A) and unverifiable-qualifier (Bucket B) entries
+    // are marked enforceable: false instead of hard-blocked on a bare
+    // task-type match.
+    const offLimitsMatch = this.offLimits.find(entry => entry.enforceable !== false
+      && Array.isArray(entry.restricts)
+      && taskType != null
+      && entry.restricts.includes(taskType));
+    if (offLimitsMatch) errors.push(`Task type is off-limits: ${taskType} (${offLimitsMatch.label})`);
+
     return errors;
   }
 

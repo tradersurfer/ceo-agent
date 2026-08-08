@@ -55,6 +55,25 @@ class SkillExecutor {
           reason: 'permission_denied',
         });
       }
+
+      // ADR-010 §2: sibling off_limits check, same shape as the
+      // permission_denied check immediately above -- a match hard-blocks,
+      // synchronously, through the same _finish()/audit path. Only entries
+      // with a non-empty `restricts` and `enforceable !== false` are live;
+      // see registry.schema.json's offLimitsEntry doc and ADR-010 §1.2-§1.3
+      // for why relational entries (Bucket A) and category-only entries
+      // whose real violation depends on an unverifiable qualifier like
+      // "unsolicited" (Bucket B) are marked enforceable: false rather than
+      // hard-blocked on a bare skill-id match.
+      const offLimitsMatch = (agent.offLimits || []).find(entry => entry.enforceable !== false
+        && Array.isArray(entry.restricts)
+        && entry.restricts.includes(skillName));
+      if (offLimitsMatch) {
+        return this._finish('failed', skillName, context, {
+          error: `Skill is off-limits for this agent: ${skillName} (${offLimitsMatch.label})`,
+          reason: 'off_limits_violation',
+        });
+      }
     }
 
     const validationErrors = validateShape(input, skill.inputSchema);
