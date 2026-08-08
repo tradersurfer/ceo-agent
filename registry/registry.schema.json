@@ -71,6 +71,10 @@
           "type": "array",
           "items": { "$ref": "#/$defs/id" },
           "uniqueItems": true
+        },
+        "off_limits": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/offLimitsEntry" }
         }
       }
     },
@@ -95,6 +99,21 @@
         "id": { "$ref": "#/$defs/id" },
         "name": { "type": "string", "minLength": 1 },
         "description": { "type": "string" }
+      }
+    },
+    "offLimitsEntry": {
+      "type": "object",
+      "description": "ADR-010: a structured off_limits prohibition. `restricts` names the skill/task-type ids this entry actually governs and is enforced (hard-blocked) at SkillExecutor.run() and BaseBridge.validatePermissions() when non-empty and `enforceable` is not false. `enforceable: false` marks an entry that cannot be checked as a discrete request today (a relational/governance constraint, or a category whose real violation depends on an unverifiable qualifier like 'unsolicited') -- present for documentation/audit-trail honesty, not enforcement.",
+      "required": ["id", "label"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "label": { "type": "string", "minLength": 1 },
+        "restricts": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/id" },
+          "uniqueItems": true
+        },
+        "enforceable": { "type": "boolean" }
       }
     },
     "skill": {

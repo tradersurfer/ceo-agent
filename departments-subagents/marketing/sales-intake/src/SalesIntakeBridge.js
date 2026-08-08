@@ -6,6 +6,16 @@ const ALLOWED_PROJECTS = (process.env.CEO_AGENT_PROJECTS || '')
   .split(',').map(s => s.trim()).filter(Boolean);
 const ALLOWED_TASK_TYPES = ['create_lead', 'intake_capture'];
 
+// ADR-010: same ids/restricts as registry/agent-registry.json's
+// sales_intake_agent.off_limits. modify_client_records_outside_scope and
+// override_ceo_agent_routing stay enforceable: false -- see that file's
+// comments for why (unverifiable qualifier / relational constraint).
+const OFF_LIMITS = [
+  { id: 'unauthorized_email', label: 'Sending unauthorized emails', restricts: [] },
+  { id: 'modify_client_records_outside_scope', label: 'Modifying client records outside authorized scope', restricts: ['create_lead', 'intake_capture'], enforceable: false },
+  { id: 'override_ceo_agent_routing', label: 'Overriding CEO Agent routing decisions', restricts: [], enforceable: false },
+];
+
 class SalesIntakeBridge extends BaseBridge {
   constructor() {
     super({
@@ -16,6 +26,7 @@ class SalesIntakeBridge extends BaseBridge {
       allowedApprovers: ALLOWED_APPROVERS,
       allowedProjects: ALLOWED_PROJECTS,
       allowedTaskTypes: ALLOWED_TASK_TYPES,
+      offLimits: OFF_LIMITS,
     });
   }
 

@@ -26,6 +26,27 @@ const ALLOWED_TASK_TYPES = [
 // any network call. Phrases are the canonical text from
 // registry/agent-registry.json's `hermes.off_limits`; this is NOT the
 // general free-text mechanism ADR-010 designs for all nine agents.
+// ADR-010: the general, structured-id off_limits mechanism (SkillExecutor.
+// run()'s sibling check, BaseBridge.validatePermissions()'s sibling check
+// below). Same ids/restricts as registry/agent-registry.json's
+// hermes.off_limits; restricts stays [] on every entry here because none
+// of ALLOWED_TASK_TYPES above genuinely performs any of these actions
+// today (ADR-010 §1.2, Bucket C) -- ships inert-but-wired, exactly as
+// ADR-010 §1.3 describes, ready to start firing the moment a future task
+// type that actually does one of these things populates its restricts.
+// This is separate from, and does not replace, OFF_LIMITS_PATTERNS below
+// (ADR-009 §4's narrow payload-text stopgap, which stays in place
+// unchanged per ADR-010's own non-goals).
+const OFF_LIMITS = [
+  { id: 'change_credentials', label: 'Changing credentials', restricts: [] },
+  { id: 'move_money', label: 'Moving money', restricts: [] },
+  { id: 'legal_claims', label: 'Making legal claims', restricts: [] },
+  { id: 'change_pricing', label: 'Changing pricing', restricts: [] },
+  { id: 'approve_production_deployments', label: 'Approving production deployments', restricts: [] },
+  { id: 'delete_source_files', label: 'Deleting source files', restricts: [] },
+  { id: 'override_ceo_agent', label: 'Overriding the CEO Agent', restricts: [], enforceable: false },
+];
+
 const OFF_LIMITS_PATTERNS = [
   { phrase: 'Changing credentials', re: /(change|reset|rotate|revoke|disable).{0,40}(credential|password|api[- ]?key|token|secret|login|access)/i },
   { phrase: 'Moving money', re: /(move|transfer|send|pay|withdraw|spend|wire).{0,40}(money|funds|payment|cash|balance|bank|transfer|wire|amount)/i },
@@ -49,6 +70,7 @@ class HermesBridge extends BaseBridge {
       allowedApprovers: ALLOWED_APPROVERS,
       allowedProjects: ALLOWED_PROJECTS,
       allowedTaskTypes: ALLOWED_TASK_TYPES,
+      offLimits: OFF_LIMITS,
     });
     // Read at construction time (not module-load time) so tests and
     // installs can (re)configure per instance.
