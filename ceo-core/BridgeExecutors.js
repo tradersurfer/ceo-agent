@@ -91,6 +91,23 @@ function buildExecutor(bridge, taskType, defaultProject, defaultApprovedBy) {
     const result = await invoke(task);
 
     if (result.status === 'triggered') {
+      // ADR-009 §3 / issue #95: a 'triggered' submission is only a real
+      // workflow success once the run actually resolves. Bridges that
+      // expose awaitRun() (currently only Hermes -- submit-now/resolve-
+      // later is not a shape SalesIntakeBridge/OnboardingCommsBridge/
+      // DisputeAgentBridge have) are followed to their real terminal
+      // outcome here; other bridges' synchronous 'triggered' is unchanged.
+      if (typeof bridge.awaitRun === 'function' && result.run_id) {
+        const resolution = await bridge.awaitRun(result.run_id);
+        if (resolution.status === 'completed') {
+          return { status: 'ok', bridgeResult: { ...result, resolution } };
+        }
+        return {
+          status: 'failed',
+          error: resolution.reason || `Hermes run ${result.run_id} did not complete (status: ${resolution.status}).`,
+          bridgeResult: { ...result, resolution },
+        };
+      }
       return { status: 'ok', bridgeResult: result };
     }
 
