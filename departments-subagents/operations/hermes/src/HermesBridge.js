@@ -191,6 +191,30 @@ class HermesBridge extends BaseBridge {
       };
     }
   }
+
+  /**
+   * ADR-009 §3's post-submission async lifecycle (issue #95). A separate
+   * call from runTask() by design: runTask()'s synchronous 'triggered'
+   * return (PR #94, unchanged here) is the submission-time contract;
+   * awaitRun() is the later, independent operation that follows a run to
+   * its real terminal outcome. Never auto-resolves waiting_for_approval —
+   * delegates entirely to HermesGatewayClient.awaitResolution(), which only
+   * ever reads status and calls stop() on timeout.
+   * @param {string} runId Run id from a prior 'triggered' runTask() result.
+   * @param {object} [options] Forwarded to HermesGatewayClient.awaitResolution.
+   * @returns {Promise<{status: 'completed'|'failed'|'cancelled', reason?: string, timedOut?: 'run'|'approval', lastPoll?: object}>}
+   */
+  async awaitRun(runId, options = {}) {
+    const resolution = await this._gateway.awaitResolution(runId, {
+      ...options,
+      onEvent: event => {
+        this.audit({ agent: 'hermes', ...event });
+        if (typeof options.onEvent === 'function') options.onEvent(event);
+      },
+    });
+    this.audit({ event: 'run_resolved', agent: 'hermes', runId, status: resolution.status, reason: resolution.reason || null });
+    return resolution;
+  }
 }
 
 module.exports = HermesBridge;
