@@ -233,7 +233,7 @@ This will enable secure, relay-based workspace connectivity so CEO Agent and the
 | `departments-subagents/marketing/sales-intake/` | Marketing-owned sales intake bridge |
 | `departments-subagents/marketing/onboarding-comms/` | Marketing-owned onboarding communications bridge |
 | `examples/dispute-agent/` | Optional domain-specific reference implementation; not in the default roster |
-| `tests/` | 57 automated suites with 497 tests covering workflows, bridges, skills, persistence, scheduling, rate limiting, health reporting, custom agents, runtime parity, user messages, department doctrine, multi-provider connections, CEO Modes, and the web dashboard's components |
+| `tests/` | 62 automated suites with 549 tests (`npm test`) covering workflows, bridges, skills, persistence, scheduling, rate limiting, health reporting, custom agents, runtime parity, user messages, department doctrine, multi-provider connections, CEO Modes, `off_limits` enforcement, the Hermes async lifecycle, Stripe webhook verification, and the web dashboard's components — plus 2 real-browser Playwright suites (`npm run test:browser`) for layout/interaction behavior jsdom can't exercise |
 | `ARCHITECTURE.md` | The full department and agent product model |
 | `SECURITY.md` | Current security posture, known limitations, and installer responsibilities |
 | `TASK_ROUTER.md`, `BEHAVIOR.md`, `ORGANIZATION-STRUCTURE.md` | Reference behavior and routing specifications |
@@ -252,6 +252,8 @@ Available through both the CLI and the local-only web dashboard.
 ---
 
 ## Roadmap
+
+See [`docs/ROADMAP-MASTER.md`](./docs/ROADMAP-MASTER.md) for the standing 50-part, tiered plan. The checklist below is the short version — real shipped milestones, not the full backlog.
 
 - [x] White-label identity layer
 - [x] Core SDK for task routing, memory, permissions, and agent lifecycle
@@ -277,6 +279,10 @@ Available through both the CLI and the local-only web dashboard.
 - [x] BYNGE: direct per-provider connections (Anthropic, OpenAI, Google, xAI) alongside OpenRouter, with per-department model defaults and a live resolved-model catalog
 - [x] CEO Modes (Conservative / Aggressive / Musk Mode) — presets over the existing escalation-assessment and quality-review thresholds
 - [x] Agent Performance Visibility / Activity feed — who ran what, cost, and outcome, read-only in the web dashboard
+- [x] `off_limits` real code enforcement at both `SkillExecutor.run()` and `BaseBridge.validatePermissions()` (ADR-010)
+- [x] Hermes async lifecycle — real polling, layered timeouts, `waiting_for_approval` never auto-resolved
+- [x] Stripe webhook signature verification at the route layer
+- [x] Draggable/resizable sidebar
 - [ ] Swarm agents: OpenClaw & T3Agent
 - [ ] WORKSPACES™️ — relay Workspace connect with Buzz by Block
 - [ ] Marketplace listing
