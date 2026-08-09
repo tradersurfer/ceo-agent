@@ -87,16 +87,46 @@ select:focus-visible,
 
 .app-shell { display: flex; height: 100vh; }
 .sidebar {
+  position: relative;
   width: 180px;
   background: var(--bg-panel);
   padding: 16px 12px;
   flex-shrink: 0;
   /* Width is the only thing that changes between expanded/collapsed --
      transitioning it (rather than a hard display:none swap) is what makes
-     .content's flex:1 reflow read as a slide instead of a jump cut. */
+     .content's flex:1 reflow read as a slide instead of a jump cut. This
+     transition is intentionally NOT active during a drag (see .sidebar
+     .sidebar-resize-handle:active sibling rule below) -- animating every
+     pointermove frame would make the drag feel laggy instead of 1:1 with
+     the cursor. */
   transition: width 0.15s ease;
   overflow: hidden;
 }
+/* #110: drag-resize handle, a thin strip on the sidebar's right edge.
+   position:absolute + inset so it doesn't participate in the flex layout
+   inside .sidebar (nav items, header) and doesn't shift when width changes
+   mid-drag. Only rendered while expanded (Sidebar.tsx) -- the collapsed
+   56px rail is not resizable, only the toggle button changes it. */
+.sidebar-resize-handle {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 6px;
+  cursor: ew-resize;
+  touch-action: none;
+  background: transparent;
+}
+.sidebar-resize-handle:hover,
+.sidebar-resize-handle:focus-visible {
+  background: var(--accent-blue);
+  opacity: 0.4;
+}
+/* Suppress the width transition while actively dragging so the sidebar
+   edge tracks the cursor 1:1 instead of chasing it with a 0.15s ease lag.
+   :has() is supported in every browser this project already targets
+   (Chrome/Edge/Safari/Firefox all shipped it before this was written). */
+.sidebar:has(.sidebar-resize-handle:active) { transition: none; }
 /* 56px: real content-area math at the narrowest viewport this app
    supports (390px, iPhone-class -- see tests/browser/
    ChatInputResponsive.test.js), not a round-number guess. The chat input
