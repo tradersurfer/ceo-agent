@@ -13,7 +13,7 @@
     "test": "node scripts/run-tests.js",
     "test:core": "node --test tests/*.test.js",
     "test:components": "node --require ./tests/components/registerTsx.js --require ./tests/components/setupJsdom.js --test tests/components/*.test.jsx",
-    "test:browser": "node --test tests/browser/*.test.js",
+    "test:browser": "node --test --test-concurrency=1 tests/browser/*.test.js",
     "setup": "node bin/setup.js",
     "start": "node bin/chat.js",
     "web": "next dev -H 127.0.0.1",

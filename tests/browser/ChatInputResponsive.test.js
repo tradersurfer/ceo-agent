@@ -22,6 +22,7 @@ const fs = require('fs');
 const path = require('path');
 const http = require('http');
 const { chromium } = require('playwright');
+const { killServerTree } = require('./_killServerTree');
 
 const ROOT = path.resolve(__dirname, '..', '..');
 const PORT = 3999;
@@ -59,10 +60,16 @@ test.before(async () => {
     createdAt: new Date().toISOString(),
   }, null, 2));
 
+  // Spawned via the npm script (shell:true) rather than exec'ing
+  // node_modules/.bin/next directly: that file is a POSIX shell script on
+  // Windows installs, which process.execPath cannot run there -- confirmed
+  // this exact spawn call failed on a real Windows host (Tier 1 Part 10,
+  // docs/ROADMAP-MASTER.md). `npm run web -- -H 127.0.0.1 -p <port>`
+  // resolves through the platform's own shell either way.
   serverProcess = spawn(
-    process.execPath,
-    [path.join(ROOT, 'node_modules', '.bin', 'next'), 'dev', '-H', '127.0.0.1', '-p', String(PORT)],
-    { cwd: ROOT, stdio: 'ignore' },
+    'npm',
+    ['run', 'web', '--', '-p', String(PORT)],
+    { cwd: ROOT, stdio: 'ignore', shell: true },
   );
   await waitForServer(BASE_URL, 45000);
   // Some sandboxed dev environments pre-install Chromium outside
@@ -78,7 +85,7 @@ test.before(async () => {
 
 test.after(async () => {
   await browser?.close();
-  if (serverProcess) serverProcess.kill('SIGTERM');
+  if (serverProcess) killServerTree(serverProcess);
   if (previousConfig === undefined) {
     if (fs.existsSync(CONFIG_PATH)) fs.unlinkSync(CONFIG_PATH);
   } else {
