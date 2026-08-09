@@ -98,3 +98,64 @@ test('before any manual toggle, resizing across the breakpoint still re-derives 
 
   assert.ok(document.querySelector('.sidebar-collapsed'), 'without a manual toggle yet, the sidebar should still track the responsive default on resize');
 });
+
+// -- Drag-resize (#110) --------------------------------------------------
+
+test('expanded sidebar defaults to 180px and renders a resize handle', () => {
+  setViewportWidth(1024);
+  renderSidebar();
+  const sidebar = document.querySelector('.sidebar');
+  assert.equal(sidebar.style.width, '180px');
+  assert.ok(document.querySelector('.sidebar-resize-handle'), 'expanded sidebar must expose a resize handle');
+});
+
+test('collapsed sidebar renders no resize handle and no inline width (CSS-fixed 56px rail wins)', () => {
+  setViewportWidth(390);
+  renderSidebar();
+  assert.equal(document.querySelector('.sidebar-resize-handle'), null, 'collapsed rail must not be draggable');
+  const sidebar = document.querySelector('.sidebar');
+  assert.equal(sidebar.style.width, '', 'no inline width should be applied while collapsed');
+});
+
+test('ArrowRight/ArrowLeft on the resize handle grows/shrinks the sidebar width, clamped to [140, 320]', () => {
+  setViewportWidth(1024);
+  renderSidebar();
+  const handle = document.querySelector('.sidebar-resize-handle');
+  const sidebar = document.querySelector('.sidebar');
+
+  fireEvent.keyDown(handle, { key: 'ArrowRight' });
+  assert.equal(sidebar.style.width, '190px');
+
+  fireEvent.keyDown(handle, { key: 'ArrowLeft' });
+  fireEvent.keyDown(handle, { key: 'ArrowLeft' });
+  assert.equal(sidebar.style.width, '170px');
+
+  for (let i = 0; i < 20; i += 1) fireEvent.keyDown(handle, { key: 'ArrowLeft' });
+  assert.equal(sidebar.style.width, '140px', 'width must clamp at the 140px floor, never go below it');
+
+  for (let i = 0; i < 30; i += 1) fireEvent.keyDown(handle, { key: 'ArrowRight' });
+  assert.equal(sidebar.style.width, '320px', 'width must clamp at the 320px ceiling, never exceed it');
+});
+
+test('collapsing then expanding restores the last dragged width, not the 180px default', () => {
+  setViewportWidth(1024);
+  renderSidebar();
+  const handle = document.querySelector('.sidebar-resize-handle');
+  for (let i = 0; i < 5; i += 1) fireEvent.keyDown(handle, { key: 'ArrowRight' });
+  assert.equal(document.querySelector('.sidebar').style.width, '230px');
+
+  fireEvent.click(screen.getByLabelText('Collapse sidebar'));
+  assert.ok(document.querySelector('.sidebar-collapsed'));
+
+  fireEvent.click(screen.getByLabelText('Expand sidebar'));
+  assert.equal(document.querySelector('.sidebar').style.width, '230px', 'expanding again must restore the dragged width, not reset to the 180px default');
+});
+
+test('drag-resize does not collapse the sidebar even at the minimum width -- collapsing stays the toggle button\'s job only', () => {
+  setViewportWidth(1024);
+  renderSidebar();
+  const handle = document.querySelector('.sidebar-resize-handle');
+  for (let i = 0; i < 20; i += 1) fireEvent.keyDown(handle, { key: 'ArrowLeft' });
+  assert.equal(document.querySelector('.sidebar').style.width, '140px');
+  assert.equal(document.querySelector('.sidebar-collapsed'), null, 'dragging to the width floor must not itself trigger the collapsed state');
+});
