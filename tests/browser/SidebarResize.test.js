@@ -20,6 +20,7 @@ const fs = require('fs');
 const path = require('path');
 const http = require('http');
 const { chromium } = require('playwright');
+const { killServerTree } = require('./_killServerTree');
 
 const ROOT = path.resolve(__dirname, '..', '..');
 const PORT = 3998;
@@ -78,7 +79,7 @@ test.before(async () => {
 
 test.after(async () => {
   await browser?.close();
-  if (serverProcess) serverProcess.kill('SIGTERM');
+  if (serverProcess) killServerTree(serverProcess);
   if (previousConfig === undefined) {
     if (fs.existsSync(CONFIG_PATH)) fs.unlinkSync(CONFIG_PATH);
   } else {
