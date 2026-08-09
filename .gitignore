@@ -11,7 +11,6 @@ ceo-agent.config.json
 .next/
 .openclaw/
 .uploads/
-docs/
 tenants/
 memory/
 skills-lock.json
