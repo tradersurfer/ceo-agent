@@ -41,7 +41,7 @@ time if the direction doesn't fit.
     `loadRuntimeRegistries()` — a green build didn't mean the app worked.
   - PR #59 added `docx` as a dependency. It contains a `require()` pattern
     webpack can't statically analyze, breaking every web route that
-    transitively imports it through `core/RegistryLoader.js` — nearly the
+    transitively imports it through `ceo-core/RegistryLoader.js` — nearly the
     whole dashboard (chat, health, status, org, dispatch). It shipped
     because verification was `npm test` plus a plain-Node script, never an
     actual `npm run web` boot.
