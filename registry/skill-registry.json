@@ -877,6 +877,28 @@
       "risk": "safe"
     },
     {
+      "id": "invoice_cash_review",
+      "capability": "treasury_management",
+      "description": "Ages pasted or uploaded invoices, drafts top-five approval-required follow-ups, and sketches base-case 90-day cash inflow. Never sends email.",
+      "inputSchema": {
+        "input": { "type": "string", "required": false },
+        "invoices": { "type": "array", "required": false },
+        "fileId": { "type": "string", "required": false },
+        "referenceDate": { "type": "string", "required": false }
+      },
+      "outputSchema": {
+        "skill": { "type": "string", "required": true },
+        "aging": { "type": "object", "required": true },
+        "topFollowUpDrafts": { "type": "array", "required": true },
+        "baseCaseCashSketch": { "type": "object", "required": true },
+        "approvalRequired": { "type": "boolean", "required": true },
+        "outboundEmail": { "type": "boolean", "required": true }
+      },
+      "permissions": { "requiresAgentAssignment": true },
+      "handler": "ceo-core/skills/invoiceCashReviewSkill.js#registerInvoiceCashReviewSkill",
+      "risk": "safe"
+    },
+    {
       "id": "web_search",
       "capability": "web_search",
       "description": "Searches the web via Perplexity's Search API and returns ranked results (title, url, snippet).",
