@@ -9,6 +9,7 @@ const { registerSchemaMarkupSkills } = require('./skills/schemaMarkupSkills');
 const { registerContentQualitySkill } = require('./skills/contentQualitySkill');
 const { registerDocumentCreationSkills } = require('./skills/documentCreationSkills');
 const { registerFinancialModelSkills } = require('./skills/financialModelSkill');
+const { registerInvoiceCashReviewSkill } = require('./skills/invoiceCashReviewSkill');
 const { registerWebSearchSkill } = require('./skills/webSearchSkill');
 const { registerCeoSkills } = require('./skills/ceoSkills');
 const { registerCfoSkills } = require('./skills/cfoSkills');
@@ -61,6 +62,7 @@ function loadRuntimeRegistries(options = {}) {
   registerContentQualitySkill(skillRegistry);
   registerDocumentCreationSkills(skillRegistry);
   registerFinancialModelSkills(skillRegistry);
+  registerInvoiceCashReviewSkill(skillRegistry);
   registerWebSearchSkill(skillRegistry);
   registerCeoSkills(skillRegistry);
   registerCfoSkills(skillRegistry);
