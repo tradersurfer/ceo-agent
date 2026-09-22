@@ -125,6 +125,7 @@
         "budget_token_allocation",
         "compute_financial_model",
         "import_revenue_csv",
+        "invoice_cash_review",
         "three_statement_modeling",
         "cash_conversion_cycle_calc",
         "dupont_performance_diagnosis",
