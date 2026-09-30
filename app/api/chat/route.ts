@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { checkRateLimit } from '../dispatch/handler';
-const { getRuntime, ensureModelsResolved, openRouterClient, anthropicClient, openAIClient, googleClient, xaiClient, buildSystemPrompt } = require('../../../lib/ceoAgentServer');
+const { getRuntime, ensureModelsResolved, openRouterClient, anthropicClient, openAIClient, googleClient, xaiClient, openCodeZenClient, buildSystemPrompt } = require('../../../lib/ceoAgentServer');
 const { friendlyMessageFor } = require('../../../lib/userMessages');
 const { getUploadMetadata } = require('../../../lib/uploadStore');
 const { recordUsage } = require('../../../ceo-core/UsageTracker');
@@ -106,7 +106,12 @@ export async function POST(request: Request) {
   }
 
   if (!modelsReady) {
-    const reason = 'OPENROUTER_API_KEY is not set. Add it in Settings.';
+    // No key AND no free roster resolved — genuinely nothing to dispatch to.
+    // The free tier needs no key (OpenRouter ':free' variants and OpenCode
+    // Zen '-free' models are both completable unauthenticated), so reaching
+    // this branch now means both catalogs were unreachable, not merely
+    // unconfigured.
+    const reason = 'No model provider is reachable. Add an OpenRouter key in Settings, or retry once the free model catalogs load.';
     return NextResponse.json({ status: 'no_api_key', agent: agent.name, reason, userMessage: friendlyMessageFor('no_api_key', reason) });
   }
 
@@ -137,6 +142,13 @@ export async function POST(request: Request) {
       openai: process.env.OPENAI_API_KEY ? openAIClient : null,
       google: process.env.GOOGLE_AI_STUDIO_API_KEY ? googleClient : null,
       xai: process.env.XAI_API_KEY ? xaiClient : null,
+      // OpenCode Zen is passed UNCONDITIONALLY, unlike the four direct
+      // connections above. Its free models are completable with no key at
+      // all (verified live), so gating this on OPENCODE_ZEN_API_KEY would
+      // make every keyless Zen model unreachable — defeating the only
+      // no-credential path the free tier has. The client itself sends no
+      // Authorization header when it has no key.
+      opencode: openCodeZenClient,
     });
     const { text, usage } = await client.chatCompletion({
       model: providerModelId,

@@ -1,436 +1,842 @@
-/* Design tokens (navy/gold) -- decided, not a proposal. Real WCAG AA
-   contrast ratios computed for every pairing actually used below (relative-
-   luminance formula, not eyeballed):
-     text-primary   on bg-base/bg-elevated/bg-panel   13.4-16.3 : 1
-     text-secondary on bg-base/bg-elevated/bg-panel     7.4-9.0 : 1  (kept
-       the existing #4A4944 -- it reads fine against the new lighter
-       neutrals, confirmed by the ratios above, not assumed)
-     white          on accent-navy / user-bubble-bg       16.3 : 1
-     text-primary   on accent-gold / accent-gold-deep   7.1-10.1 : 1
-   accent-gold and accent-gold-deep FAIL AA badly as text on any light
-   background (1.4-2.3 : 1) -- both are used only as backgrounds (with dark
-   navy/secondary text on top) or as text/accents ON the navy surface,
-   never as foreground text on a light surface. */
+/* ==========================================================================
+   CEO Agent — Design Tokens
+   Executive Command system
+   ========================================================================== */
+
 :root {
-  --bg-base: #F2F3F5;
-  --bg-elevated: #FFFFFF;
-  --bg-panel: #E9E9E9;
-  /* Recessed-within-a-panel tone (code blocks inside a bubble, table
-     headers) -- one step darker than --bg-panel, cool-neutral like the
-     rest of this palette rather than the old warm #e8e6df. */
-  --bg-recessed: #ECECEC;
-  --text-primary: #10203A;
-  --text-secondary: #4A4944;
-  /* Cool-neutral replacement for the old warm #8a8983/#6a6963 tertiary
-     grays (fine print, labels, muted metadata) -- picked and verified
-     against all three backgrounds above (>=4.5:1 everywhere), not reused
-     as-is, because the old warm tone clashes against the cooler base. */
-  --text-tertiary: #5B6472;
-  /* Cool-neutral replacement for the old warm #e5e3dc/#d8d6d0 hairline
-     divider color. Decorative dividers/card borders, not text -- same
-     subtlety as the previous scheme (also well under the 3:1 non-text
-     threshold; verified this was already true before this migration, so
-     it's not a regression). */
-  --border-color: #DCDDE1;
-  --accent-navy: #10203A;
-  --accent-blue: #316CC8;
-  --accent-gold: #E8C97A;
-  --accent-gold-deep: #C9A84C;
-  --user-bubble-bg: #10203A;
-  /* Tested both #F2F3F5 (flush with the page) and #FFFFFF against real
-     chat content: #F2F3F5 made the agent bubble disappear into the page
-     background entirely (no bubble boundary at all), while #FFFFFF reads
-     as a clear, separate card -- consistent with every other elevated
-     surface in this file (.org-card, .status-card, .connection-card all
-     already use white-on-base for the same reason). Picked #FFFFFF. */
-  --agent-bubble-bg: #FFFFFF;
+  /* Surfaces */
+  --bg-base:        #09090b;
+  --bg-sidebar:     #0c0c0f;
+  --bg-elevated:    #18181b;
+  --bg-panel:       #27272a;
+  --bg-hover:       #2e2e33;
+
+  /* Borders */
+  --border:         #3f3f46;
+  --border-subtle:  rgba(255, 255, 255, 0.08);
+
+  /* Text */
+  --text-primary:   #fafafa;
+  --text-secondary: #a1a1aa;
+  --text-muted:     #71717a;
+
+  /* Accent */
+  --accent:         #8b5cf6;
+  --accent-soft:    #a78bfa;
+  --accent-muted:   rgba(139, 92, 246, 0.15);
+
+  /* Semantic */
+  --success:        #34d399;
+  --success-muted:  rgba(52, 211, 153, 0.15);
+  --danger:         #f87171;
+  --danger-muted:   rgba(248, 113, 113, 0.15);
+
+  /* Prestige (use sparingly — executive status, rare achievements only) */
+  --gold-prestige:  #f0c674;
+
+  /* Department semantic colors */
+  --color-ceo:         var(--accent);
+  --color-hermes:      #34d399;
+  --color-finance:     #22c55e;
+  --color-technology:  #3b82f6;
+  --color-marketing:   #f97316;
+  --color-legal:       #ef4444;
+  --color-people:      #ec4899;
+
+  /* Typography */
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+  /* Spacing */
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-5:  20px;
+  --space-6:  24px;
+  --space-8:  32px;
+  --space-10: 40px;
+
+  /* Radii */
+  --radius-sm:  6px;
+  --radius-md:  8px;
+  --radius-lg:  12px;
+  --radius-pill: 999px;
+
+  /* Motion */
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --duration-fast: 150ms;
+  --duration: 220ms;
 }
 
+/* ==========================================================================
+   Base
+   ========================================================================== */
+
 * { box-sizing: border-box; }
+
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: var(--font-sans);
   color: var(--text-primary);
   background: var(--bg-base);
 }
+
 input, textarea, select, button {
   font-family: inherit;
   font-size: 14px;
 }
+
 input, textarea, select {
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
   padding: 8px 10px;
   width: 100%;
+  background: var(--bg-elevated);
+  color: var(--text-primary);
 }
+
 button {
-  background: var(--accent-navy);
+  background: var(--accent);
   color: #fff;
   border: none;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   padding: 8px 16px;
   cursor: pointer;
 }
-button:disabled { opacity: 0.5; cursor: default; }
-/* Real focus-visible affordance -- there was none at all before this
-   migration. accent-blue is otherwise unused elsewhere in this file, and
-   a visible keyboard-focus ring is a genuine, standards-based (WCAG 2.4.7)
-   use for it, not a decorative one. */
-button:focus-visible,
-input:focus-visible,
-textarea:focus-visible,
-select:focus-visible,
-[tabindex]:focus-visible {
-  outline: 2px solid var(--accent-blue);
-  outline-offset: 2px;
+
+button:disabled {
+  opacity: 0.5;
+  cursor: default;
 }
 
-.app-shell { display: flex; height: 100vh; }
+/* ==========================================================================
+   App shell
+   ========================================================================== */
+
+.app-shell {
+  display: flex;
+  height: 100vh;
+}
+
 .sidebar {
-  position: relative;
   width: 180px;
-  background: var(--bg-panel);
+  background: var(--bg-sidebar);
   padding: 16px 12px;
   flex-shrink: 0;
-  /* Width is the only thing that changes between expanded/collapsed --
-     transitioning it (rather than a hard display:none swap) is what makes
-     .content's flex:1 reflow read as a slide instead of a jump cut. This
-     transition is intentionally NOT active during a drag (see .sidebar
-     .sidebar-resize-handle:active sibling rule below) -- animating every
-     pointermove frame would make the drag feel laggy instead of 1:1 with
-     the cursor. */
-  transition: width 0.15s ease;
-  overflow: hidden;
+  border-right: 1px solid var(--border-subtle);
 }
-/* #110: drag-resize handle, a thin strip on the sidebar's right edge.
-   position:absolute + inset so it doesn't participate in the flex layout
-   inside .sidebar (nav items, header) and doesn't shift when width changes
-   mid-drag. Only rendered while expanded (Sidebar.tsx) -- the collapsed
-   56px rail is not resizable, only the toggle button changes it. */
-.sidebar-resize-handle {
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  width: 6px;
-  cursor: ew-resize;
-  touch-action: none;
-  background: transparent;
-}
-.sidebar-resize-handle:hover,
-.sidebar-resize-handle:focus-visible {
-  background: var(--accent-blue);
-  opacity: 0.4;
-}
-/* Suppress the width transition while actively dragging so the sidebar
-   edge tracks the cursor 1:1 instead of chasing it with a 0.15s ease lag.
-   :has() is supported in every browser this project already targets
-   (Chrome/Edge/Safari/Firefox all shipped it before this was written). */
-.sidebar:has(.sidebar-resize-handle:active) { transition: none; }
-/* 56px: real content-area math at the narrowest viewport this app
-   supports (390px, iPhone-class -- see tests/browser/
-   ChatInputResponsive.test.js), not a round-number guess. The chat input
-   row needs ~281px (attach button + gap + textarea's 160px floor + gap +
-   Send button) to render with zero horizontal overflow; .content's own
-   padding takes 48px (24px each side); 390 - 48 - 281 = 61px is the most
-   this can be. 56px leaves a few px of margin. */
-.sidebar-collapsed { width: 56px; padding: 16px 8px; }
+
 .sidebar-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
   font-weight: 600;
   font-size: 15px;
   margin-bottom: 20px;
   padding: 0 8px;
+  color: var(--text-primary);
 }
-.sidebar-collapsed .sidebar-header { justify-content: center; padding: 0; }
-.sidebar-logo { flex-shrink: 0; }
-.sidebar-header-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.sidebar-toggle {
-  background: transparent;
-  color: var(--text-secondary);
-  padding: 4px 8px;
-  font-size: 14px;
-  font-weight: 600;
-  border-radius: 6px;
-  flex-shrink: 0;
-}
-.sidebar-toggle:hover { background: var(--border-color); }
+
 .nav-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  display: block;
   width: 100%;
   text-align: left;
   background: transparent;
   color: var(--text-secondary);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   padding: 8px 10px;
   margin-bottom: 2px;
   font-weight: 400;
 }
-.nav-item-icon { flex-shrink: 0; font-size: 15px; line-height: 1; }
-.nav-item-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-/* Active tab: navy text on an elevated (white) chip, plus a thin gold
-   left-border as the "you are here" indicator -- gold is deliberately
-   reserved for this kind of current-state marker (see also the CEO Modes
-   active chip below) rather than spread across every accent role.
-   padding-left drops 3px to offset the new border so the text doesn't
-   shift right when a tab becomes active. */
+
 .nav-item.active {
-  background: var(--bg-elevated);
-  color: var(--text-primary);
+  background: var(--accent-muted);
+  color: var(--accent-soft);
   font-weight: 500;
-  border-left: 3px solid var(--accent-gold);
-  padding-left: 7px;
 }
-/* Comes after .nav-item.active so the collapsed rail's symmetric,
-   icon-centered padding always wins over the active tab's asymmetric
-   padding-left -- an active item while collapsed still gets the gold
-   border (different property, not overridden), just without the
-   layout shift that padding-left would cause in a centered icon rail. */
-.sidebar-collapsed .nav-item { justify-content: center; padding: 8px; }
-.content { flex: 1; padding: 24px; overflow-y: auto; min-width: 0; }
 
-.empty-state { padding: 40px; color: var(--text-tertiary); }
+.content {
+  flex: 1;
+  padding: 24px;
+  overflow-y: auto;
+}
 
-.chat-view { display: flex; flex-direction: column; height: 100%; max-width: 640px; }
-.chat-messages { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding-bottom: 12px; }
-.chat-empty { color: var(--text-tertiary); font-size: 14px; padding: 20px 0; }
-.chat-bubble { max-width: 80%; position: relative; }
-.chat-user .chat-text, .chat-system .chat-text { white-space: pre-wrap; }
-/* Dark-navy user bubble, white text -- matches the mockup's pattern. */
-.chat-user { align-self: flex-end; background: var(--user-bubble-bg); color: #fff; padding: 8px 12px; border-radius: 10px; }
-.chat-agent { align-self: flex-start; }
-.chat-agent .chat-text { background: var(--agent-bubble-bg); padding: 8px 12px; border-radius: 10px; }
-.chat-agent-label { font-size: 12px; color: var(--text-tertiary); margin-bottom: 4px; }
-.chat-system { align-self: center; font-size: 13px; color: #b0473f; }
-.chat-skill { align-self: flex-start; }
-.chat-skill-output { background: var(--agent-bubble-bg); padding: 8px 12px; border-radius: 10px; overflow-x: auto; font-size: 0.9em; margin: 0; }
-/* react-markdown renders block elements as direct children of .chat-text
-   for agent messages — trim the bubble's own top/bottom margin doubling. */
+.empty-state {
+  padding: 40px;
+  color: var(--text-muted);
+}
+
+/* ==========================================================================
+   Chat
+   ========================================================================== */
+
+.chat-view {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  max-width: 640px;
+}
+
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-bottom: 12px;
+}
+
+.chat-empty {
+  color: var(--text-muted);
+  font-size: 14px;
+  padding: 20px 0;
+}
+
+.chat-bubble {
+  max-width: 80%;
+}
+
+.chat-user .chat-text,
+.chat-system .chat-text {
+  white-space: pre-wrap;
+}
+
+.chat-user {
+  align-self: flex-end;
+  background: var(--accent);
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 10px;
+}
+
+.chat-agent {
+  align-self: flex-start;
+}
+
+.chat-agent .chat-text {
+  background: var(--bg-panel);
+  padding: 8px 12px;
+  border-radius: 10px;
+}
+
+.chat-agent-label {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+.chat-system {
+  align-self: center;
+  font-size: 13px;
+  color: var(--danger);
+}
+
+.chat-skill {
+  align-self: flex-start;
+}
+
+.chat-skill-output {
+  background: var(--bg-panel);
+  padding: 8px 12px;
+  border-radius: 10px;
+  overflow-x: auto;
+  font-size: 0.9em;
+  margin: 0;
+}
+
 .chat-agent .chat-text > :first-child { margin-top: 0; }
 .chat-agent .chat-text > :last-child { margin-bottom: 0; }
-.chat-agent .chat-text pre { overflow-x: auto; padding: 8px; background: var(--bg-recessed); border-radius: 6px; }
-.chat-agent .chat-text code { font-size: 0.9em; }
-.chat-agent .chat-text ul, .chat-agent .chat-text ol { padding-left: 20px; }
-/* Issue #85: tables previously had only border-collapse + cell borders — no
-   header distinction, no zebra striping, and a wide table would clip
-   silently inside the fixed-width chat bubble instead of scrolling. Tokens
-   reused from the palette, not invented: --bg-recessed is this file's
-   "recessed panel inside a bubble" tone (see the code-block rule just
-   above); --bg-base is the page background, lighter than the bubble, used
-   here for a subtle zebra tint. */
+
+.chat-agent .chat-text pre {
+  overflow-x: auto;
+  padding: 8px;
+  background: var(--bg-elevated);
+  border-radius: var(--radius-sm);
+}
+
+.chat-agent .chat-text code {
+  font-size: 0.9em;
+  font-family: var(--font-mono);
+}
+
+.chat-agent .chat-text ul,
+.chat-agent .chat-text ol {
+  padding-left: 20px;
+}
+
 .chat-agent .chat-text table {
   border-collapse: collapse;
   display: block;
   overflow-x: auto;
   max-width: 100%;
 }
-.chat-agent .chat-text th, .chat-agent .chat-text td { border: 1px solid var(--border-color); padding: 4px 8px; }
+
+.chat-agent .chat-text th,
+.chat-agent .chat-text td {
+  border: 1px solid var(--border);
+  padding: 4px 8px;
+}
+
 .chat-agent .chat-text th {
-  background: var(--bg-recessed);
+  background: var(--bg-elevated);
   font-weight: 600;
   color: var(--text-primary);
   text-align: left;
 }
-.chat-agent .chat-text tbody tr:nth-child(even) td { background: var(--bg-base); }
-/* Issue #88: .chat-usage is already a DOM-separate sibling of .chat-text
-   (not concatenated into the message), but a 4px gap with no visual
-   boundary read as "part of the bubble" at a glance. Reuses the same
-   metadata-below-content pattern already established by .org-highlight
-   (margin-top/padding-top/border-top), not an invented new token. */
-.chat-usage { font-size: 11px; color: var(--text-tertiary); margin-top: 10px; padding-top: 6px; border-top: 1px solid var(--border-color); }
-.chat-attachments { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
-.chat-attachment-chip { display: inline-flex; align-items: center; gap: 4px; background: var(--bg-recessed); color: var(--text-secondary); font-size: 12px; padding: 3px 8px; border-radius: 999px; }
-.chat-user .chat-attachment-chip { background: rgba(255,255,255,0.18); color: #fff; }
-.chat-attachment-remove { background: transparent; border: none; color: inherit; padding: 0; margin-left: 2px; cursor: pointer; font-size: 13px; line-height: 1; }
-.chat-pending-attachments { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding: 8px 0 0; }
-.chat-upload-error { font-size: 12px; color: #b0473f; }
-/* Below MOBILE_BREAKPOINT_PX (640px, this file's existing "compact layout"
-   threshold -- see .chat-view/.status-cards max-width:640px), the input
-   controls and the toggle chips stack into two separate full-width rows
-   instead of sharing one row. Sharing one row is what crushed the
-   textarea: 11 toggle chips (3 CEO Modes + 5 model roles + 3 cost tiers)
-   are flex-shrink:0 by design (see .chat-model-selector/.ceo-mode-selector
-   below), so at a narrow viewport they claimed nearly all the row's width
-   and left the textarea's flex:1 nothing to grow into -- a min-width
-   floor just made it stop shrinking, it didn't make it usable. Above the
-   breakpoint this is unchanged from before: one row, chips beside the
-   input, exactly as it already worked on desktop. */
-.chat-input-row { display: flex; flex-direction: column; gap: 8px; border-top: 1px solid var(--border-color); padding-top: 12px; }
-.chat-input-primary { display: flex; gap: 8px; align-items: flex-end; }
-.chat-input-toggles { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-@media (min-width: 641px) {
-  /* Only undo the mobile column-stack, nothing else -- .chat-input-primary
-     and .chat-input-toggles stay unflexed (default flex: 0 1 auto), which
-     reproduces the exact same one-row layout and the exact same
-     shrink-to-min-width behavior this had before the mobile fix. Giving
-     .chat-input-primary flex:1 here plus flex-shrink:0 on
-     .chat-input-toggles looked like the "obvious" desktop equivalent but
-     wasn't: with 11 chips' true unwrapped content width (~720px) exceeding
-     the row's own 640px cap (.chat-view max-width), flex-shrink:0 forced
-     toggles to claim all of it and left .chat-input-primary's flex:1
-     nothing to grow into -- verified this actually squeezed the textarea
-     to 0px width, a regression, before reverting to this simpler rule. */
-  .chat-input-row { flex-direction: row; align-items: flex-end; }
-}
-/* Auto-resize textarea: grows with content up to TEXTAREA_MAX_HEIGHT_PX
-   (ChatView.tsx), then scrolls. resize: none because the height is
-   controlled by the auto-resize effect, not a manual drag handle. */
-.chat-textarea {
-  flex: 1;
-  /* overflow-y: auto zeroes a flex item's automatic min-width (unlike the
-     plain <input> this replaced, which defaults to overflow: visible and
-     so kept a sane intrinsic min-width). min-width here is now a real
-     floor for extreme cases, not the only thing standing between the
-     textarea and a handful of px -- .chat-input-primary has the row to
-     itself below the mobile breakpoint (see above), and gets flex:1 of
-     the shared row above it, so this rarely needs to bind in practice
-     anymore. */
-  min-width: 160px;
-  resize: none;
-  overflow-y: auto;
-  min-height: 40px;
-  max-height: 120px;
-  line-height: 1.4;
-  font-family: inherit;
-}
-.chat-attach-button { background: var(--bg-panel); color: var(--text-secondary); padding: 8px 12px; flex-shrink: 0; }
 
-/* Hover actions (copy/edit/regenerate): hidden until the bubble is
-   hovered or a button inside receives keyboard focus, so they never
-   compete visually with the message itself at rest. */
-.chat-actions {
+.chat-agent .chat-text tbody tr:nth-child(even) td {
+  background: var(--bg-base);
+}
+
+.chat-usage {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+.chat-attachments {
   display: flex;
-  gap: 10px;
+  flex-wrap: wrap;
+  gap: 6px;
   margin-top: 6px;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.15s ease;
 }
-.chat-bubble:hover .chat-actions,
-.chat-actions:focus-within {
-  opacity: 1;
-  pointer-events: auto;
+
+.chat-attachment-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--bg-panel);
+  color: var(--text-secondary);
+  font-size: 12px;
+  padding: 3px 8px;
+  border-radius: var(--radius-pill);
 }
-.chat-action-button {
+
+.chat-user .chat-attachment-chip {
+  background: rgba(255, 255, 255, 0.18);
+  color: #fff;
+}
+
+.chat-attachment-remove {
   background: transparent;
   border: none;
+  color: inherit;
   padding: 0;
-  font-size: 11px;
-  color: var(--text-tertiary);
+  margin-left: 2px;
   cursor: pointer;
-  text-decoration: underline;
+  font-size: 13px;
+  line-height: 1;
 }
-.chat-action-button:hover:not(:disabled) { color: var(--text-secondary); }
-.chat-action-button:disabled { opacity: 0.5; cursor: default; }
-.chat-user .chat-action-button { color: rgba(255, 255, 255, 0.65); }
-.chat-user .chat-action-button:hover:not(:disabled) { color: #fff; }
 
-.org-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
-.org-card { background: var(--bg-elevated); border: 1px solid var(--border-color); border-radius: 12px; padding: 14px; }
-.org-card-header { display: flex; align-items: center; justify-content: space-between; font-weight: 600; font-size: 13px; text-transform: capitalize; margin-bottom: 8px; color: var(--text-secondary); }
-.org-agent { padding: 4px 0; }
-.org-agent-name { font-weight: 500; font-size: 14px; display: block; }
-.org-agent-title { font-size: 12px; color: var(--text-tertiary); }
-/* "Live" status stays semantic green regardless of theme -- not part of
-   the navy/gold accent system, so left untouched by this migration. */
-.org-working-indicator { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 500; text-transform: none; color: #2f7d4f; }
-.org-working-dot { width: 7px; height: 7px; border-radius: 50%; background: #2f7d4f; display: inline-block; animation: org-working-pulse 1.4s ease-in-out infinite; }
+.chat-pending-attachments {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 0 0;
+}
+
+.chat-upload-error {
+  font-size: 12px;
+  color: var(--danger);
+}
+
+.chat-input-row {
+  display: flex;
+  gap: 8px;
+  border-top: 1px solid var(--border-subtle);
+  padding-top: 12px;
+}
+
+.chat-input-row input[type="text"] {
+  flex: 1;
+}
+
+.chat-attach-button {
+  background: var(--bg-panel);
+  color: var(--text-secondary);
+  padding: 8px 12px;
+  flex-shrink: 0;
+}
+
+/* ==========================================================================
+   Org
+   ========================================================================== */
+
+.org-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+.org-card {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 14px;
+}
+
+.org-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-weight: 600;
+  font-size: 13px;
+  text-transform: capitalize;
+  margin-bottom: 8px;
+  color: var(--text-secondary);
+}
+
+.org-agent {
+  padding: 4px 0;
+}
+
+.org-agent-name {
+  font-weight: 500;
+  font-size: 14px;
+  display: block;
+  color: var(--text-primary);
+}
+
+.org-agent-title {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.org-working-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: none;
+  color: var(--success);
+}
+
+.org-working-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--success);
+  display: inline-block;
+  animation: org-working-pulse 1.4s ease-in-out infinite;
+}
+
 @keyframes org-working-pulse {
-  0% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.4; transform: scale(0.75); }
+  0%   { opacity: 1; transform: scale(1); }
+  50%  { opacity: 0.4; transform: scale(0.75); }
   100% { opacity: 1; transform: scale(1); }
 }
-.org-highlight { margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--border-color); font-size: 12px; color: var(--text-tertiary); }
-.org-highlight-time { color: var(--text-tertiary); }
 
-.activity-view { display: flex; flex-direction: column; gap: 24px; max-width: 900px; }
-.activity-section h3 { font-size: 14px; font-weight: 600; margin: 0 0 10px; color: var(--text-primary); }
-.activity-subsection { margin-top: 12px; }
-.activity-table { border: 1px solid var(--border-color); border-radius: 10px; overflow: hidden; }
-.activity-row { display: grid; grid-template-columns: 1.2fr 1.4fr 1fr 1fr; gap: 8px; padding: 8px 12px; font-size: 13px; border-top: 1px solid var(--border-color); align-items: center; }
-.activity-row:first-child { border-top: none; }
-.activity-row-header { background: var(--bg-panel); font-weight: 500; color: var(--text-secondary); font-size: 12px; }
-/* Status colors are semantic (ok/failed), not part of the accent system. */
-.activity-status-ok { color: #2f7d4f; }
-.activity-status-failed { color: #b0473f; }
-.activity-notes { display: flex; flex-direction: column; gap: 4px; }
+.org-highlight {
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border-subtle);
+  font-size: 12px;
+  color: var(--text-muted);
+}
 
-.status-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-bottom: 20px; max-width: 640px; }
-.status-card { background: var(--bg-elevated); border: 1px solid var(--border-color); border-radius: 10px; padding: 14px; }
-.status-label { font-size: 13px; color: var(--text-tertiary); margin: 0 0 4px; }
-.status-value { font-size: 22px; font-weight: 600; margin: 0; }
-.status-healthy { color: #2f7d4f; }
-.status-list { max-width: 640px; border: 1px solid var(--border-color); border-radius: 10px; overflow: hidden; }
-.status-row { display: flex; justify-content: space-between; padding: 10px 14px; font-size: 13px; border-top: 1px solid var(--border-color); }
-.status-row:first-child { border-top: none; }
-.status-ready { color: #2f7d4f; }
+.org-highlight-time {
+  color: var(--text-muted);
+}
 
-.settings-form { display: flex; flex-direction: column; gap: 14px; max-width: 420px; }
-.settings-form label { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--text-secondary); }
-.settings-form fieldset { border: 1px solid var(--border-color); border-radius: 8px; padding: 10px 12px; }
-.settings-form legend { font-size: 13px; color: var(--text-secondary); padding: 0 4px; }
-.checkbox-row { flex-direction: row !important; align-items: center; gap: 8px !important; font-size: 14px !important; padding: 4px 0; }
-.checkbox-row input { width: auto; }
-.hint { font-size: 12px; color: var(--text-tertiary); }
+/* ==========================================================================
+   Activity
+   ========================================================================== */
 
-.connections-view { display: flex; flex-direction: column; gap: 16px; max-width: 480px; }
-.connection-card { background: var(--bg-elevated); border: 1px solid var(--border-color); border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 10px; }
-.connection-card-header { display: flex; justify-content: space-between; align-items: center; }
-.connection-card-name { font-weight: 600; font-size: 14px; }
-.connection-status { font-size: 12px; padding: 2px 8px; border-radius: 999px; background: var(--bg-panel); color: var(--text-tertiary); }
-/* "Connected" status stays semantic green, not part of the accent system. */
-.connection-status-connected { background: #e4f2e9; color: #2f7d4f; }
-.connection-card label { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--text-secondary); }
-.connection-card-models { border-top: 1px solid var(--border-color); padding-top: 10px; }
+.activity-view {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  max-width: 900px;
+}
 
-.model-selector { display: flex; flex-direction: column; gap: 6px; }
-.model-selector-compact { flex-direction: row; align-items: center; flex-wrap: wrap; gap: 4px; }
-.model-selector-axis { display: flex; gap: 4px; flex-wrap: wrap; }
-.model-selector-inactive { font-size: 12px; color: var(--text-tertiary); }
-.model-selector-status { font-size: 12px; color: var(--text-tertiary); }
-.model-selector-detail { font-size: 12px; color: var(--text-tertiary); margin-top: 4px; }
-.model-selector-detail-name { font-weight: 500; color: var(--text-primary); }
+.activity-section h3 {
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0 0 10px;
+  color: var(--text-primary);
+}
+
+.activity-subsection {
+  margin-top: 12px;
+}
+
+.activity-table {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.activity-row {
+  display: grid;
+  grid-template-columns: 1.2fr 1.4fr 1fr 1fr;
+  gap: 8px;
+  padding: 8px 12px;
+  font-size: 13px;
+  border-top: 1px solid var(--border-subtle);
+  align-items: center;
+}
+
+.activity-row:first-child {
+  border-top: none;
+}
+
+.activity-row-header {
+  background: var(--bg-panel);
+  font-weight: 500;
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+.activity-status-ok {
+  color: var(--success);
+}
+
+.activity-status-failed {
+  color: var(--danger);
+}
+
+.activity-notes {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* ==========================================================================
+   Status
+   ========================================================================== */
+
+.status-cards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+  max-width: 640px;
+}
+
+.status-card {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px;
+}
+
+.status-label {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin: 0 0 4px;
+}
+
+.status-value {
+  font-size: 22px;
+  font-weight: 600;
+  margin: 0;
+  color: var(--text-primary);
+}
+
+.status-healthy {
+  color: var(--success);
+}
+
+.status-list {
+  max-width: 640px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.status-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 14px;
+  font-size: 13px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.status-row:first-child {
+  border-top: none;
+}
+
+.status-ready {
+  color: var(--success);
+}
+
+/* ==========================================================================
+   Settings
+   ========================================================================== */
+
+.settings-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-width: 420px;
+}
+
+.settings-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.settings-form fieldset {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 10px 12px;
+}
+
+.settings-form legend {
+  font-size: 13px;
+  color: var(--text-secondary);
+  padding: 0 4px;
+}
+
+.checkbox-row {
+  flex-direction: row !important;
+  align-items: center;
+  gap: 8px !important;
+  font-size: 14px !important;
+  padding: 4px 0;
+}
+
+.checkbox-row input {
+  width: auto;
+}
+
+.hint {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* ==========================================================================
+   Connections
+   ========================================================================== */
+
+.connections-view {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 480px;
+}
+
+.connection-card {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.connection-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.connection-card-name {
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--text-primary);
+}
+
+.connection-status {
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  background: var(--bg-panel);
+  color: var(--text-muted);
+}
+
+.connection-status-connected {
+  background: var(--success-muted);
+  color: var(--success);
+}
+
+/* Validation failure on a key. Errors must not rely on colour alone — the
+   text itself is the message, and the element carries role="alert", so a
+   colour-blind or screen-reader user gets the same information. */
+.connection-error {
+  display: block;
+  color: var(--danger);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.connection-card label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.connection-card-models {
+  border-top: 1px solid var(--border-subtle);
+  padding-top: 10px;
+}
+
+/* ==========================================================================
+   Model selector
+   ========================================================================== */
+
+.model-selector {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.model-selector-compact {
+  flex-direction: row;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.model-selector-axis {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.model-selector-inactive {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.model-selector-status {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.model-selector-detail {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+.model-selector-detail-name {
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
 .chip {
   background: var(--bg-panel);
   color: var(--text-secondary);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   padding: 3px 10px;
   font-size: 11px;
   font-weight: 500;
 }
-/* Default active-chip treatment (model role/tier, connection provider
-   selection, etc.): navy, matching every other "selected/primary" surface
-   (buttons, user bubble). Gold is reserved for CEO Modes below -- see that
-   rule's comment for why the two selection states are deliberately
-   different. */
-.chip-active { background: var(--accent-navy); color: #fff; }
-/* flex-shrink:0 used to be safe here because this always shared a row
-   with the textarea, which had its own min-width floor absorbing the
-   squeeze. Now that .chat-input-toggles gives this its own row (see the
-   mobile chat-input-row rule above), flex-shrink:0 became actively
-   harmful: a flex item that refuses to shrink at all is sized to its full
-   unconstrained content width regardless of available space, which means
-   the flex-wrap:wrap on .model-selector-axis inside it never actually
-   gets a "not enough room" signal to wrap on -- confirmed via a real
-   390px Playwright check that the tier chips (Flagship/Efficient/
-   Affordable) rendered past the viewport edge instead of wrapping, even
-   though .chat-input-toggles itself had plenty of flex-wrap room. Letting
-   this shrink (default flex-shrink:1, min-width:0 so shrinking isn't
-   blocked by content's intrinsic minimum) lets that wrap actually trigger. */
-.chat-model-selector { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; min-width: 0; max-width: 100%; }
-.chat-model-reset { background: transparent; color: var(--text-tertiary); padding: 2px 6px; font-size: 11px; }
-.ceo-mode-selector { display: flex; flex-direction: column; gap: 2px; min-width: 0; max-width: 100%; }
-.ceo-mode-selector-hint { display: none; }
-/* CEO Modes gets the gold treatment (not navy) deliberately: it's the one
-   toggle that sets a standing executive-decision posture for the whole
-   session (Conservative/Aggressive/Musk Mode), not a per-message or
-   per-role selection like the chips above -- gold marks it as the more
-   consequential "you are here" state, same signal as the sidebar's active-
-   tab indicator. text-primary (navy) on accent-gold is 10.1:1, comfortably
-   AA; gold is never used as text here, only as the chip's background. */
-.ceo-mode-selector-chips .chip-active { background: var(--accent-gold); color: var(--text-primary); }
+
+.chip-active {
+  background: var(--accent);
+  color: #fff;
+}
+
+.chat-model-selector {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.chat-model-reset {
+  background: transparent;
+  color: var(--text-muted);
+  padding: 2px 6px;
+  font-size: 11px;
+}
+/* 3. Primary button / key interactive feedback (optional) */
+button:not(:disabled) {
+  transition: background-color var(--duration-fast) var(--ease),
+              transform var(--duration-fast) var(--ease),
+              box-shadow var(--duration-fast) var(--ease);
+}
+
+button:not(:disabled):hover {
+  background: var(--accent-soft);
+  transform: scale(1.02);
+}
+
+button:not(:disabled):active {
+  transform: scale(0.98);
+}
+/* ==========================================================================
+   STEP 4 — Directional treatments
+   ========================================================================== */
+
+/* 1. Active nav treatment */
+.nav-item.active {
+  background: var(--accent-muted);
+  color: var(--accent-soft);
+  font-weight: 500;
+  position: relative;
+}
+
+.nav-item.active::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 6px;
+  bottom: 6px;
+  width: 3px;
+  border-radius: 0 2px 2px 0;
+  background: var(--accent);
+}
+
+/* 2. Working-indicator treatment */
+.org-working-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: none;
+  color: var(--success);
+}
+
+.org-working-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--success);
+  display: inline-block;
+  animation: org-working-pulse 1.4s ease-in-out infinite;
+  box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.45);
+}
+
+@keyframes org-working-pulse {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.45);
+  }
+  50% {
+    opacity: 0.55;
+    transform: scale(0.78);
+    box-shadow: 0 0 0 6px rgba(52, 211, 153, 0);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(52, 211, 153, 0);
+  }
+}
+
+/* 3. Primary button / key interactive feedback (optional) */
+button:not(:disabled) {
+  transition: background-color var(--duration-fast) var(--ease),
+              transform var(--duration-fast) var(--ease),
+              box-shadow var(--duration-fast) var(--ease);
+}
+
+button:not(:disabled):hover {
+  background: var(--accent-soft);
+  transform: scale(1.02);
+}
+
+button:not(:disabled):active {
+  transform: scale(0.98);
+}

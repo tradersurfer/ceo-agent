@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 const { loadConfig, saveConfig, maskKey, setProviderKey, resetRuntimeCache, getRuntime, ensureModelsResolved } = require('../../../lib/ceoAgentServer');
 const { PROVIDERS, PROVIDER_IDS, ACTIVE_PROVIDER_IDS } = require('../../../lib/providers');
-const { ALL_DEPARTMENTS, buildConnections, buildCatalog, sanitizeDepartmentModelDefaults } = require('../../../lib/connectionsConfig');
+const { ALL_DEPARTMENTS, buildConnections, buildCatalog, buildFreeRoster, sanitizeDepartmentModelDefaults } = require('../../../lib/connectionsConfig');
+const { verifyProviderKey } = require('../../../lib/providerKeyValidation');
 const { CEO_MODES, DEFAULT_CEO_MODE } = require('../../../ceo-core/ceoModes');
 
 async function buildConfigResponse(config: any) {
@@ -49,6 +50,7 @@ async function buildConfigResponse(config: any) {
     // module with no import/export syntax of its own).
     providers: PROVIDERS.map((p: { id: string; label: string }) => ({ id: p.id, label: p.label })),
     catalog,
+    freeRoster: buildFreeRoster(runtime.modelBroker),
     allDepartments: ALL_DEPARTMENTS,
     skills,
   };
@@ -97,12 +99,55 @@ export async function POST(request: Request) {
 
   saveConfig(config);
 
+  // Provider keys are verified against the provider's own API BEFORE any
+  // key is written. Two rules this block exists to enforce:
+  //
+  //  1. NOTHING is written unless it verifies. Previously any non-empty
+  //     string was accepted and written to .env verbatim, which is the bug
+  //     this fixes — the Connections tab reported "Saved." for "hello" and
+  //     then failed at first chat call.
+  //  2. A failure never destroys an existing key. On any rejection we
+  //     return 400/502 and skip setProviderKey entirely, so a transient
+  //     network error, a provider outage, or a 429 cannot blank out a key
+  //     that is already working. Overwriting a good key with a bad one is
+  //     the worst outcome this endpoint could produce.
+  //
+  // Keys are verified in sequence, not in parallel: a request normally
+  // carries exactly one key, and sequential verification keeps the
+  // "first invalid key wins" error message deterministic and avoids
+  // several simultaneous outbound calls on save.
   if (body.providerKeys && typeof body.providerKeys === 'object') {
+    const submitted = body.providerKeys as Record<string, unknown>;
+    const labels: Record<string, string> = Object.fromEntries(
+      PROVIDERS.map((p: { id: string; label: string }) => [p.id, p.label])
+    );
+
     for (const providerId of PROVIDER_IDS) {
-      const key = (body.providerKeys as Record<string, unknown>)[providerId];
-      if (typeof key === 'string' && key.trim()) {
-        setProviderKey(providerId, key.trim());
+      const key = submitted[providerId];
+      if (typeof key !== 'string' || !key.trim()) continue;
+
+      const result = await verifyProviderKey(providerId, key);
+      if (!result.valid) {
+        // Distinguish "we know this key is bad" from "we couldn't tell"
+        // in the status code: 400 for a genuine auth/shape rejection, 502
+        // for a provider/network problem, so a client can tell a bad key
+        // from a flaky connection.
+        const status = result.errorCode === 'invalid' ? 400 : 502;
+        return NextResponse.json(
+          {
+            error: result.error,
+            errorCode: result.errorCode,
+            provider: providerId,
+            providerLabel: labels[providerId] || providerId,
+            // Explicit so the client can say "not saved" without inferring
+            // it from the error text.
+            saved: false,
+          },
+          { status }
+        );
       }
+
+      setProviderKey(providerId, key.trim());
     }
   }
 

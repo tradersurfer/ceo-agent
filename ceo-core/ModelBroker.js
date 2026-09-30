@@ -65,6 +65,83 @@ class ModelBroker {
   }
 
   /**
+   * Fetches the live free-model roster from OpenRouter and OpenCode Zen and
+   * stores it on the `free` role (core/FreeModelCatalog.js).
+   *
+   * Kept SEPARATE from refreshFromOpenRouter() because the two catalogs are
+   * genuinely different problems: the paid tiers are a per-role question
+   * ("best claude at tier X"), while the free roster is a flat provider-
+   * agnostic pool — OpenRouter's free models live under nvidia/, poolside/,
+   * thinkingmachines/ and others, none of which back the five vendor roles,
+   * so they can never be resolved as a per-role tier. See FreeModelCatalog.js.
+   *
+   * All four tiers on the `free` role point at the SAME best free model
+   * deliberately: `free` is a zero-cost choice, not a quality scale, so
+   * letting a cost tier silently pick a different (worse) free model would be
+   * meaningless — there is no "efficient free" vs "flagship free" when
+   * everything on the list costs $0.
+   *
+   * Tolerant of either source being unavailable: resolves from whatever
+   * succeeded and records the rest under `freeErrors` rather than throwing,
+   * so a free tier still works when only one provider is reachable.
+   *
+   * @param {import('../sdk/OpenRouterClient')} openRouterClient
+   * @param {import('../sdk/OpenCodeZenClient')} [openCodeZenClient]
+   * @returns {Promise<{resolved: boolean, count: number, best: object|null, errors: string[]}>}
+   */
+  async refreshFreeModels(openRouterClient, openCodeZenClient) {
+    const { resolveFreeModels, pickBestFree } = require('./FreeModelCatalog');
+    const errors = [];
+
+    const [orResult, zenResult] = await Promise.allSettled([
+      openRouterClient.listModels(),
+      openCodeZenClient ? openCodeZenClient.listModels() : Promise.resolve([]),
+    ]);
+
+    if (orResult.status === 'rejected') {
+      errors.push(`OpenRouter: ${orResult.reason?.message || String(orResult.reason)}`);
+    }
+    if (zenResult.status === 'rejected') {
+      errors.push(`OpenCode Zen: ${zenResult.reason?.message || String(zenResult.reason)}`);
+    }
+
+    const { models } = resolveFreeModels({
+      openRouterModels: orResult.status === 'fulfilled' ? orResult.value : [],
+      zenModels: zenResult.status === 'fulfilled' ? zenResult.value : [],
+    });
+
+    const existing = this.models.get('free');
+    if (!existing) return { resolved: false, count: models.length, best: null, errors };
+
+    const best = pickBestFree(models);
+    const entry = best
+      ? {
+        apiModelId: best.apiModelId,
+        contextLength: best.contextLength,
+        name: best.name,
+        pricing: best.pricing,
+        source: best.source,
+      }
+      : null;
+
+    this.models.set('free', {
+      ...existing,
+      tiers: {
+        flagship: entry,
+        efficient: entry,
+        cheapest: entry,
+        free: entry,
+      },
+      freeModels: models,
+      freeErrors: errors,
+      apiModelId: entry ? entry.apiModelId : existing.apiModelId,
+      resolvedAt: new Date().toISOString(),
+    });
+
+    return { resolved: Boolean(entry), count: models.length, best: entry, errors };
+  }
+
+  /**
    * Gets the resolved per-token USD pricing for a role at a given cost tier
    * (see core/ModelResolver.js#extractPricing for the documented-but-not-
    * independently-verified OpenRouter pricing contract this reads).

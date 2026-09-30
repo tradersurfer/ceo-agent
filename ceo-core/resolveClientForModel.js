@@ -75,6 +75,15 @@ const MODEL_PREFIX_TO_PROVIDER_ID = Object.freeze({
   'openai/': 'openai',
   'google/': 'google',
   'x-ai/': 'xai',
+  // 'opencode/' (sdk/OpenCodeZenClient.js) is NOT an OpenRouter prefix like
+  // the four above — OpenRouter has no opencode/ listings. It exists because
+  // core/FreeModelCatalog.js namespaces OpenCode Zen's bare ids ("space-
+  // bunny-free" -> "opencode/space-bunny-free") so they can travel through
+  // this same prefix-keyed seam instead of needing a second dispatch path.
+  // Zen ids are otherwise indistinguishable from a bare model name and would
+  // hit the unrecognized-prefix fallback below, dispatching through
+  // OpenRouter with an id OpenRouter has never heard of.
+  'opencode/': 'opencode',
 });
 
 /**

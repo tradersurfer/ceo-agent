@@ -47,7 +47,7 @@
 // stored. Checking `connected` first, unconditionally, keeps that word
 // meaning the same thing everywhere this component renders.
 
-export type ChatRole = 'claude' | 'codex' | 'gpt' | 'gemini' | 'grok';
+export type ChatRole = 'claude' | 'codex' | 'gpt' | 'gemini' | 'grok' | 'free';
 export type CostTier = 'flagship' | 'efficient' | 'cheapest';
 
 export type CatalogEntry = {
@@ -65,6 +65,13 @@ const ROLES: { id: ChatRole; label: string; hint: string }[] = [
   { id: 'gpt', label: 'GPT', hint: 'Systems / architecture' },
   { id: 'gemini', label: 'Gemini', hint: 'Design generation' },
   { id: 'grok', label: 'Grok', hint: 'Rapid research' },
+  // A ROLE, not a fourth cost tier, and that distinction is the whole point:
+  // the other five roles each resolve to one vendor's paid model family,
+  // while `free` resolves to the live zero-cost roster (Nemotron, Laguna,
+  // Space Bunny, Gemma, ...) which spans multiple vendors and is therefore
+  // not a variant of any one of them. Putting it on the tier axis would
+  // imply "cheaper Claude", which is not what it is.
+  { id: 'free', label: 'Free', hint: 'Zero-cost models' },
 ];
 
 // tier id 'cheapest' matches ModelResolver#pickCheapest / ModelBroker's

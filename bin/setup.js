@@ -3,6 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const readline = require('readline');
 const { setProviderKey } = require('../lib/ceoAgentServer');
+const { validateKeyShape } = require('../lib/providerKeyValidation');
 
 const ROOT = path.resolve(__dirname, '..');
 const CONFIG_PATH = path.join(ROOT, 'ceo-agent.config.json');
@@ -21,6 +22,7 @@ function paint(code, text) {
 const cyan = text => paint(36, text);
 const gray = text => paint(90, text);
 const green = text => paint(32, text);
+const red = text => paint(31, text);
 const amber = text => paint(33, text);
 const bold = text => paint(1, text);
 
@@ -152,7 +154,33 @@ async function main() {
   const hasKey = await askYesNo('do you have one ready to add now?', false);
   let openRouterKey = '';
   if (hasKey) {
+    // Same validation as the Connections tab, so the wizard cannot write a
+    // key that would only fail at the first chat call. This is the OFFLINE
+    // shape check only — deliberately, because the wizard is an
+    // interactive terminal flow and the live check needs a network round
+    // trip; that call belongs to the API route, which runs it before
+    // persisting anything. The local check still catches the realistic
+    // setup-time mistakes (pasted into the wrong field, truncated, or a
+    // non-key string), and the wizard verifies end-to-end by actually
+    // starting the agent immediately afterwards.
     openRouterKey = await askSecret("paste it here (won't be shown back)");
+    const shape = validateKeyShape('openrouter', openRouterKey);
+    if (!shape.ok) {
+      console.log(red(`  ${shape.error}`));
+      const retry = await askYesNo('try pasting it again?', true);
+      if (retry) {
+        openRouterKey = await askSecret("paste it here (won't be shown back)");
+        const retryShape = validateKeyShape('openrouter', openRouterKey);
+        if (!retryShape.ok) {
+          console.log(red(`  ${retryShape.error}`));
+          console.log(gray("  skipping — you can add OPENROUTER_API_KEY to .env later."));
+          openRouterKey = '';
+        }
+      } else {
+        console.log(gray('  skipping — you can add OPENROUTER_API_KEY to .env later.'));
+        openRouterKey = '';
+      }
+    }
   } else {
     console.log(gray('  skipping — you can add OPENROUTER_API_KEY to .env later.'));
   }

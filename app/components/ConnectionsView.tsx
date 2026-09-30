@@ -30,6 +30,7 @@ export default function ConnectionsView({ config, onSaved }: { config: any; onSa
   const [keyDrafts, setKeyDrafts] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState<string | null>(null);
   const [savedMessage, setSavedMessage] = useState<Record<string, string>>({});
+  const [errorMessage, setErrorMessage] = useState<Record<string, string>>({});
   const [selections, setSelections] = useState<Record<string, { role: ChatRole; tier: CostTier }>>({});
 
   function draftFor(id: string) {
@@ -38,6 +39,9 @@ export default function ConnectionsView({ config, onSaved }: { config: any; onSa
 
   function setDraft(id: string, val: string) {
     setKeyDrafts(prev => ({ ...prev, [id]: val }));
+    // Typing clears a previous error/success line so a stale "rejected by
+    // OpenRouter" doesn't sit under a field the user is actively retyping.
+    setErrorMessage(prev => (prev[id] ? { ...prev, [id]: '' } : prev));
   }
 
   function selectionFor(id: string): { role: ChatRole; tier: CostTier } {
@@ -49,19 +53,41 @@ export default function ConnectionsView({ config, onSaved }: { config: any; onSa
     if (!value) return;
     setSaving(providerId);
     setSavedMessage(prev => ({ ...prev, [providerId]: '' }));
+    setErrorMessage(prev => ({ ...prev, [providerId]: '' }));
 
-    const res = await fetch('/api/config', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ providerKeys: { [providerId]: value } }),
-    });
+    let res: Response;
+    try {
+      res = await fetch('/api/config', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ providerKeys: { [providerId]: value } }),
+      });
+    } catch {
+      // Network-level failure reaching our own server — no HTTP status and
+      // therefore no server-provided reason to show.
+      setErrorMessage(prev => ({ ...prev, [providerId]: 'Could not reach the server. Check your connection and try again.' }));
+      setSaving(null);
+      return;
+    }
 
     if (res.ok) {
       setDraft(providerId, '');
       setSavedMessage(prev => ({ ...prev, [providerId]: 'Saved.' }));
       onSaved();
     } else {
-      setSavedMessage(prev => ({ ...prev, [providerId]: 'Save failed.' }));
+      // Show the server's specific reason ("That OpenRouter API key was
+      // rejected…", "That looks like an OpenAI key…", "could not reach the
+      // provider…") instead of the old blanket "Save failed." The server
+      // returns an author-written, key-free message; fall back to a generic
+      // one only if the body is missing or unparseable.
+      let detail = 'Save failed.';
+      try {
+        const body = await res.json();
+        if (body && typeof body.error === 'string' && body.error) detail = body.error;
+      } catch {
+        // Non-JSON error body (proxy/gateway page) — keep the generic text.
+      }
+      setErrorMessage(prev => ({ ...prev, [providerId]: detail }));
     }
     setSaving(null);
   }
@@ -99,9 +125,18 @@ export default function ConnectionsView({ config, onSaved }: { config: any; onSa
               />
             </label>
             <button onClick={() => saveKey(provider.id)} disabled={saving === provider.id || !draftFor(provider.id).trim()}>
-              {saving === provider.id ? 'Saving...' : 'Save key'}
+              {saving === provider.id ? 'Checking…' : 'Save key'}
             </button>
             {savedMessage[provider.id] && <span className="hint">{savedMessage[provider.id]}</span>}
+            {/* Real reason the key was refused — e.g. rejected by the
+                provider, or pasted into the wrong provider's card. Rendered
+                in an aria-live region so a screen reader announces a
+                rejection that arrives asynchronously. */}
+            {errorMessage[provider.id] && (
+              <span className="hint connection-error" role="alert" data-testid={`connection-error-${provider.id}`}>
+                {errorMessage[provider.id]}
+              </span>
+            )}
 
             <div className="connection-card-models">
               <ModelSelector

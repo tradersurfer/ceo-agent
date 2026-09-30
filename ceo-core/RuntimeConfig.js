@@ -26,6 +26,14 @@ const DEFAULT_CONFIG = Object.freeze({
     { id: 'grok', name: 'Grok', provider: 'xAI', role: 'rapid_build_research', enabled: false },
     { id: 'openclaw', name: 'OpenClaw', provider: 'OpenClaw', role: 'runtime_connectors', enabled: true },
     { id: 'hermes', name: 'Hermes', provider: 'Nous Research', role: 'operations_execution', enabled: true },
+    // Zero-cost tier. Not a vendor: this role's model id comes from the live
+    // FREE roster (core/FreeModelCatalog.js) spanning OpenRouter's ":free"
+    // variants and OpenCode Zen's "-free" models, so `provider` is the
+    // dispatch seam rather than a single vendor. Registered here (rather
+    // than added ad hoc at refresh time) because refreshFromOpenRouter()
+    // only updates roles that already exist in the registry — without this
+    // entry the free tier would have nowhere to land.
+    { id: 'free', name: 'Free', provider: 'OpenRouter + OpenCode Zen', role: 'zero_cost_execution', enabled: true },
   ],
 });
 

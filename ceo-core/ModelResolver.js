@@ -33,6 +33,37 @@ const PROVIDER_PREFIXES = Object.freeze({
 const SMALL_TIER_KEYWORDS = Object.freeze(['mini', 'nano', 'haiku', 'flash', 'lite', 'instant', 'small']);
 const UNSTABLE_KEYWORDS = Object.freeze(['preview', 'experimental', 'beta']);
 const FLAGSHIP_VARIANT_KEYWORDS = Object.freeze(['-fast']);
+
+// OpenRouter model ids carry variant suffixes that select a different
+// billing/serving mode on the SAME underlying model. Two matter here:
+//
+// - ':batch' — the asynchronous Batch API. Cheaper per token (verified live:
+//   claude-haiku-4.5 is $0.50/M batched vs $1.00/M for the same model
+//   unbatched), which is exactly why it used to WIN pickCheapest by price.
+//   But a batch endpoint does not return a chat completion synchronously,
+//   so targeting one from an interactive chat call yields a response the
+//   caller never receives. Excluded from every tier rather than special-
+//   cased in pickCheapest only, because the same argument disqualifies it
+//   from pickFlagship/pickEfficient too.
+// - ':free' — the free tier. Deliberately NOT excluded here; instead it is
+//   excluded from flagship/efficient/cheapest (so those tiers keep returning
+//   the best genuinely-paid option for a role) and surfaced on its own via
+//   pickFree()/'free' tier below.
+//
+// Checked as a suffix on the id rather than a substring search anywhere in
+// it, since a model id like "vendor/model:free" only means "free" in that
+// exact trailing position.
+const BATCH_VARIANT_SUFFIX = ':batch';
+
+// Free models that are real text models but are NOT general-purpose chat
+// assistants — routing a chat completion to one of these returns a
+// classifier verdict instead of an assistant reply. OpenRouter's live
+// catalog currently lists nvidia/nemotron-3.5-content-safety:free, which
+// passes every other filter (text output modality, no -preview suffix, real
+// created timestamp) and would otherwise be a valid pickFree() candidate.
+// Pattern-matched rather than listed by exact id so the same guard holds as
+// these safety/moderation models get renamed across vendors.
+const NON_CHAT_FREE_PATTERN = /content[-_]?safety|moderation|guardrail|classifier|embedding|(^|[-/.])safety([-/.]|$)/i;
 const ROLE_FAMILIES = Object.freeze({
   claude: { include: /^anthropic\/claude-/, flagship: /(?:^|[-/])opus(?:[-/]|$)/ },
   gpt: { include: /^openai\/gpt-/, exclude: /codex/, flagship: /(?:^|-)pro(?:-|$)/ },
@@ -40,6 +71,53 @@ const ROLE_FAMILIES = Object.freeze({
   gemini: { include: /^google\/gemini-/, flagship: /(?:^|-)pro(?:-|$)/ },
   grok: { include: /^x-ai\/grok-/, exclude: /(?:build|multi-agent)/ },
 });
+
+/**
+ * Splits a model id into lowercase name tokens on the separators that
+ * actually delimit a model name: '/', '-', '.', '_' and ':'. Version
+ * numbers deliberately survive as their own tokens ("4.5" -> "4","5") so
+ * they can never accidentally spell a keyword.
+ * @param {string} id OpenRouter-style model id.
+ * @returns {string[]} Lowercased tokens.
+ */
+function tokenizeModelId(id) {
+  return String(id).toLowerCase().split(/[-/._:]+/);
+}
+
+/**
+ * Whether a model id names a SMALL_TIER_KEYWORDS model.
+ *
+ * This is a token match, NOT a substring match, and the distinction is a
+ * real bug fix rather than a stylistic choice: the previous `id.includes(
+ * keyword)` form made every Gemini model count as "mini", because "gemini"
+ * contains the substring "mini". Since pickFlagship() uses this to build
+ * its non-small pool, every Gemini model landed in the small tier, that
+ * pool was empty, and flagship fell through to the newest candidate with
+ * no small-tier keyword at all — resolving Gemini flagship to
+ * google/gemini-2.5-pro while google/gemini-3.1-pro sat unused, because
+ * 3.1 Pro is still published under a -preview suffix.
+ *
+ * Token matching fixes the whole family of accidental substrings, not just
+ * this one: "flash" would similarly match "Flashpoint", "lite" would match
+ * "elite"/"satellite", "small" would match "smalltalk", and "nano" would
+ * match "nanoseconds" if any vendor ever shipped those names.
+ * @param {string} id OpenRouter-style model id.
+ * @returns {boolean}
+ */
+function isSmallTierModel(id) {
+  const tokens = new Set(tokenizeModelId(id));
+  return SMALL_TIER_KEYWORDS.some(keyword => tokens.has(keyword));
+}
+
+/**
+ * Whether a model id names a FLAGSHIP_VARIANT_KEYWORDS model.
+ * Token-matched for the same reason isSmallTierModel() is — see its
+ * docstring; '-fast' as a suffix test would also miss "gpt-6-fast-preview".
+ */
+function isFlagshipVariantModel(id) {
+  const tokens = new Set(tokenizeModelId(id));
+  return FLAGSHIP_VARIANT_KEYWORDS.some(keyword => tokens.has(keyword.replace(/^-/, '')));
+}
 
 /**
  * Checks whether a model is a pure text-chat model (excludes multimodal
@@ -55,18 +133,49 @@ function isTextCapable(model) {
 }
 
 /**
- * Picks the newest stable premium-family candidate for a provider.
+ * Whether a model id is a free-tier variant, checked as a trailing suffix.
+ * @param {string} id OpenRouter-style model id.
+ * @returns {boolean}
+ */
+function isFreeVariant(id) {
+  return typeof id === 'string' && id.endsWith(':free');
+}
+
+/**
+ * Whether a model id is a Batch-API variant, checked as a trailing suffix.
+ * @param {string} id OpenRouter-style model id.
+ * @returns {boolean}
+ */
+function isBatchVariant(id) {
+  return typeof id === 'string' && id.endsWith(BATCH_VARIANT_SUFFIX);
+}
+
+/**
+ * Builds the candidate pool every tier picker draws from.
+ *
+ * Filters applied here (shared by all tiers) are the ones that disqualify a
+ * model from an interactive chat completion at all:
+ *   - wrong provider prefix / role family
+ *   - Batch-API variants (async, never returns inline)
+ *   - non-text-output models
+ * Filters that only disqualify a model from SOME tiers (free variants, via
+ * `includeFree`) are applied by the caller.
  * @param {object[]} models Full OpenRouter model list.
  * @param {string} prefix Provider id prefix, e.g. "anthropic/".
- * @returns {object|null}
+ * @param {string|null} [role] Role family key, or null for prefix-only matching.
+ * @param {object} [options]
+ * @param {boolean} [options.includeFree] Keep ':free' variants in the pool.
+ * @returns {object[]}
  */
-function getCandidates(models, prefix, role = null) {
+function getCandidates(models, prefix, role = null, options = {}) {
+  const includeFree = options.includeFree === true;
   const family = role ? ROLE_FAMILIES[role] : null;
   return models
     .filter(model => typeof model.id === 'string' && model.id.startsWith(prefix))
     .filter(model => !family || family.include.test(model.id))
     .filter(model => !family?.exclude || !family.exclude.test(model.id))
-    .filter(model => !model.id.endsWith(':free'))
+    .filter(model => includeFree || !isFreeVariant(model.id))
+    .filter(model => !isBatchVariant(model.id))
     .filter(isTextCapable);
 }
 
@@ -87,9 +196,7 @@ function pickFlagship(models, prefix, role = null) {
   const candidates = getCandidates(models, prefix, role);
   if (candidates.length === 0) return null;
 
-  const flagshipTier = candidates.filter(
-    model => !SMALL_TIER_KEYWORDS.some(keyword => model.id.toLowerCase().includes(keyword))
-  );
+  const flagshipTier = candidates.filter(model => !isSmallTierModel(model.id));
   let pool = flagshipTier.length > 0 ? flagshipTier : candidates;
   const family = role ? ROLE_FAMILIES[role] : null;
   const preferred = family?.flagship
@@ -98,10 +205,51 @@ function pickFlagship(models, prefix, role = null) {
   if (preferred.length > 0) pool = preferred;
   const stable = pool.filter(isStable);
   pool = stable.length > 0 ? stable : pool;
-  const canonical = pool.filter(
-    model => !FLAGSHIP_VARIANT_KEYWORDS.some(keyword => model.id.toLowerCase().includes(keyword))
-  );
+  const canonical = pool.filter(model => !isFlagshipVariantModel(model.id));
   return newest(canonical.length > 0 ? canonical : pool);
+}
+
+/**
+ * Picks the best AVAILABLE free-tier chat model for a role.
+ *
+ * Free models are resolved per-role against the live catalog, NOT from a
+ * hardcoded slug list — OpenRouter's free roster churns (16 models live at
+ * time of writing) and a hardcoded id fails silently the moment one is
+ * retired, which is the exact failure mode this module documents for
+ * hardcoded slugs everywhere else.
+ *
+ * "Best" is decided by real capability signals from the catalog record:
+ * largest context window wins, newest model breaking ties. Context is the
+ * most honest available proxy for "can actually do the job" among free
+ * models, whose quality varies enormously.
+ *
+ * Filters out, on top of the shared getCandidates() disqualifiers:
+ *   - NON_CHAT_FREE_PATTERN matches (safety/moderation/embedding models —
+ *     real text models that answer as classifiers, not assistants)
+ *   - unstable (-preview/-beta/-experimental) free models, by the same
+ *     rule every other tier uses: a preview free model can vanish without
+ *     notice
+ *
+ * Returns null when a role has no free option — every major vendor's free
+ * tier currently sits outside these five prefixes — which callers must read
+ * as "no free tier for this role", not as an error.
+ * @param {object[]} models Full OpenRouter model list.
+ * @param {string} prefix Provider id prefix, e.g. "anthropic/".
+ * @param {string} [role] Role family key.
+ * @returns {object|null}
+ */
+function pickFree(models, prefix, role = null) {
+  const candidates = getCandidates(models, prefix, role, { includeFree: true })
+    .filter(model => isFreeVariant(model.id))
+    .filter(model => !NON_CHAT_FREE_PATTERN.test(model.id))
+    .filter(isStable);
+  if (candidates.length === 0) return null;
+
+  return candidates.reduce((best, current) => {
+    const ctxDelta = (current.context_length || 0) - (best.context_length || 0);
+    if (ctxDelta !== 0) return ctxDelta > 0 ? current : best;
+    return (current.created || 0) > (best.created || 0) ? current : best;
+  }, candidates[0]);
 }
 
 /**
@@ -119,9 +267,7 @@ function pickEfficient(models, prefix, role = null) {
 
   const stable = candidates.filter(isStable);
   const stablePool = stable.length > 0 ? stable : candidates;
-  const smallTier = stablePool.filter(
-    model => SMALL_TIER_KEYWORDS.some(keyword => model.id.toLowerCase().includes(keyword))
-  );
+  const smallTier = stablePool.filter(model => isSmallTierModel(model.id));
   if (smallTier.length > 0) return newest(smallTier);
 
   return stablePool.reduce((cheapest, current) => {
@@ -203,42 +349,40 @@ function extractPricing(model) {
 }
 
 /**
- * Resolves all known role labels to live OpenRouter model ids, all three
+ * Shapes a raw catalog record into the resolved-tier entry shape every
+ * consumer (ModelBroker, /api/config's catalog, ModelSelector) expects.
+ * @param {object|null} model Raw catalog record.
+ * @returns {object|null}
+ */
+function toTierEntry(model) {
+  if (!model) return null;
+  return {
+    apiModelId: model.id,
+    contextLength: model.context_length || null,
+    name: model.name || model.id,
+    pricing: extractPricing(model),
+  };
+}
+
+/**
+ * Resolves all known role labels to live OpenRouter model ids, all four
  * tiers.
+ *
+ * The fourth tier, `free`, is zero-cost and additive: it never displaces
+ * flagship/efficient/cheapest (those still return the best genuinely-paid
+ * option for a role), and is null for any role whose provider publishes no
+ * free model — see pickFree().
  * @param {object[]} models Full OpenRouter model list.
- * @returns {object} Map of role -> { flagship: {...}|null, efficient: {...}|null, cheapest: {...}|null }
+ * @returns {object} Map of role -> { flagship, efficient, cheapest, free }
  */
 function resolveRoleModels(models) {
   const resolved = {};
   for (const [role, prefix] of Object.entries(PROVIDER_PREFIXES)) {
-    const flagship = pickFlagship(models, prefix, role);
-    const efficient = pickEfficient(models, prefix, role);
-    const cheapest = pickCheapest(models, prefix, role);
     resolved[role] = {
-      flagship: flagship
-        ? {
-          apiModelId: flagship.id,
-          contextLength: flagship.context_length || null,
-          name: flagship.name || flagship.id,
-          pricing: extractPricing(flagship),
-        }
-        : null,
-      efficient: efficient
-        ? {
-          apiModelId: efficient.id,
-          contextLength: efficient.context_length || null,
-          name: efficient.name || efficient.id,
-          pricing: extractPricing(efficient),
-        }
-        : null,
-      cheapest: cheapest
-        ? {
-          apiModelId: cheapest.id,
-          contextLength: cheapest.context_length || null,
-          name: cheapest.name || cheapest.id,
-          pricing: extractPricing(cheapest),
-        }
-        : null,
+      flagship: toTierEntry(pickFlagship(models, prefix, role)),
+      efficient: toTierEntry(pickEfficient(models, prefix, role)),
+      cheapest: toTierEntry(pickCheapest(models, prefix, role)),
+      free: toTierEntry(pickFree(models, prefix, role)),
     };
   }
   return resolved;
@@ -249,11 +393,19 @@ module.exports = {
   pickFlagship,
   pickEfficient,
   pickCheapest,
+  pickFree,
   isTextCapable,
   extractPricing,
+  tokenizeModelId,
+  isSmallTierModel,
+  isFlagshipVariantModel,
+  isFreeVariant,
+  isBatchVariant,
   PROVIDER_PREFIXES,
   ROLE_FAMILIES,
   SMALL_TIER_KEYWORDS,
   UNSTABLE_KEYWORDS,
   FLAGSHIP_VARIANT_KEYWORDS,
+  BATCH_VARIANT_SUFFIX,
+  NON_CHAT_FREE_PATTERN,
 };
