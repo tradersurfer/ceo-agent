@@ -3,6 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const readline = require('readline');
 const ui = require('./cliTheme');
+const { bootCommands } = require('./slash/registry');
 
 const ROOT = path.resolve(__dirname, '..');
 const CONFIG_PATH = path.join(ROOT, 'ceo-agent.config.json');
@@ -176,7 +177,7 @@ async function main() {
     console.log('');
   }
 
-  console.log(ui.commandStrip());
+  console.log(ui.commandStrip(bootCommands()));
   console.log('');
 
   const rl = readline.createInterface({
@@ -248,6 +249,73 @@ async function main() {
         console.log(ui.errorLine(`Could not attach "${filePath}": ${err.message}`));
         console.log('');
       }
+      rl.prompt();
+      return;
+    }
+
+    if (input === '/departments') {
+      console.log(ui.section('departments'));
+      console.log(ui.hintLine((config.activeDepartments || []).join(' · ') || 'none'));
+      console.log('');
+      rl.prompt();
+      return;
+    }
+
+    if (input === '/who' || input === '/agents') {
+      input = '/org';
+    }
+
+    if (input === '/health') {
+      console.log(ui.section('health'));
+      try {
+        const snap = runtime.getStatus ? runtime.getStatus() : { ok: true };
+        console.log(JSON.stringify(snap, null, 2));
+      } catch (err) {
+        console.log(ui.errorLine(err.message));
+      }
+      console.log('');
+      rl.prompt();
+      return;
+    }
+
+    if (input === '/config') {
+      console.log(ui.section('config'));
+      const safe = {
+        agentName: config.agentName,
+        principalName: config.principalName,
+        businessContext: config.businessContext,
+        activeDepartments: config.activeDepartments,
+        costMode: config.costMode,
+        ceoMode: config.ceoMode,
+      };
+      console.log(JSON.stringify(safe, null, 2));
+      console.log('');
+      rl.prompt();
+      return;
+    }
+
+    if (input === '/clear') {
+      if (typeof console.clear === 'function') console.clear();
+      console.log(ui.banner(config.agentName, config.principalName));
+      console.log(ui.commandStrip(bootCommands()));
+      console.log('');
+      rl.prompt();
+      return;
+    }
+
+    if (input === '/new') {
+      pendingAttachments = [];
+      console.log('');
+      console.log(ui.okLine('New turn. Pending attachments cleared.'));
+      console.log('');
+      rl.prompt();
+      return;
+    }
+
+    if (input === '/activity' || input === '/usage' || input === '/history' || input === '/save' || input === '/reload' || input === '/connections' || input === '/stop' || input === '/verbose') {
+      console.log('');
+      console.log(ui.warnLine(`${input} is reserved — not wired yet.`));
+      console.log('');
       rl.prompt();
       return;
     }

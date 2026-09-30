@@ -41,6 +41,18 @@ function padVisible(s, n) {
   return ' '.repeat(left) + str + ' '.repeat(n - len - left);
 }
 
+// Hard-slicing a description mid-word ("Show or set c") reads as broken, not terse.
+// Clip at the last space inside the budget and mark the cut so a reader can tell
+// "shorter help" from "whole help".
+function clipVisible(text, max) {
+  const str = String(text || '');
+  if (visibleWidth(str) <= max) return str;
+  const hard = str.slice(0, max - 1);
+  const lastSpace = hard.lastIndexOf(' ');
+  const body = (lastSpace > max * 0.5 ? hard.slice(0, lastSpace) : hard).trimEnd();
+  return body + '…';
+}
+
 function rule(char = '─') {
   return theme.accent(char.repeat(W));
 }
@@ -87,11 +99,29 @@ function hintLine(text) {
   return '  ' + theme.muted(text);
 }
 
-function commandStrip() {
-  const cmds = ['/org', '/status', '/models', '/cost', '/mode', '/skills', '/help', '/exit'];
+function commandStrip(commands) {
+  const list = Array.isArray(commands) && commands.length
+    ? commands
+    : ['/org', '/status', '/models', '/cost', '/mode', '/skills', '/help', '/exit'];
+
+  const NAME_W = 14;
+  const HELP_W = 30;
+  const cell = entry => {
+    if (typeof entry === 'string') return entry;
+    return `${String(entry.name).padEnd(NAME_W)} ${clipVisible(entry.help, HELP_W).padEnd(HELP_W)}`.trimEnd();
+  };
+
+  const rows = [];
+  for (let i = 0; i < list.length; i += 2) {
+    const left = cell(list[i]);
+    const right = list[i + 1] ? cell(list[i + 1]) : '';
+    rows.push('  ' + theme.accent(String(left).slice(0, NAME_W + 1 + HELP_W)) +
+      (right ? '  ' + theme.muted(right) : ''));
+  }
+
   return (
-    '  ' + theme.muted('commands  ') +
-    cmds.map(c => theme.accent(c)).join(theme.muted('  ')) +
+    theme.muted('  commands') + '\n' +
+    rows.join('\n') +
     '\n  ' + theme.muted('address a department with ') +
     theme.accent('@legal') +
     theme.muted(' draft an NDA clause')

@@ -1,9 +1,28 @@
 # ADR-010: `off_limits` enforcement — structured identifiers, dual chokepoints, hard-block failure mode
 
-- **Status:** Proposed (design only — no implementation code in this change)
-- **Date:** 2026-07-29
+- **Status:** Accepted — **implemented** (design promoted; see "Implementation status" below)
+- **Date:** 2026-07-29 (proposed) / 2026-09-30 (promoted to Accepted after verification)
 - **Tracking issue:** [#83](https://github.com/tradersurfer/ceo-agent/issues/83) (off_limits declarative-only, zero enforcement — this document is the "future fix" scoping that issue asked for, not a resolution of the issue itself)
 - **Related:** `registry/agent-registry.json` (`off_limits` on all nine agents), `registry/registry.schema.json` (`$defs/agent`, `$defs/capability`, `$defs/skill`), `registry/skill-registry.json` (`risk` field precedent), `core/SkillExecutor.js`, `core/BridgeExecutors.js`, `sdk/BaseBridge.js`, `sdk/Permissions.js`, `sdk/constants.js` (`Statuses`, `TaskTypes`, `ExecutiveStatuses`), `core/skills/managerSkills.js` (`escalation_assessment`), every department `CONTRACT.md` (Type 1/Type 2 escalation authority), [`ADR-008`](./ADR-008-yolo-full-auto-mode.md) (found and named the gap; no auto-approval, ever), [`ADR-009`](./ADR-009-hermes-gateway-client-design.md) §4 (narrow, Hermes-only stopgap — this document is the general mechanism ADR-009 explicitly left open)
+
+---
+
+## Implementation status (added 2026-09-30)
+
+**This ADR is implemented. The `Status: Proposed (design only)` header it carried from 2026-07-29 until 2026-09-30 was stale and misled a full roadmap audit into reporting Tier 1 Part 2 as unbuilt.**
+
+Verified by running the code, not by reading the design:
+
+| Chokepoint | Location | Behavior |
+|---|---|---|
+| Skill dispatch | `ceo-core/SkillExecutor.js:59-76` | Sibling to the `permission_denied` check. An `offLimits` entry with non-empty `restricts` and `enforceable !== false` matching the skill name hard-blocks via `_finish('failed', …)` with `reason: 'off_limits_violation'`. |
+| Bridge task-type dispatch | `sdk/BaseBridge.js:91-103` | `validateTask()` pushes `Task type is off-limits: …`; `execute()` returns `BLOCKED`, distinct from a plain permission failure. |
+
+**Bucket A/B semantics are implemented as designed:** relational entries and category-only entries whose real violation depends on an unverifiable qualifier (e.g. "unsolicited") carry `enforceable: false` and do **not** hard-block on a bare skill-id match. Ordering is also as designed — `permission_denied` is evaluated before `off_limits`.
+
+**Receipt:** `node --test tests/OffLimitsEnforcement.test.js` → **9 pass, 0 fail** (372ms), covering: hard-block on enforceably-restricted skill; allow when unrestricted; no block on matching-but-`enforceable:false`; permission-before-off_limits ordering; bridge `validateTask()` hard-block; `execute()` → `BLOCKED`; bridge allow; `OnboardingCommsBridge` carrying registered limits without blocking its own Bucket-B task types; and `SalesIntakeBridge`/`HermesBridge` limits matching `registry/agent-registry.json`.
+
+**Still open from the original design scope:** the general mechanism is live for skills and bridge task types. Coverage of *every* declared prohibition on all nine agents is not established by these 9 tests — a prohibition expressed only as prose, or with an empty `restricts` array, is still declarative. See the roadmap's standing rules: absence of a test is not evidence of a gap, and presence of a test is not evidence of coverage.
 
 ---
 
