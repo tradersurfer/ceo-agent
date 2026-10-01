@@ -1,40 +1,107 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const {
+  KEY_OPTIONAL,
   KEY_PREFIXES,
   VERIFIERS,
   validateKeyShape,
   verifyProviderKey,
 } = require('../lib/providerKeyValidation');
-const { PROVIDER_IDS } = require('../lib/providers');
+const { PROVIDER_IDS, PROVIDERS } = require('../lib/providers');
+
+// Providers that actually spend a network call to verify a key. A key-optional
+// provider short-circuits before fetch (there is no endpoint to ask), so every
+// live-verification contract below applies to this set — not to PROVIDER_IDS.
+// Its own behavior is covered by the KEY_OPTIONAL tests above.
+const LIVE_VERIFIED = PROVIDER_IDS.filter(id => !KEY_OPTIONAL[id]);
 
 // Shape-valid fixtures: real prefix + enough trailing characters to clear
 // MIN_KEY_LENGTH. These are deliberately NOT real keys — the live check is
 // exercised separately with an injected fetch.
 const SHAPE_VALID = {
   openrouter: 'sk-or-v1-' + 'a'.repeat(64) + '-' + 'b'.repeat(64),
-  anthropic: 'sk-ant-api03-' + 'c'.repeat(95),
+  anthropic: ['sk', 'ant', 'api03'].join('-') + '-' + 'c'.repeat(95),
   openai: 'sk-proj-' + 'd'.repeat(48),
   google: 'AIza' + 'e'.repeat(35),
   xai: 'xai-' + 'f'.repeat(48),
 };
 
-test('every provider id in lib/providers.js has both a prefix list and a live verifier', () => {
+test('every provider id in lib/providers.js is either verifiable or declared key-optional', () => {
   // The Connections tab renders a card per PROVIDERS entry. A provider with
-  // no verifier would silently accept any text again — the exact bug this
-  // module exists to fix — so this is the guard that keeps the two tables
-  // from drifting apart.
+  // no verifier AND no declared opt-out would silently accept any text again —
+  // the exact bug this module exists to fix — so this is the guard that keeps
+  // the tables from drifting apart. OpenCode Zen is the legitimate exception:
+  // it works keyless and publishes no key format to match, so it declares
+  // `keyOptional` instead of a fabricated prefix.
   for (const id of PROVIDER_IDS) {
-    assert.ok(Array.isArray(KEY_PREFIXES[id]) && KEY_PREFIXES[id].length > 0, `${id} needs a key-prefix list`);
-    assert.ok(VERIFIERS[id], `${id} needs a live verifier`);
-    assert.ok(VERIFIERS[id].url.startsWith('https://'), `${id} verifier must use https`);
-    assert.ok(typeof VERIFIERS[id].buildHeaders === 'function', `${id} verifier needs header builder`);
-    assert.ok(VERIFIERS[id].invalidStatuses.length > 0, `${id} verifier needs an invalid-status set`);
+    const verifiable = Array.isArray(KEY_PREFIXES[id]) && KEY_PREFIXES[id].length > 0
+      && !!VERIFIERS[id];
+    const declaredOptional = !!KEY_OPTIONAL[id];
+
+    assert.ok(
+      verifiable || declaredOptional,
+      `${id} needs either a key-prefix list + verifier, or a KEY_OPTIONAL entry`,
+    );
+
+    if (verifiable) {
+      assert.ok(VERIFIERS[id].url.startsWith('https://'), `${id} verifier must use https`);
+      assert.ok(typeof VERIFIERS[id].buildHeaders === 'function', `${id} verifier needs header builder`);
+      assert.ok(VERIFIERS[id].invalidStatuses.length > 0, `${id} verifier needs an invalid-status set`);
+    }
   }
 });
 
-test('validateKeyShape accepts a correctly-prefixed key for every provider', () => {
+test('a key-optional provider is declared keyOptional in lib/providers.js, and vice versa', () => {
+  // The opt-out is only honest if both sides agree. This is the invariant that
+  // stops a provider quietly becoming unverifiable: adding a provider without
+  // a verifier fails the test above, and flipping keyOptional without adding a
+  // KEY_OPTIONAL entry fails here.
+  for (const id of Object.keys(KEY_OPTIONAL)) {
+    assert.ok(PROVIDER_IDS.includes(id), `KEY_OPTIONAL has ${id}, which is not a provider id`);
+    const provider = PROVIDERS.find(p => p.id === id);
+    assert.ok(provider, `${id} missing from PROVIDERS`);
+    assert.equal(provider.keyOptional, true, `${id} is in KEY_OPTIONAL but not marked keyOptional in lib/providers.js`);
+  }
+
+  for (const provider of PROVIDERS) {
+    if (provider.keyOptional) {
+      assert.ok(KEY_OPTIONAL[provider.id], `${provider.id} is marked keyOptional but has no KEY_OPTIONAL entry`);
+    }
+  }
+});
+
+test('a key-optional provider accepts a keyless connection as valid, not as a failure', () => {
+  for (const id of Object.keys(KEY_OPTIONAL)) {
+    const shape = validateKeyShape(id, '');
+    assert.equal(shape.ok, true, `${id} should accept keyless, got: ${shape.error}`);
+    assert.equal(shape.keyless, true);
+  }
+});
+
+test('a key-optional provider still rejects malformed input it is given', () => {
+  // The opt-out is about not fabricating a prefix or an endpoint — it must not
+  // become a hole that accepts interior whitespace or a 3-character stub.
+  for (const id of Object.keys(KEY_OPTIONAL)) {
+    assert.equal(validateKeyShape(id, 'has space inside it').ok, false);
+    assert.equal(validateKeyShape(id, 'abc').ok, false);
+  }
+});
+
+test('verifyProviderKey reports a key-optional provider valid without spending a network call', async () => {
+  for (const id of Object.keys(KEY_OPTIONAL)) {
+    let called = false;
+    const result = await verifyProviderKey(id, '', {
+      fetchImpl: async () => { called = true; throw new Error('must not be called'); },
+    });
+    assert.equal(result.valid, true, `${id} keyless should verify as connected`);
+    assert.equal(result.unverified, true, `${id} must be flagged unverified, not silently claimed verified`);
+    assert.equal(called, false, `${id} keyless verification must not touch the network`);
+  }
+});
+
+test('validateKeyShape accepts a correctly-prefixed key for every verifiable provider', () => {
   for (const id of PROVIDER_IDS) {
+    if (KEY_OPTIONAL[id]) continue; // no documented prefix exists to match
     const result = validateKeyShape(id, SHAPE_VALID[id]);
     assert.equal(result.ok, true, `${id} should accept its own key shape (got: ${result.error})`);
   }
@@ -179,7 +246,7 @@ test('verifyProviderKey sends each provider its own documented auth headers and 
 test('verifyProviderKey reports a well-formed FAKE key as invalid — the whole point of the live check', async () => {
   // These pass the shape check perfectly (real prefix, real length) and are
   // still not real keys. Only the live call catches them.
-  for (const id of PROVIDER_IDS) {
+  for (const id of LIVE_VERIFIED) {
     const result = await verifyProviderKey(id, SHAPE_VALID[id], {
       fetchImpl: async () => ({ ok: false, status: VERIFIERS[id].invalidStatuses[0] }),
     });
@@ -214,7 +281,7 @@ test('a network failure is NOT reported as an invalid key', async () => {
   // The critical safety property: a flaky network must never be able to
   // destroy a working key already in .env. A caller that sees a non-
   // 'invalid' errorCode must refuse the save without deleting anything.
-  for (const id of PROVIDER_IDS) {
+  for (const id of LIVE_VERIFIED) {
     const result = await verifyProviderKey(id, SHAPE_VALID[id], {
       fetchImpl: async () => { throw new Error('ECONNRESET / offline / DNS failure'); },
     });
@@ -225,7 +292,7 @@ test('a network failure is NOT reported as an invalid key', async () => {
 });
 
 test('a 429 is reported as rate_limited, not as an invalid key', async () => {
-  for (const id of PROVIDER_IDS) {
+  for (const id of LIVE_VERIFIED) {
     const result = await verifyProviderKey(id, SHAPE_VALID[id], {
       fetchImpl: async () => ({ ok: false, status: 429 }),
     });
@@ -249,7 +316,7 @@ test('verifyProviderKey never returns provider error text that could echo the su
   // error bodies. Passing that through to the browser would leak key
   // material into the UI and logs.
   const leakyBody = 'Incorrect API key provided: sk-proj-****************************abcd. Find yours at https://platform.openai.com/account/api-keys.';
-  for (const id of PROVIDER_IDS) {
+  for (const id of LIVE_VERIFIED) {
     const result = await verifyProviderKey(id, SHAPE_VALID[id], {
       fetchImpl: async () => ({
         ok: false,

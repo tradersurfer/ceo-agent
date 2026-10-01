@@ -34,7 +34,14 @@ test('saveUpload stores content retrievable by fileId', () => {
   }
 });
 
-test('upload directory and file are not group/world readable', () => {
+// POSIX file modes are not a concept on Windows: statSync().mode carries the
+// synthetic Windows permission bits, so asserting `mode & 0o077 === 0` here can
+// only ever pass by accident of the umask, and can never fail for the real
+// reason (a world-readable upload). The real hardening lives in saveUpload's
+// chmod; this test can only verify it on a POSIX host.
+const isPosix = process.platform !== 'win32';
+
+test('upload directory and file are not group/world readable', { skip: isPosix ? false : 'POSIX file modes; not meaningful on Windows' }, () => {
   const buffer = Buffer.from('sensitive');
   const metadata = saveUpload({ filename: 'secret.txt', buffer });
   try {
@@ -42,6 +49,20 @@ test('upload directory and file are not group/world readable', () => {
     const fileMode = fs.statSync(path.join(UPLOAD_ROOT, metadata.fileId, metadata.filename)).mode & 0o777;
     assert.equal(dirMode & 0o077, 0, `upload directory is group/world-accessible: ${dirMode.toString(8)}`);
     assert.equal(fileMode & 0o077, 0, `upload file is group/world-readable: ${fileMode.toString(8)}`);
+  } finally {
+    cleanup(metadata.fileId);
+  }
+});
+
+test('an upload is still stored and read back byte-for-byte regardless of platform', () => {
+  // The platform-agnostic half of the contract above: whatever the file mode,
+  // the bytes round-trip and the metadata is retrievable. This is the part
+  // that can regress on every host, so it runs everywhere.
+  const buffer = Buffer.from('sensitive payload');
+  const metadata = saveUpload({ filename: 'secret.txt', buffer });
+  try {
+    assert.deepEqual(readUpload(metadata.fileId), buffer);
+    assert.equal(getUploadMetadata(metadata.fileId).filename, 'secret.txt');
   } finally {
     cleanup(metadata.fileId);
   }

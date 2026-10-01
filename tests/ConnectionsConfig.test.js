@@ -7,15 +7,25 @@ const {
   buildCatalog,
   sanitizeDepartmentModelDefaults,
 } = require('../lib/connectionsConfig');
+const { PROVIDER_IDS, CHAT_ROLES } = require('../lib/providers');
 
 test('buildConnections reports hasKey/active per provider and never leaks the raw key', () => {
   const env = {
-    OPENROUTER_API_KEY: 'sk-or-1234567890abcd',
+    OPENROUTER_API_KEY: 'sk-or-v1-testkey-aaaaaaaaaaaaaaaa',
     ANTHROPIC_API_KEY: '',
   };
   const connections = buildConnections(env, maskKey);
 
-  assert.deepEqual(Object.keys(connections).sort(), ['anthropic', 'google', 'openai', 'openrouter', 'xai'].sort());
+  // A relationship, not a snapshot: every provider in lib/providers.js gets a
+  // card, and every card is one of those ids. Hardcoding the list made this
+  // fail the moment a provider was added (opencode, 919e188) without the test
+  // saying anything true about behavior.
+  const expected = PROVIDER_IDS.slice().sort();
+  assert.deepEqual(Object.keys(connections).sort(), expected);
+  for (const id of expected) {
+    assert.equal(typeof connections[id].hasKey, 'boolean', `${id} needs a boolean hasKey`);
+    assert.equal(typeof connections[id].active, 'boolean', `${id} needs a boolean active`);
+  }
 
   assert.equal(connections.openrouter.hasKey, true);
   assert.equal(connections.openrouter.active, true, 'openrouter has a real ProviderClient');
@@ -86,7 +96,18 @@ test('buildCatalog reads resolved tiers (including "cheapest") per role from Mod
   assert.equal(catalog.claude.cheapest.apiModelId, 'anthropic/claude-value-tier');
   assert.deepEqual(catalog.codex, { flagship: null, efficient: null, cheapest: null });
   assert.deepEqual(catalog.gpt, { flagship: null, efficient: null, cheapest: null });
-  assert.deepEqual(Object.keys(catalog).sort(), ['claude', 'codex', 'gemini', 'gpt', 'grok'].sort());
+
+  // Relationship, not snapshot: the catalog covers every chat role, and each
+  // role resolves to exactly the same three-tier shape. The old hardcoded list
+  // broke when the 'free' role was added without saying anything true.
+  assert.deepEqual(Object.keys(catalog).sort(), CHAT_ROLES.slice().sort());
+  for (const role of CHAT_ROLES) {
+    assert.deepEqual(
+      Object.keys(catalog[role]).sort(),
+      ['cheapest', 'efficient', 'flagship'],
+      `${role} must expose exactly the three tiers`,
+    );
+  }
 });
 
 test('sanitizeDepartmentModelDefaults keeps only valid department ids and valid catalog roles', () => {
