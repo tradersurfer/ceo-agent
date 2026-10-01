@@ -308,4 +308,137 @@ test('compact mode does not render the expanded per-role resolved-model detail p
   );
 
   assert.throws(() => screen.getByText('anthropic/claude-opus-5'), 'compact mode is for the chat input row — no detail panel');
-});
+  });
+
+  // --- Compact resolution strip (added Sep 30, 2026) ----------------------
+  // Compact mode showed WHICH role and WHICH tier but never WHICH model, which
+  // is the thing a user actually picks on. The strip renders it inline, without
+  // widening compact mode's "no detail panel" contract into a panel.
+
+  test('compact mode shows which model the current role and tier actually resolved to', () => {
+    const { container } = render(
+      React.createElement(ModelSelector, {
+        mode: 'compact',
+        active: true,
+        connected: true,
+        catalog: SAMPLE_CATALOG,
+        value: { role: 'claude', tier: 'flagship' },
+        onChange: () => {},
+      })
+    );
+
+    const strip = container.querySelector('.model-selector-resolved');
+    assert.ok(strip, 'compact mode must name the resolved model, not just the role/tier');
+    assert.ok(strip.textContent.includes('anthropic/claude-opus-5'));
+  });
+
+  test('the compact resolution strip scales per-token catalog pricing to a per-million figure', () => {
+    // SAMPLE_CATALOG prices flagship at 0.000015 PER TOKEN. Rendered raw that is
+    // "$0.00/M in" -- a number that looks like a real price and is silently wrong,
+    // which is worse than showing no price at all. This is the regression guard.
+    const { container } = render(
+      React.createElement(ModelSelector, {
+        mode: 'compact',
+        active: true,
+        connected: true,
+        catalog: SAMPLE_CATALOG,
+        value: { role: 'claude', tier: 'flagship' },
+        onChange: () => {},
+      })
+    );
+
+    const text = container.querySelector('.model-selector-resolved').textContent;
+    assert.ok(text.includes('$15.00/M in'), 'expected 0.000015/token scaled to $15.00/M, got: ' + text);
+    assert.ok(!text.includes('$0.00'), 'a zero price must never be rendered as a real number');
+  });
+
+  test('a cheap-enough tier that would round to $0.00 shows its real magnitude instead', () => {
+    const cheap = {
+      claude: { flagship: { apiModelId: 'anthropic/claude-lite', pricing: { prompt: 0.0000003 } } },
+    };
+    const { container } = render(
+      React.createElement(ModelSelector, {
+        mode: 'compact',
+        active: true,
+        connected: true,
+        catalog: cheap,
+        value: { role: 'claude', tier: 'flagship' },
+        onChange: () => {},
+      })
+    );
+
+    const text = container.querySelector('.model-selector-resolved').textContent;
+    assert.ok(text.includes('$0.30/M in'), 'expected 0.0000003/token as $0.30/M, got: ' + text);
+  });
+
+  test('an explicitly-null prompt price renders as free, not as a missing value', () => {
+    // The free roster is the real case: pricing.prompt is null because there IS
+    // no price. Silently dropping the fact would read as "unknown", which for a
+    // free model is the wrong answer to the question the user is asking.
+    const freeCatalog = {
+      free: { flagship: { apiModelId: 'inclusionai/ling-3.0-flash-sante:free', pricing: null } },
+    };
+    const { container } = render(
+      React.createElement(ModelSelector, {
+        mode: 'compact',
+        active: true,
+        connected: true,
+        catalog: freeCatalog,
+        value: { role: 'free', tier: 'flagship' },
+        onChange: () => {},
+      })
+    );
+
+    const text = container.querySelector('.model-selector-resolved').textContent;
+    assert.ok(text.includes('inclusionai/ling-3.0-flash-sante:free'), text);
+    assert.ok(text.includes('free'), 'a null price means free, not unknown: ' + text);
+  });
+
+  test('context length renders compactly when the resolver supplies it', () => {
+    const withContext = {
+      claude: { flagship: { apiModelId: 'anthropic/claude-opus-5', contextLength: 200000 } },
+    };
+    const { container } = render(
+      React.createElement(ModelSelector, {
+        mode: 'compact',
+        active: true,
+        connected: true,
+        catalog: withContext,
+        value: { role: 'claude', tier: 'flagship' },
+        onChange: () => {},
+      })
+    );
+
+    assert.ok(container.querySelector('.model-selector-resolved').textContent.includes('200k'));
+  });
+
+  test('expanded mode keeps its detail panel and does not also render the compact strip', () => {
+    const { container } = render(
+      React.createElement(ModelSelector, {
+        mode: 'expanded',
+        active: true,
+        connected: true,
+        catalog: SAMPLE_CATALOG,
+        value: { role: 'claude', tier: 'flagship' },
+        onChange: () => {},
+      })
+    );
+
+    assert.ok(container.querySelector('.model-selector-detail'), 'expanded keeps its panel');
+    assert.equal(container.querySelector('.model-selector-resolved'), null, 'expanded must not double-render the strip');
+  });
+
+  test('an unresolved role renders no strip rather than a placeholder', () => {
+    const { container } = render(
+      React.createElement(ModelSelector, {
+        mode: 'compact',
+        active: true,
+        connected: true,
+        catalog: SAMPLE_CATALOG,
+        value: { role: 'gpt', tier: 'flagship' },  // gpt is all-null in the sample
+        onChange: () => {},
+      })
+    );
+
+    assert.equal(container.querySelector('.model-selector-resolved'), null);
+  });

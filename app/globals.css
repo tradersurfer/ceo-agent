@@ -721,6 +721,30 @@ button:disabled {
   color: var(--text-primary);
 }
 
+/* Compact mode's inline resolution: the model id, its context window, and its
+   prompt price, on one line beside the role/tier chips. Sized to sit in ChatView's
+   input row without pushing the send button — it truncates rather than wraps,
+   because a wrapped strip doubles the input row's height mid-conversation. */
+.model-selector-resolved {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+  margin-left: 2px;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+  /* Narrow viewports already wrap the chips; the strip takes a full second line
+     rather than competing with them for the first. */
+  .model-selector-compact .model-selector-resolved {
+    flex-basis: 100%;
+    margin-left: 0;
+  }
+}
+
 .chip {
   background: var(--bg-panel);
   color: var(--text-secondary);

@@ -84,6 +84,65 @@ const TIERS: { id: CostTier; label: string }[] = [
   { id: 'cheapest', label: 'Affordable' },
 ];
 
+// --- Compact resolution strip ------------------------------------------
+// Compact mode lives in ChatView's input row, so it deliberately renders no
+// detail panel (tests/components/ModelSelector.test.jsx: "compact mode is for
+// the chat input row — no detail panel"). That left the row answering "which
+// role, which tier" and never "which model did that actually resolve to" — the
+// one thing a user picking a model actually wants to know, and the thing BYNGE
+// exists to make legible.
+//
+// This strip closes that gap WITHOUT widening compact mode's contract: same
+// elements, same data, an extra line rendered alongside the chips. It is
+// additive on purpose — a native <select> over the 18 role×tier pairs was
+// considered and rejected: it flattens two independent axes into one 18-item
+// list, drops the keyboard-reachable chip groups, and loses the per-option
+// affordance (a disabled unresolved role is explained in place today).
+//
+// One line, all the facts a choice hinges on: model id, context window, and
+// prompt price. Completion price is deliberately omitted — at compact width
+// it wraps, and prompt price is the number that drives "is this expensive".
+export function formatCompactResolution(entry: CatalogEntry): string | null {
+  if (!entry) return null;
+
+  const modelId = entry.apiModelId || entry.name || null;
+  if (!modelId) return null;
+
+  const parts: string[] = [modelId];
+
+  // Context is per-model metadata, not per-tier; absent on unresolved entries
+  // and on direct-provider dispatches that have no catalog at all.
+  if (typeof entry.contextLength === 'number' && entry.contextLength > 0) {
+    parts.push(formatContextLength(entry.contextLength));
+  }
+
+  // Catalog pricing is PER TOKEN (0.000015 = $15/M), so it must be scaled by
+    // 1e6 before display. Forgetting that prints "$0.00/M in" — a number that
+    // looks like a real price and is silently wrong, which is worse than omitting
+    // it. Same scaling the expanded panel has always used.
+    const promptPerToken = entry.pricing?.prompt;
+    if (typeof promptPerToken === 'number') {
+      const perMillion = promptPerToken * 1_000_000;
+      // Sub-$0.01/M would round to a misleading "$0.00"; show the real magnitude.
+      parts.push(perMillion < 0.01 && perMillion > 0
+        ? `$${perMillion.toFixed(4)}/M in`
+        : `$${perMillion.toFixed(2)}/M in`);
+    } else if (entry.pricing?.prompt === null) {
+    // Explicitly null (vs undefined) means the resolver knows there is no price.
+    // The free roster is the real case: saying "free" beats showing nothing.
+    parts.push('free');
+  }
+
+  return parts.join(' · ');
+}
+
+/** 200000 -> "200k", 1048576 -> "1M". Compact form; no decimals needed here. */
+export function formatContextLength(length: number): string {
+  if (length >= 1_000_000) return `${Math.round(length / 100_000) / 10}M`;
+  if (length >= 1_000) return `${Math.round(length / 1_000)}k`;
+  return String(length);
+}
+
 export default function ModelSelector({
   mode,
   active,
@@ -171,6 +230,16 @@ export default function ModelSelector({
   const selectedRoleCatalog = catalog[value.role];
   const selectedEntry = selectedRoleCatalog ? selectedRoleCatalog[value.tier] : null;
 
+  // Compact mode gets the resolved model as a single trailing line: not a detail
+  // panel (that stays expanded-only), just the answer to "which model am I about
+  // to talk to" sitting next to the chips that chose it.
+  const compactResolutionText = formatCompactResolution(selectedEntry);
+  const compactResolution = compactResolutionText ? (
+    <span className="model-selector-resolved" title={compactResolutionText}>
+      {compactResolutionText}
+    </span>
+  ) : null;
+
   return (
     <div className={`model-selector model-selector-${mode}`} data-testid="model-selector-active">
       <div className="model-selector-axis model-selector-roles" role="group" aria-label="Model role">
@@ -204,7 +273,7 @@ export default function ModelSelector({
           </button>
         ))}
       </div>
-      {mode === 'expanded' && (
+      {mode === 'expanded' ? (
         <div className="model-selector-detail">
           {selectedEntry ? (
             <>
@@ -222,6 +291,8 @@ export default function ModelSelector({
             <div className="hint">Not resolved yet — add an OpenRouter key and reload to fetch the live catalog.</div>
           )}
         </div>
+      ) : (
+        compactResolution
       )}
     </div>
   );
