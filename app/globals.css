@@ -153,6 +153,119 @@ button:disabled {
   font-weight: 500;
 }
 
+/* --- Sidebar internals -----------------------------------------------------
+   The sidebar grew a logo row, a collapse toggle, a drag-resize handle (#110)
+   and icon/label pairs, but only `.sidebar` / `.sidebar-header` / `.nav-item`
+   ever got rules — so those new elements rendered as unstyled inline content.
+   `.nav-item.active` is redefined further down with the ::before indicator;
+   the rule above is kept so the active state is correct even if that block moves. */
+
+.sidebar-logo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  /* The header is a flex row so the collapse toggle can sit at its far edge. */
+  min-width: 0;
+}
+
+.sidebar-header-name {
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  /* Drives the collapsed-rail crossfade: the name and labels fade out as the
+     sidebar narrows, rather than being clipped mid-glyph. */
+  transition: opacity var(--duration) var(--ease);
+}
+
+.sidebar-toggle {
+  margin-left: auto;
+  flex-shrink: 0;
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 2px var(--space-2);
+  font-size: 11px;
+  cursor: pointer;
+  transition: color var(--duration-fast) var(--ease), border-color var(--duration-fast) var(--ease);
+}
+
+.sidebar-toggle:hover {
+  color: var(--text-primary);
+  border-color: var(--border);
+}
+
+/* Drag-resize handle on the sidebar's right edge (#110/#118). The visible
+   affordance is a 1px line that thickens and tints on hover/focus, so it does
+   not compete with the nav items at rest. `role="separator"` carries real
+   aria-valuemin/max/now, so it stays keyboard-operable. */
+.sidebar-resize-handle {
+  position: absolute;
+  top: 0;
+  right: -3px;
+  width: 6px;
+  height: 100%;
+  cursor: col-resize;
+  background: transparent;
+  border: none;
+  padding: 0;
+  touch-action: none;
+}
+
+.sidebar-resize-handle::after {
+  content: '';
+  position: absolute;
+  inset: 0 2px;
+  background: var(--border-subtle);
+  transition: background var(--duration-fast) var(--ease), inset var(--duration-fast) var(--ease);
+}
+
+.sidebar-resize-handle:hover::after,
+.sidebar-resize-handle:focus-visible::after {
+  background: var(--accent);
+  inset: 0 1px;
+}
+
+.sidebar-resize-handle:focus-visible {
+  outline: none;
+}
+
+.nav-item-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  flex-shrink: 0;
+  font-size: 14px;
+  line-height: 1;
+}
+
+.nav-item-label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: opacity var(--duration) var(--ease);
+}
+
+/* Nav items lay icon + label out as a row; the shared .nav-item rule above
+   supplies the button reset (background, padding, radius). */
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* Collapsed rail: the name and every label fade out together so the icons keep
+   a consistent optical rhythm instead of the text being hard-clipped. */
+.sidebar-collapsed .sidebar-header-name,
+.sidebar-collapsed .nav-item-label {
+  opacity: 0;
+  pointer-events: none;
+}
+
 .content {
   flex: 1;
   padding: 24px;
@@ -341,20 +454,148 @@ button:disabled {
 
 .chat-input-row {
   display: flex;
-  gap: 8px;
+  flex-direction: column;
+  gap: var(--space-2);
   border-top: 1px solid var(--border-subtle);
-  padding-top: 12px;
+  padding-top: var(--space-3);
 }
 
-.chat-input-row input[type="text"] {
+/* The composer is a <textarea>, not an <input>. The old
+   `.chat-input-row input[type="text"]` rule stopped matching when the input
+   became multi-line (Shift+Enter for a newline, issue #87), which left the
+   whole composer rendering as an unstyled native control — the single biggest
+   reason the dashboard read as unstyled. These rules target what is actually
+   in the DOM. */
+.chat-input-primary {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-2);
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md, 8px);
+  padding: var(--space-2);
+  transition: border-color 120ms ease, box-shadow 120ms ease;
+}
+
+.chat-input-primary:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-muted);
+}
+
+.chat-input-primary:has(textarea:disabled) {
+  opacity: 0.6;
+}
+
+.chat-textarea {
   flex: 1;
+  min-width: 0;               /* lets the row shrink instead of overflowing */
+  resize: none;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.5;
+  /* Rows=1 is the initial render; JS grows it. Cap so a long paste cannot
+     push the message list off screen. */
+  max-height: 200px;
+  padding: var(--space-2) var(--space-1);
+}
+
+.chat-textarea::placeholder {
+  color: var(--text-muted);
+}
+
+/* The Send button carries no class in the markup, so it is targeted
+   positionally — it is the last child of the primary row by construction. */
+.chat-input-primary > button:last-child {
+  flex-shrink: 0;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm, 6px);
+  padding: var(--space-2) var(--space-4);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 120ms ease, opacity 120ms ease;
+}
+
+.chat-input-primary > button:last-child:hover:not(:disabled) {
+  background: var(--accent-soft);
+}
+
+.chat-input-primary > button:last-child:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .chat-attach-button {
-  background: var(--bg-panel);
+  background: transparent;
   color: var(--text-secondary);
-  padding: 8px 12px;
+  border: none;
+  border-radius: var(--radius-sm, 6px);
+  padding: var(--space-2);
+  font-size: 15px;
+  line-height: 1;
   flex-shrink: 0;
+  cursor: pointer;
+  transition: background 120ms ease, color 120ms ease;
+}
+
+.chat-attach-button:hover:not(:disabled) {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.chat-attach-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* CEO Modes + the compact model selector — 11 toggle chips between them. Kept
+   on their own row so the composer above never gets crushed. */
+.chat-input-toggles {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+/* Per-message actions (copy / edit / regenerate) revealed on the bubble. */
+.chat-actions {
+  display: flex;
+  gap: var(--space-1);
+  margin-top: var(--space-1);
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+
+.chat-bubble:hover .chat-actions,
+.chat-actions:focus-within {
+  opacity: 1;
+}
+
+.chat-action-button {
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm, 6px);
+  padding: 2px var(--space-2);
+  font-size: 11px;
+  cursor: pointer;
+  transition: color 120ms ease, border-color 120ms ease;
+}
+
+.chat-action-button:hover:not(:disabled) {
+  color: var(--text-primary);
+  border-color: var(--border);
+}
+
+.chat-action-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 /* ==========================================================================
@@ -675,6 +916,29 @@ button:disabled {
 .connection-card-models {
   border-top: 1px solid var(--border-subtle);
   padding-top: 10px;
+}
+
+.ceo-mode-selector {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* The two selector axes share .model-selector-axis's flex row. They differ only
+   in that the role axis must not shrink the composer when it wraps, so the
+   compact row below is what actually separates them. */
+.ceo-mode-selector-chips {
+  flex-shrink: 0;
+}
+
+.ceo-mode-selector-hint {
+  margin: 0;
+  font-size: 11px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 32ch;
 }
 
 /* ==========================================================================
