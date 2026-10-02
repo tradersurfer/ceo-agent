@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Sidebar from './components/Sidebar';
+import RightSidebar from './components/RightSidebar';
 import ChatView from './components/ChatView';
 import OrgView from './components/OrgView';
 import StatusView from './components/StatusView';
@@ -44,17 +45,24 @@ export default function Home() {
   }
 
   return (
-    <div className="app-shell">
-      <Sidebar agentName={config.agentName} tab={tab} onSelect={setTab} />
-      <main className="content">
-        {tab === 'chat' && <ChatView config={config} onConfigChange={refreshConfig} />}
-        {tab === 'org' && <OrgView />}
-        {tab === 'status' && <StatusView />}
-        {tab === 'activity' && <ActivityView />}
-        {tab === 'add' && <AddAgentView onCreated={refreshConfig} />}
-        {tab === 'connections' && <ConnectionsView config={config} onSaved={refreshConfig} />}
-        {tab === 'settings' && <SettingsView config={config} onSaved={refreshConfig} />}
-      </main>
-    </div>
-  );
-}
+      <div className="app-shell">
+        <Sidebar agentName={config.agentName} tab={tab} onSelect={setTab} />
+        <main className="content">
+          {tab === 'chat' && <ChatView config={config} onConfigChange={refreshConfig} />}
+          {tab === 'org' && <OrgView />}
+          {tab === 'status' && <StatusView />}
+          {tab === 'activity' && <ActivityView />}
+          {tab === 'add' && <AddAgentView onCreated={refreshConfig} />}
+          {tab === 'connections' && <ConnectionsView config={config} onSaved={refreshConfig} />}
+          {tab === 'settings' && <SettingsView config={config} onSaved={refreshConfig} />}
+        </main>
+        {/* Chat-only by design. Org, Status and Activity are full-width tables
+            that need the whole main column; a persistent right rail beside them
+            would squeeze readable width for no gain, and would duplicate the very
+            view the user just opened. The chat surface is where ambient runtime
+            context is actually useful -- you are mid-conversation and want to see
+            who is working without leaving it. */}
+        {tab === 'chat' && <RightSidebar />}
+      </div>
+    );
+  }

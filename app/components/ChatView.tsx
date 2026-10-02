@@ -12,6 +12,10 @@ type ChatRequestBody = {
   attachmentIds: string[];
   role?: ChatRole;
   tier?: CostTier;
+  // Prior turns, oldest first, in provider `messages` shape. The route used to
+  // send [system, user] only, which is why the agent claimed there was "no
+  // previous question" while a full transcript sat on screen.
+  history?: { role: 'user' | 'assistant'; content: string }[];
 };
 
 type Message = {
@@ -38,6 +42,31 @@ type Attachment = { fileId: string; filename: string; size: number };
 // around indefinitely.
 const TEXTAREA_MIN_HEIGHT_PX = 40;
 const TEXTAREA_MAX_HEIGHT_PX = 120;
+
+/**
+ * Prior turns in provider `messages` shape.
+ *
+ * Only real user/agent turns are included. 'system' rows are local UI notices
+ * (rate limits, "request failed", skill dispatch) — sending those to the model
+ * would teach it that the user said things they never said. 'skill' rows carry
+ * a payload object rather than prose, so there is no content to replay.
+ *
+ * Bounded on purpose: an unbounded transcript eventually exceeds the model
+ * context window and the request fails outright, which is worse than a slightly
+ * shorter memory. The cap keeps the most recent turns, which are the ones a
+ * follow-up question almost always refers to.
+ */
+const HISTORY_TURN_LIMIT = 40;
+
+function buildHistory(messages: Message[]): { role: 'user' | 'assistant'; content: string }[] {
+  const turns = messages
+    .filter((m: Message) => (m.role === 'user' || m.role === 'agent') && m.text.trim().length > 0)
+    .map((m: Message) => ({
+      role: m.role === 'user' ? ('user' as const) : ('assistant' as const),
+      content: m.text,
+    }));
+  return turns.slice(-HISTORY_TURN_LIMIT);
+}
 
 export default function ChatView({ config, onConfigChange }: { config: any; onConfigChange?: () => void | Promise<void> }) {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -168,11 +197,16 @@ export default function ChatView({ config, onConfigChange }: { config: any; onCo
     const text = input.trim();
     if (!text || busy) return;
     const attachmentsForThisMessage = pendingAttachments;
-    const requestBody: ChatRequestBody = {
-      message: text,
-      attachmentIds: attachmentsForThisMessage.map(a => a.fileId),
-      ...(modelOverride ? { role: modelOverride.role, tier: modelOverride.tier } : {}),
-    };
+        // History is derived from the state AT SEND TIME, before this turn is
+        // appended — so the array is exactly the prior conversation and never
+        // includes the message being sent right now.
+        const history = buildHistory(messages);
+        const requestBody: ChatRequestBody = {
+          message: text,
+          attachmentIds: attachmentsForThisMessage.map(a => a.fileId),
+          ...(history.length ? { history } : {}),
+          ...(modelOverride ? { role: modelOverride.role, tier: modelOverride.tier } : {}),
+        };
     setMessages(prev => [...prev, { id: nextId(), role: 'user', text, attachments: attachmentsForThisMessage }]);
     setInput('');
     setPendingAttachments([]);

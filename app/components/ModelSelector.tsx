@@ -1,5 +1,7 @@
 'use client';
 
+import { useState } from 'react';
+
 // Role x tier selector (BYNGE Phase 1 — see docs/design/BYNGE-connection-
 // scoping.md §3/§5). One component, two render modes:
 //   - mode="compact": inline control in ChatView's .chat-input-row
@@ -230,69 +232,120 @@ export default function ModelSelector({
   const selectedRoleCatalog = catalog[value.role];
   const selectedEntry = selectedRoleCatalog ? selectedRoleCatalog[value.tier] : null;
 
-  // Compact mode gets the resolved model as a single trailing line: not a detail
-  // panel (that stays expanded-only), just the answer to "which model am I about
-  // to talk to" sitting next to the chips that chose it.
-  const compactResolutionText = formatCompactResolution(selectedEntry);
-  const compactResolution = compactResolutionText ? (
-    <span className="model-selector-resolved" title={compactResolutionText}>
-      {compactResolutionText}
-    </span>
-  ) : null;
+  // Compact mode: single small pill + dropdown (per review feedback).
+  // Keeps the two-axis logic intact but hides the competing chips in the input row.
+  // Clicking the pill opens a neat dropdown with roles as categories and tiers as selectable items,
+  // plus the resolved model shown. Mimics a clean model picker with drill-down affordance.
+  const compactResolutionText = formatCompactResolution(selectedEntry) || `${value.role} ${value.tier}`;
+
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+
+  function selectAndClose(newRole: ChatRole, newTier: CostTier) {
+    onChange({ role: newRole, tier: newTier });
+    setDropdownOpen(false);
+  }
+
+  const compactUI = (
+    <div className="model-selector-compact-pill" data-testid="model-selector-compact-pill">
+      <button
+        type="button"
+        className="model-pill"
+        onClick={() => setDropdownOpen(!dropdownOpen)}
+        title="Select model / tier"
+        aria-expanded={dropdownOpen}
+      >
+        {compactResolutionText} ▾
+      </button>
+      {dropdownOpen && (
+        <div className="model-dropdown" role="dialog" aria-label="Model selector">
+          <div className="model-dropdown-header">Models</div>
+          {ROLES.map(role => {
+            const roleData = catalog ? catalog[role.id] : null;
+            const roleResolved = Boolean(roleData && (roleData.flagship || roleData.efficient || roleData.cheapest));
+            return (
+              <div key={role.id} className="model-category">
+                <div className="category-label">{role.label} — {role.hint}</div>
+                {TIERS.map(tier => {
+                  const entry = roleData ? roleData[tier.id] : null;
+                  const label = entry && entry.apiModelId ? entry.apiModelId : `${role.label} ${tier.label}`;
+                  return (
+                    <button
+                      key={tier.id}
+                      type="button"
+                      className={`model-option ${value.role === role.id && value.tier === tier.id ? 'active' : ''}`}
+                      disabled={disabled || !roleResolved}
+                      onClick={() => selectAndClose(role.id, tier.id)}
+                      title={label}
+                    >
+                      {label}
+                      {entry && entry.pricing && entry.pricing.prompt != null && (
+                        <span className="price-hint"> · ${((entry.pricing.prompt || 0) * 1_000_000).toFixed(2)}/M</span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            );
+          })}
+          <div className="model-dropdown-footer">Click a model to select. Free roster uses OpenRouter zero-cost models.</div>
+        </div>
+      )}
+    </div>
+  );
 
   return (
     <div className={`model-selector model-selector-${mode}`} data-testid="model-selector-active">
-      <div className="model-selector-axis model-selector-roles" role="group" aria-label="Model role">
-        {ROLES.map(role => {
-          const roleData = catalog ? catalog[role.id] : null;
-          const roleResolved = Boolean(roleData && (roleData.flagship || roleData.efficient || roleData.cheapest));
-          return (
-            <button
-              key={role.id}
-              type="button"
-              className={`chip ${value.role === role.id ? 'chip-active' : ''}`}
-              title={mode === 'expanded' ? role.hint : `${role.label} — ${role.hint}`}
-              disabled={disabled || !roleResolved}
-              onClick={() => onChange({ role: role.id, tier: value.tier })}
-            >
-              {role.label}
-            </button>
-          );
-        })}
-      </div>
-      <div className="model-selector-axis model-selector-tiers" role="group" aria-label="Cost tier">
-        {TIERS.map(tier => (
-          <button
-            key={tier.id}
-            type="button"
-            className={`chip ${value.tier === tier.id ? 'chip-active' : ''}`}
-            disabled={disabled}
-            onClick={() => onChange({ role: value.role, tier: tier.id })}
-          >
-            {tier.label}
-          </button>
-        ))}
-      </div>
-      {mode === 'expanded' ? (
-        <div className="model-selector-detail">
-          {selectedEntry ? (
-            <>
-              <div className="model-selector-detail-name">{selectedEntry.name || selectedEntry.apiModelId}</div>
-              <div className="hint">{selectedEntry.apiModelId}</div>
-              {selectedEntry.pricing && (selectedEntry.pricing.prompt != null || selectedEntry.pricing.completion != null) && (
-                <div className="hint">
-                  {selectedEntry.pricing.prompt != null ? `$${(selectedEntry.pricing.prompt * 1_000_000).toFixed(2)}/M prompt` : ''}
-                  {selectedEntry.pricing.prompt != null && selectedEntry.pricing.completion != null ? ' · ' : ''}
-                  {selectedEntry.pricing.completion != null ? `$${(selectedEntry.pricing.completion * 1_000_000).toFixed(2)}/M completion` : ''}
-                </div>
-              )}
-            </>
-          ) : (
-            <div className="hint">Not resolved yet — add an OpenRouter key and reload to fetch the live catalog.</div>
-          )}
-        </div>
-      ) : (
-        compactResolution
+      {mode === 'compact' ? compactUI : (
+        <>
+          <div className="model-selector-axis model-selector-roles" role="group" aria-label="Model role">
+            {ROLES.map(role => {
+              const roleData = catalog ? catalog[role.id] : null;
+              const roleResolved = Boolean(roleData && (roleData.flagship || roleData.efficient || roleData.cheapest));
+              return (
+                <button
+                  key={role.id}
+                  type="button"
+                  className={`chip ${value.role === role.id ? 'chip-active' : ''}`}
+                  title={mode === 'expanded' ? role.hint : `${role.label} — ${role.hint}`}
+                  disabled={disabled || !roleResolved}
+                  onClick={() => onChange({ role: role.id, tier: value.tier })}
+                >
+                  {role.label}
+                </button>
+              );
+            })}
+          </div>
+          <div className="model-selector-axis model-selector-tiers" role="group" aria-label="Cost tier">
+            {TIERS.map(tier => (
+              <button
+                key={tier.id}
+                type="button"
+                className={`chip ${value.tier === tier.id ? 'chip-active' : ''}`}
+                disabled={disabled}
+                onClick={() => onChange({ role: value.role, tier: tier.id })}
+              >
+                {tier.label}
+              </button>
+            ))}
+          </div>
+          <div className="model-selector-detail">
+            {selectedEntry ? (
+              <>
+                <div className="model-selector-detail-name">{selectedEntry.name || selectedEntry.apiModelId}</div>
+                <div className="hint">{selectedEntry.apiModelId}</div>
+                {selectedEntry.pricing && (selectedEntry.pricing.prompt != null || selectedEntry.pricing.completion != null) && (
+                  <div className="hint">
+                    {selectedEntry.pricing.prompt != null ? `$${(selectedEntry.pricing.prompt * 1_000_000).toFixed(2)}/M prompt` : ''}
+                    {selectedEntry.pricing.prompt != null && selectedEntry.pricing.completion != null ? ' · ' : ''}
+                    {selectedEntry.pricing.completion != null ? `$${(selectedEntry.pricing.completion * 1_000_000).toFixed(2)}/M completion` : ''}
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="hint">Not resolved yet — add an OpenRouter key and reload to fetch the live catalog.</div>
+            )}
+          </div>
+        </>
       )}
     </div>
   );

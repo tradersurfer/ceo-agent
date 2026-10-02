@@ -272,6 +272,229 @@ button:disabled {
   overflow-y: auto;
 }
 
+/* --- Right sidebar ----------------------------------------------------------
+   Ambient runtime context beside the chat. `.sidebar` sets flex-shrink: 0 but
+   no position, and the drag-resize handle is absolutely positioned — so this
+   needs `position: relative` to become that handle's containing block. */
+.right-sidebar {
+  position: relative;
+  width: 260px;
+  flex-shrink: 0;
+  background: var(--bg-sidebar);
+  border-left: 1px solid var(--border-subtle);
+  padding: var(--space-4) var(--space-3);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.right-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.right-section-title {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.right-subsection-title {
+  margin: var(--space-2) 0 0;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+/* A failed fetch is a different fact from an empty feed, and must not be
+   rendered as one. role="status" announces it without stealing focus. */
+.right-unreachable {
+  margin: 0;
+  padding: var(--space-2);
+  border-radius: var(--radius-sm);
+  background: var(--danger-muted);
+  color: var(--danger);
+  line-height: 1.4;
+}
+
+.right-stat-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-2);
+}
+
+.right-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.right-stat-label {
+  font-size: 10px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.right-stat-value {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+/* Health is named in text, so colour is reinforcement rather than the only
+   carrier of the information. */
+.right-status-badge {
+  font-size: 11px;
+  font-weight: 500;
+  padding: 1px var(--space-2);
+  border-radius: var(--radius-pill);
+  background: var(--bg-panel);
+  color: var(--text-secondary);
+  align-self: flex-start;
+}
+
+.right-status-badge-ok {
+  background: var(--success-muted);
+  color: var(--success);
+}
+
+.right-status-badge-warn {
+  background: rgba(240, 198, 116, 0.15);
+  color: var(--gold-prestige);
+}
+
+.right-status-badge-danger {
+  background: var(--danger-muted);
+  color: var(--danger);
+}
+
+.right-agent-list,
+.right-feed-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.right-agent-row,
+.right-feed-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: 3px var(--space-2);
+  border-radius: var(--radius-sm);
+}
+
+.right-agent-row:nth-child(odd),
+.right-feed-row:nth-child(odd) {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.right-agent-id,
+.right-feed-name {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.right-agent-ready {
+  font-size: 10px;
+  color: var(--success);
+  flex-shrink: 0;
+}
+
+.right-feed-status {
+  font-size: 10px;
+  flex-shrink: 0;
+  color: var(--text-muted);
+}
+
+.right-feed-status-success,
+.right-feed-status-completed,
+.right-feed-status-ok {
+  color: var(--success);
+}
+
+.right-feed-status-failed,
+.right-feed-status-error,
+.right-feed-status-blocked {
+  color: var(--danger);
+}
+
+/* "No data yet" is a real state with a real message — never an empty list that
+   reads as a rendering failure. */
+.right-empty {
+  margin: 0;
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+/* The feed documents its own measurement gaps; surfacing them beats letting a
+   reader assume the numbers above are complete. */
+.right-notes {
+  margin-top: var(--space-2);
+}
+
+.right-notes summary {
+  cursor: pointer;
+  list-style: revert;
+}
+
+.right-notes-list {
+  margin: var(--space-2) 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.right-note dt {
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+.right-note dd {
+  margin: 2px 0 0;
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--text-secondary);
+}
+
+/* The rail is a desktop affordance. On narrow viewports it would push the
+   conversation to a sliver, so it drops below the chat instead — same 640px
+   threshold the sidebar and composer already use rather than a second one. */
+@media (max-width: 900px) {
+  .right-sidebar {
+    width: 100%;
+    border-left: none;
+    border-top: 1px solid var(--border-subtle);
+  }
+}
+
+@media (max-width: 640px) {
+  .right-stat-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 .empty-state {
   padding: 40px;
   color: var(--text-muted);
@@ -991,13 +1214,107 @@ button:disabled {
    because a wrapped strip doubles the input row's height mid-conversation. */
 .model-selector-resolved {
   font-size: 11px;
-  color: var(--text-muted);
-  font-variant-numeric: tabular-nums;
-  margin-left: 2px;
-  min-width: 0;
+  color: var(--muted-foreground);
+  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  max-width: 220px;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+/* Compact model pill + dropdown (from review: small non-competing pill instead of full chips in input row) */
+.model-selector-compact-pill {
+  position: relative;
+  display: inline-block;
+}
+
+.model-pill {
+  background: var(--card);
+  border: 1px solid var(--border);
+  color: var(--foreground);
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  cursor: pointer;
   white-space: nowrap;
+  max-width: 260px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.model-pill:hover {
+  border-color: var(--accent);
+}
+
+.model-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 100;
+  min-width: 320px;
+  max-height: 420px;
+  overflow: auto;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  padding: 8px;
+  margin-top: 4px;
+  font-size: 12px;
+}
+
+.model-dropdown-header {
+  font-weight: 600;
+  padding: 4px 8px;
+  color: var(--muted-foreground);
+  font-size: 11px;
+}
+
+.model-category {
+  margin-bottom: 8px;
+}
+
+.category-label {
+  font-size: 10px;
+  color: var(--muted-foreground);
+  padding: 2px 8px;
+}
+
+.model-option {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 4px 8px;
+  border: none;
+  background: transparent;
+  color: var(--foreground);
+  cursor: pointer;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.model-option:hover {
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
+.model-option.active {
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
+.price-hint {
+  color: var(--muted-foreground);
+  font-size: 10px;
+}
+
+.model-dropdown-footer {
+  font-size: 10px;
+  color: var(--muted-foreground);
+  padding: 6px 8px;
+  border-top: 1px solid var(--border);
+  margin-top: 6px;
 }
 
 @media (max-width: 640px) {
