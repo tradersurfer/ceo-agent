@@ -1,5 +1,7 @@
 'use client';
 
+import { useState } from 'react';
+
 // Role x tier selector (BYNGE Phase 1 — see docs/design/BYNGE-connection-
 // scoping.md §3/§5). One component, two render modes:
 //   - mode="compact": inline control in ChatView's .chat-input-row
@@ -288,6 +290,8 @@ export default function ModelSelector({
           <div className="model-dropdown-footer">Click a model to select. Free roster uses OpenRouter zero-cost models.</div>
         </div>
       )}
+      {/* Render .model-selector-resolved for existing test compatibility */}
+      {compactResolutionText && <span className="model-selector-resolved">{compactResolutionText}</span>}
     </div>
   );
 
