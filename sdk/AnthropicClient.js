@@ -130,11 +130,50 @@ class AnthropicClient {
 
     const systemParts = [];
     const conversation = [];
+
+    function toAnthropicContent(content) {
+      // Support both string (text-only) and array (multimodal with images)
+      if (typeof content === 'string') {
+        return content;
+      }
+      if (Array.isArray(content)) {
+        return content.map(part => {
+          if (part && part.type === 'image_url' && part.image_url && part.image_url.url) {
+            // Convert data: URL to Anthropic base64 source
+            const url = part.image_url.url;
+            const match = url.match(/^data:([^;]+);base64,(.+)$/);
+            if (match) {
+              return {
+                type: 'image',
+                source: {
+                  type: 'base64',
+                  media_type: match[1],
+                  data: match[2],
+                },
+              };
+            }
+            // Fallback: if somehow not data URL, skip or error
+            return { type: 'text', text: '[image attachment could not be decoded]' };
+          }
+          if (part && part.type === 'text') {
+            return { type: 'text', text: part.text || '' };
+          }
+          // Plain text part in the array
+          if (typeof part === 'string') {
+            return { type: 'text', text: part };
+          }
+          return { type: 'text', text: String(part || '') };
+        });
+      }
+      return content;
+    }
+
     for (const msg of messages || []) {
       if (msg && msg.role === 'system') {
         if (msg.content) systemParts.push(msg.content);
       } else if (msg) {
-        conversation.push({ role: msg.role, content: msg.content });
+        const anthContent = toAnthropicContent(msg.content);
+        conversation.push({ role: msg.role, content: anthContent });
       }
     }
 

@@ -163,6 +163,40 @@ export default function Sidebar({
           </button>
         ))}
       </nav>
+
+      {!collapsed && (
+        <div className="sidebar-sessions">
+          <input
+            type="text"
+            className="session-search"
+            placeholder="Search sessions / chats..."
+            onChange={(e) => { /* wire to filter in parent or local state later */ }}
+          />
+
+          <div className="session-section">
+            <div className="section-label">Projects</div>
+            <div className="session-list">
+              <button className="session-item" title="Pinned project">📌 Ganjavores DC</button>
+              <button className="session-item" title="Pinned project">📌 DREAMZ DC</button>
+              <button className="session-item">BYNGE v2</button>
+              <button className="session-item">Hermes TUI port</button>
+            </div>
+          </div>
+
+          <div className="session-section">
+            <div className="section-label">Chats</div>
+            <div className="session-list">
+              <button className="session-item active">Current: CEO dashboard review</button>
+              <button className="session-item">Roadmap & TUI work</button>
+              <button className="session-item">Image reading fix</button>
+              <button className="session-item">Model selector redesign</button>
+              <button className="session-item more">+ 12 more…</button>
+            </div>
+            <button className="new-chat" onClick={() => alert('New chat (wire to clear state in parent)')}>+ New chat</button>
+          </div>
+        </div>
+      )}
+
       {!collapsed && (
         <div
           className="sidebar-resize-handle"
