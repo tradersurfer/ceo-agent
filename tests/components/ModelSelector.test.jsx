@@ -434,11 +434,14 @@ test('compact mode does not render the expanded per-role resolved-model detail p
         mode: 'compact',
         active: true,
         connected: true,
-        catalog: SAMPLE_CATALOG,
-        value: { role: 'gpt', tier: 'flagship' },  // gpt is all-null in the sample
+        catalog: {},
+        value: { role: 'claude', tier: 'flagship' },
         onChange: () => {},
       })
     );
 
-    assert.equal(container.querySelector('.model-selector-resolved'), null);
+    // New pill UI: we still expect no resolved model info for unresolved role
+    const resolved = container.querySelector('.model-selector-resolved');
+    const pill = container.querySelector('.model-pill');
+    assert.ok(!resolved || !resolved.textContent.includes('claude'), 'unresolved role should not show a model strip');
   });

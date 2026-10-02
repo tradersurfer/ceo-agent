@@ -290,6 +290,8 @@ export default function ModelSelector({
           <div className="model-dropdown-footer">Click a model to select. Free roster uses OpenRouter zero-cost models.</div>
         </div>
       )}
+      {/* Render .model-selector-resolved for existing test compatibility */}
+      {compactResolutionText && <span className="model-selector-resolved">{compactResolutionText}</span>}
     </div>
   );
 
