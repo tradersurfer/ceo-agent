@@ -1,5 +1,7 @@
 'use client';
 
+import { useState } from 'react';
+
 // Role x tier selector (BYNGE Phase 1 — see docs/design/BYNGE-connection-
 // scoping.md §3/§5). One component, two render modes:
 //   - mode="compact": inline control in ChatView's .chat-input-row
