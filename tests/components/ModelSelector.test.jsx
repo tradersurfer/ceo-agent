@@ -178,7 +178,7 @@ test('clicking a tier chip calls onChange with the current role and the new tier
   let received = null;
   render(
     React.createElement(ModelSelector, {
-      mode: 'compact',
+      mode: 'expanded', // tier chips only render in expanded mode; compact uses a dropdown pill
       active: true,
       connected: true,
       catalog: SAMPLE_CATALOG,
@@ -310,7 +310,7 @@ test('compact mode does not render the expanded per-role resolved-model detail p
   assert.throws(() => screen.getByText('anthropic/claude-opus-5'), 'compact mode is for the chat input row — no detail panel');
   });
 
-  // --- Compact resolution strip (added Sep 30, 2026) ----------------------
+    // --- Compact resolution strip (added Sep 30, 2026) ----------------------
   // Compact mode showed WHICH role and WHICH tier but never WHICH model, which
   // is the thing a user actually picks on. The strip renders it inline, without
   // widening compact mode's "no detail panel" contract into a panel.
