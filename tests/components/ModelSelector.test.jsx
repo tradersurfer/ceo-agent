@@ -178,7 +178,7 @@ test('clicking a tier chip calls onChange with the current role and the new tier
   let received = null;
   render(
     React.createElement(ModelSelector, {
-      mode: 'compact',
+      mode: 'expanded', // tier chips only render in expanded mode; compact uses a dropdown pill
       active: true,
       connected: true,
       catalog: SAMPLE_CATALOG,

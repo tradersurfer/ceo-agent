@@ -105,19 +105,51 @@ test('overlapping tick() calls do not resume the same due run twice', async () =
 });
 
 test('start() polls tick() on an interval and stop() halts it', async () => {
+  // Use fake timers to eliminate wall-clock flakiness
   const runtime = new WorkflowRuntime();
   let tickCount = 0;
   const scheduler = new WorkflowScheduler({ runtime, workflowResolver: resolveWorkflow });
   scheduler.tick = async () => { tickCount += 1; return []; };
 
-  scheduler.start(5);
-  await new Promise(resolve => setTimeout(resolve, 25));
-  scheduler.stop();
-  const countAfterStop = tickCount;
-  await new Promise(resolve => setTimeout(resolve, 25));
+  // Fake timer implementation - synchronous, controlled by fakeTime
+  let fakeTime = 0;
+  const timers = [];
+  const fakeSetInterval = (fn, interval) => {
+    const id = { interval, nextFire: fakeTime + interval, cancelled: false, fn };
+    timers.push(id);
+    return id;
+  };
+  const fakeClearInterval = (id) => { id.cancelled = true; };
+  const advanceTime = (ms) => {
+    fakeTime += ms;
+    // Fire any timers that are due
+    for (const timer of timers) {
+      while (!timer.cancelled && fakeTime >= timer.nextFire) {
+        timer.nextFire += timer.interval;
+        timer.fn();
+      }
+    }
+  };
 
-  assert.ok(countAfterStop >= 2, `expected at least 2 ticks, got ${countAfterStop}`);
-  assert.equal(tickCount, countAfterStop);
+  // Temporarily replace global timers
+  const origSetInterval = global.setInterval;
+  const origClearInterval = global.clearInterval;
+  global.setInterval = fakeSetInterval;
+  global.clearInterval = fakeClearInterval;
+
+  try {
+    scheduler.start(5);
+    advanceTime(25); // Advance 25ms - should fire 5 times (at 5, 10, 15, 20, 25)
+    scheduler.stop();
+    const countAfterStop = tickCount;
+    advanceTime(25); // Advance another 25ms - should NOT fire (stopped)
+
+    assert.ok(countAfterStop >= 2, `expected at least 2 ticks, got ${countAfterStop}`);
+    assert.equal(tickCount, countAfterStop);
+  } finally {
+    global.setInterval = origSetInterval;
+    global.clearInterval = origClearInterval;
+  }
 });
 
 test('start() is a no-op when already started, and requires a positive interval', () => {

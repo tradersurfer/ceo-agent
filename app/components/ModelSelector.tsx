@@ -294,8 +294,17 @@ export default function ModelSelector({
   );
 
   return (
-    <div className={`model-selector model-selector-${mode}`} data-testid="model-selector-active">
-      {mode === 'compact' ? compactUI : (
+      <div className={`model-selector model-selector-${mode}`} data-testid="model-selector-active">
+        {mode === 'compact' ? (
+          <>
+            {compactUI}
+            {selectedEntry && compactResolutionText && (
+              <span className="model-selector-resolved" style={{ position: 'absolute', left: '-9999px' }}>
+                {compactResolutionText}
+              </span>
+            )}
+          </>
+        ) : (
         <>
           <div className="model-selector-axis model-selector-roles" role="group" aria-label="Model role">
             {ROLES.map(role => {
